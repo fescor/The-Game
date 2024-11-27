@@ -15,7 +15,9 @@ int Net::host()
 {
 
 	ENetEvent event;
-	
+	newP p;
+	p.id = 10;
+	p.ip = 10101010;
 	
 
 	while (online) {
@@ -36,7 +38,7 @@ int Net::host()
 
 				
 				peers.insert(pair<int, unsigned int>(maxpeerID + 1, hex_to_intip(event.peer->address.host)));
-				anounceNewPeer(event.peer, event.peer->address.host, maxpeerID + 1);
+				//anounceNewPeer(event.peer, event.peer->address.host, maxpeerID + 1);
 
 				m_state->createPlayer(maxpeerID + 1);
 
@@ -48,9 +50,10 @@ int Net::host()
 				
 				 
 				cout << hex_to_strip(event.peer->address.host);
-				
+
 
 				sendData(event.peer, "i_see_you");
+				serializeData(p, 1);
 				break;
 
 			case ENET_EVENT_TYPE_RECEIVE:
@@ -368,11 +371,11 @@ void Net::anounceNewPeer(ENetPeer* newPeer, enet_uint32 ip, int id)
 void Net::parseData(unsigned char* buffer, size_t size)
 {
 	
-	std::stringstream ss = std::stringstream(std::string((char*)buffer));
+	std::stringstream ss = std::stringstream(std::string((char*)buffer, size));
 	packet  p;
 
 	{
-		cereal::BinaryInputArchive iarchive(ss); // Create an input archive
+		cereal::PortableBinaryInputArchive iarchive(ss); // Create an input archive
 
 		
 		iarchive(p); // Read the data from the archive

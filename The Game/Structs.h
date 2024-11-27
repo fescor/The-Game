@@ -3,7 +3,7 @@
 
 struct newP 
 {
-	uint8_t id = 0;
+	int id = 0;
 	enet_uint32 ip = 0;
 
 
@@ -14,27 +14,7 @@ struct newP
 	}
 };
 
-struct payload {
-	int msgtype = 0;
 
-
-	void* data = nullptr;
-
-	payload() {};
-	payload(void* _data, int _msgtype) : data(_data), msgtype(_msgtype) {}
-
-	payload(payload& p) {
-		msgtype = p.msgtype;
-		data = p.data;
-	}
-	payload& operator=(payload& p) {
-		msgtype = p.msgtype;
-		data = p.data;
-		return *this;
-	}
-
-
-};
 
 enum PACKETTYPE {
 	NEWPEER , 
