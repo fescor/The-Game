@@ -27,9 +27,9 @@ class Net : public GameObject {
 
 	void sendData(ENetPeer* peer ,const char* data );
 	void sendData(ENetPeer* peer, const unsigned int data);
-	void sendData(const char* data);
+	void sendData(const char* data , size_t size);
 	void sendData(const unsigned int data);
-	void sendData(void* data) const;
+	void sendData(void* data , size_t size) const;
 
 	std::string hex_to_strip(unsigned int input);
 	int hex_to_intip(unsigned int input);

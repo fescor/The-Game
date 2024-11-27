@@ -29,12 +29,7 @@ int Net::host()
 					event.peer->address.host,
 					event.peer->address.port);
 				
-				//memcpy(p, buffer + 1, sizeof(newP));
-
-				//memcpy(temp2, &event.peer->address.host, sizeof enet_uint32);
-				//temp2 = &event.peer->address.host;
 				
-				//auto temp = pair<int, unsigned int>(maxpeerID + 1, event.peer->address.host);
 
 				
 				peers.insert(pair<int, unsigned int>(maxpeerID + 1, hex_to_intip(event.peer->address.host)));
@@ -101,7 +96,7 @@ int Net::join()
 {	
 	ENetEvent event;
 	connectToPeer("10.124.68.24");
-	sendData("this_is_some_data");
+	//sendData("this_is_some_data");
 	
 	while (online) {
 		if (enet_host_service(client, &event, 0) > 0) {
@@ -174,9 +169,9 @@ void Net::sendData(ENetPeer* peer, const unsigned int data)
 
 }
 
-void Net::sendData(const char* data)
+void Net::sendData(const char* data , size_t size)
 {
-	ENetPacket* packet = enet_packet_create(&data, sizeof(data) + 1, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket* packet = enet_packet_create(data, size + 1, ENET_PACKET_FLAG_RELIABLE);
 	enet_host_broadcast(client, 0, packet);
 
 }
@@ -188,10 +183,10 @@ void Net::sendData(const unsigned int data)
 
 }
 
-void Net::sendData(void* data) const
+void Net::sendData(void* data, size_t size) const
 {
 
-	ENetPacket* packet = enet_packet_create(data, sizeof(data) + 1, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket* packet = enet_packet_create(data, size + 1, ENET_PACKET_FLAG_RELIABLE);
 	enet_host_broadcast(client, 0, packet);
 
 }
@@ -361,7 +356,7 @@ void Net::anounceNewPeer(ENetPeer* newPeer, enet_uint32 ip, int id)
 	newP* p = new newP();
 	p->id = id;
 	p->ip = ip;
-	sendData(p);
+	//sendData(p);
 	//createpayload(p, 1);
 	
 	
@@ -370,8 +365,22 @@ void Net::anounceNewPeer(ENetPeer* newPeer, enet_uint32 ip, int id)
 
 void Net::parseData(unsigned char* buffer, size_t size)
 {
-	
+	for (int i =0 ; i < size; i++) {
+		cout << buffer[i] ;
+
+	}
+	cout << endl;
+
 	std::stringstream ss = std::stringstream(std::string((char*)buffer, size));
+	char* buffer2 = (char*)buffer;
+
+	for (int i = 0; i < size; i++) {
+		cout << buffer2[i];
+
+	}
+	cout << endl;
+
+	
 	packet  p;
 
 	{
@@ -439,7 +448,7 @@ void Net::serializeData(newP structure, int datatype)
 	
 
 	std::string data = ss.str();
-	sendData(data.c_str());
+	sendData(data.c_str() , data.length());
 	
 
 }
