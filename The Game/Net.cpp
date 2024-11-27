@@ -47,7 +47,7 @@ int Net::host()
 				cout << hex_to_strip(event.peer->address.host);
 
 
-				sendData(event.peer, "i_see_you");
+				//sendData(event.peer, "i_see_you");
 				serializeData(p, 1);
 				break;
 
@@ -173,6 +173,7 @@ void Net::sendData(const char* data , size_t size)
 {
 	ENetPacket* packet = enet_packet_create(data, size + 1, ENET_PACKET_FLAG_RELIABLE);
 	enet_host_broadcast(client, 0, packet);
+	cout << "sending some data " << endl;
 
 }
 
@@ -365,20 +366,10 @@ void Net::anounceNewPeer(ENetPeer* newPeer, enet_uint32 ip, int id)
 
 void Net::parseData(unsigned char* buffer, size_t size)
 {
-	for (int i =0 ; i < size; i++) {
-		cout << buffer[i] ;
 
-	}
-	cout << endl;
 
 	std::stringstream ss = std::stringstream(std::string((char*)buffer, size));
-	char* buffer2 = (char*)buffer;
-
-	for (int i = 0; i < size; i++) {
-		cout << buffer2[i];
-
-	}
-	cout << endl;
+	
 
 	
 	packet  p;
