@@ -1,3 +1,5 @@
+The Game.exp
+The Game.lib
 # Prerequisites
 *.d
 
@@ -62,7 +64,7 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-[Bb]in/
+
 [Oo]bj/
 [Ll]og/
 [Ll]ogs/
