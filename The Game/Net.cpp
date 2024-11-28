@@ -5,6 +5,8 @@
 #include <winsock2.h>
 #include <sstream>
 
+#define PC_IP "10.124.68.23"
+#define LAPTOP_IP "10.124.68.24"
 
 
 
@@ -35,7 +37,7 @@ int Net::host()
 
 			case ENET_EVENT_TYPE_DISCONNECT:
 
-				cout << "\n %d disconnected.\n" , *(int*)event.peer->data;
+				cout << *(int*)event.peer->data, "\n disconnected.\n";
 
 				deletePeer(*(int*)event.peer->data);
 				event.peer->data = NULL;
@@ -52,8 +54,8 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	connectToPeer("10.124.68.24");
-	//sendData("this_is_some_data");
+	connectToPeer(LAPTOP_IP);
+	
 	
 	while (online) {
 		if (enet_host_service(client, &event, 0) > 0) {
@@ -394,7 +396,7 @@ void Net::parseData(unsigned char* buffer, size_t size)
 		iarchive(p); // Read the data from the archive
 	}
 
-	cout << "msg type : " << p.type << " peer id : " << p.newpeer.id << " peer ip : " << p.newpeer.ip << endl;
+	cout << "msg type : " << p.type << endl << " peer id : " << p.newpeer.id << endl << " peer ip : " << hex_to_strip(p.newpeer.ip) << endl;
 
 	
 
