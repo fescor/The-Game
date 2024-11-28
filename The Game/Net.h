@@ -9,6 +9,7 @@
 #include "Structs.h"
 #include "cereal/archives/binary.hpp"
 #include "cereal/archives/portable_binary.hpp"
+#include "Player.h"
 
 
 
@@ -44,13 +45,19 @@ class Net : public GameObject {
 	
 	void deletePeer(int id);
 	
-	void validatePeer(enet_uint32 ip , int id);
+	
 	
 	
 	
 	std::string hex_to_strip(unsigned int input);
 	int hex_to_intip(unsigned int input);
 	
+	///JOIN FUNCTIONS
+
+	void setmyID(int id);
+	void validatePeer(enet_uint32 ip, int id);
+
+
 	
 	int maxpeerID = 0;
 

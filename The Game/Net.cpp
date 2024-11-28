@@ -7,7 +7,7 @@
 
 #define PC_IP "10.124.68.23"
 #define LAPTOP_IP "10.124.68.24"
-
+//TODO : implement corectly getting a conection from a peer when in join validating the peer and joining to one 
 
 
 
@@ -115,15 +115,25 @@ int Net::join()
 
 void Net::connectRoutine(ENetEvent& event)
 {
-	anounceNewPeer(event.peer, event.peer->address.host, maxpeerID + 1);
+	maxpeerID++;
+
+	setID setid;
+	setid.id = maxpeerID;
+	union data payload;
+	payload.setid = setid;
+
+	sendDataToPeer(event.peer, payload , SETID);
+
+	anounceNewPeer(event.peer, event.peer->address.host, maxpeerID);
 
 	peers.insert(pair<int, unsigned int>(maxpeerID + 1, hex_to_intip(event.peer->address.host)));
 	
 
-	m_state->createPlayer(maxpeerID + 1);
+	m_state->createPlayer(maxpeerID);
 
 	event.peer->data = m_state->connectpeer2player(); //afto simenei oti to peer pou ekane join einai conected me to m_id toy player pou eftiaksa (peer.data = player.o_id)
-	maxpeerID++;
+	
+	
 
 
 	cout << peers.begin()->first<< endl;
@@ -144,7 +154,11 @@ void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type) //
 	case NEWPEER:
 		p.type = NEWPEER;
 		p.newpeer = payload.newp;
-
+		break;
+	case SETID:
+		p.type = SETID;
+		p.setid = payload.setid;
+		break;
 
 	}
 
@@ -176,8 +190,6 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	case NEWPEER:
 		p.type = NEWPEER;
 		p.newpeer = payload.newp;
-
-
 	}
 
 	std::stringstream ss; // any stream can be used
@@ -396,7 +408,17 @@ void Net::parseData(unsigned char* buffer, size_t size)
 		iarchive(p); // Read the data from the archive
 	}
 
-	cout << "msg type : " << p.type << endl << " peer id : " << p.newpeer.id << endl << " peer ip : " << hex_to_strip(p.newpeer.ip) << endl;
+	switch (p.type)
+	{
+	case NEWPEER:
+		cout << "msg type : " << p.type << endl << " peer id : " << p.newpeer.id << endl << " peer ip : " << hex_to_strip(p.newpeer.ip) << endl;
+		break;
+	case SETID:
+		setmyID(p.setid.id);
+		break;
+	}
+
+	
 
 	
 
@@ -414,6 +436,14 @@ void Net::deletePeer(int id)
 			
 		}
 	}
+
+}
+
+void Net::setmyID(int id)
+{
+
+	m_state->getPlayer()->seto_id(id);
+
 
 }
 
