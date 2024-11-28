@@ -24,28 +24,38 @@ class Net : public GameObject {
 	std::list < std::string> newPeers; // peers connected waiting for validation;
 	int host();
 	int join();
+	
+	void connectRoutine(ENetEvent& event);
 
-	void sendData(ENetPeer* peer ,const char* data );
-	void sendData(ENetPeer* peer, const unsigned int data);
-	void sendData(const char* data , size_t size);
-	void sendData(const unsigned int data);
-	void sendData(void* data , size_t size) const;
 
-	std::string hex_to_strip(unsigned int input);
-	int hex_to_intip(unsigned int input);
+	void sendDataToPeer(ENetPeer* peer , union data payload, PACKETTYPE type);
+
+	void sendDataBroadcast(union data payload, PACKETTYPE type);
+
+
+
+	
 	void connectToPeer(const std::string ip);
 	void connectToPeer(const std::string ip, const int id);
+
 	void anounceNewPeer(ENetPeer * peer , enet_uint32 ip, int id);
+	
 	void parseData(unsigned char* buffer, size_t size);
+	
 	void deletePeer(int id);
+	
 	void validatePeer(enet_uint32 ip , int id);
+	
+	
+	
+	std::string hex_to_strip(unsigned int input);
+	int hex_to_intip(unsigned int input);
+	
+	
 	int maxpeerID = 0;
 
 
 	bool _host = false;
-	void serializeData(newP structure, int datatype);
-
-
 
 	public:
 		Net(bool host);

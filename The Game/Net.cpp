@@ -13,79 +13,36 @@ using namespace std;
 
 int Net::host()
 {
-
 	ENetEvent event;
-	newP p;
-	p.id = 10;
-	p.ip = 10101010;
-	
 
 	while (online) {
 		if (enet_host_service(client, &event, 0) > 0) {
 			switch (event.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT:
-				printf("A new client connected from %x:%u.\n",
-					event.peer->address.host,
-					event.peer->address.port);
+				cout << "A new client connected from %x:%u.\n", event.peer->address.host, event.peer->address.port;
 				
-				
+				connectRoutine(event);
 
-				
-				peers.insert(pair<int, unsigned int>(maxpeerID + 1, hex_to_intip(event.peer->address.host)));
-				//anounceNewPeer(event.peer, event.peer->address.host, maxpeerID + 1);
-
-				m_state->createPlayer(maxpeerID + 1);
-
-				event.peer->data = m_state->connectpeer2player(); //afto simenei oti to peer pou ekane join einai conected me to m_id toy player pou eftiaksa (peer.data = player.o_id)
-				maxpeerID++;
-
-
-				cout << peers.begin()->first;
-				
-				 
-				cout << hex_to_strip(event.peer->address.host);
-
-
-				//sendData(event.peer, "i_see_you");
-				serializeData(p, 1);
 				break;
 
 			case ENET_EVENT_TYPE_RECEIVE:
-				/*
-				printf("A packet of length %u containing %s was received from %s on channel %u.\n",
-					event.packet->dataLength,
-					event.packet->data,
-					event.peer->data,
-					event.channelID);
-				*/
+
 				parseData(event.packet->data, event.packet->dataLength);
-				/* Clean up the packet now that we're done using it. */
 				enet_packet_destroy(event.packet);
 
 				break;
 
 			case ENET_EVENT_TYPE_DISCONNECT:
-				printf("\n %d disconnected.\n", *(int*)event.peer->data);
+
+				cout << "\n %d disconnected.\n" , *(int*)event.peer->data;
 
 				deletePeer(*(int*)event.peer->data);
-
-				
-				
-				
-
-
-				/* Reset the peer's client information. */
 				event.peer->data = NULL;
-
-				
-
 
 			}
 		}
-		
-
-
+	
 	}
 	m_state->setOnline(false, false);
 	enet_host_destroy(client);
@@ -154,43 +111,92 @@ int Net::join()
 
 }
 
-void Net::sendData(ENetPeer* peer, const char* data) ///overloading sendData ////
+void Net::connectRoutine(ENetEvent& event)
 {
-	ENetPacket* packet = enet_packet_create(data, strlen(data) + 1, ENET_PACKET_FLAG_RELIABLE);
+	anounceNewPeer(event.peer, event.peer->address.host, maxpeerID + 1);
+
+	peers.insert(pair<int, unsigned int>(maxpeerID + 1, hex_to_intip(event.peer->address.host)));
+	
+
+	m_state->createPlayer(maxpeerID + 1);
+
+	event.peer->data = m_state->connectpeer2player(); //afto simenei oti to peer pou ekane join einai conected me to m_id toy player pou eftiaksa (peer.data = player.o_id)
+	maxpeerID++;
+
+
+	cout << peers.begin()->first<< endl;
+
+
+	cout << hex_to_strip(event.peer->address.host) << endl;
+
+
+
+}
+
+void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type) ///overloading sendData ////
+{
+
+	packet p;
+	switch (type)
+	{
+	case NEWPEER:
+		p.type = NEWPEER;
+		p.newpeer = payload.newp;
+
+
+	}
+
+
+	std::stringstream ss; // any stream can be used
+	std::ios::binary;
+	{
+		cereal::PortableBinaryOutputArchive oarchive(ss); // Create an output archive		
+		oarchive(p);// Write the data to the archive
+
+	} // archive goes out of scope, ensuring all contents are flushed
+
+
+	std::string data = ss.str();
+
+	ENetPacket* packet = enet_packet_create(data.c_str(), data.length() + 1, ENET_PACKET_FLAG_RELIABLE);
 	enet_peer_send(peer, 0, packet); //second parameter is channel id i want to send the packet through
+
 	
 
 }
 
-void Net::sendData(ENetPeer* peer, const unsigned int data)
-{
-	ENetPacket* packet = enet_packet_create(&data, sizeof(data) + 1, ENET_PACKET_FLAG_RELIABLE);
-	enet_peer_send(peer, 0, packet);
 
-}
-
-void Net::sendData(const char* data , size_t size)
+void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 {
-	ENetPacket* packet = enet_packet_create(data, size + 1, ENET_PACKET_FLAG_RELIABLE);
+	packet p;
+	switch (type)
+	{
+	case NEWPEER:
+		p.type = NEWPEER;
+		p.newpeer = payload.newp;
+
+
+	}
+
+	std::stringstream ss; // any stream can be used
+	std::ios::binary;
+	{
+		cereal::PortableBinaryOutputArchive oarchive(ss); // Create an output archive		
+		oarchive(p);// Write the data to the archive
+
+	} // archive goes out of scope, ensuring all contents are flushed
+
+
+	std::string data = ss.str();
+	
+	ENetPacket* packet = enet_packet_create(data.c_str(), data.length() + 1, ENET_PACKET_FLAG_RELIABLE);
 	enet_host_broadcast(client, 0, packet);
 	cout << "sending some data " << endl;
 
 }
 
-void Net::sendData(const unsigned int data)
-{
-	ENetPacket* packet = enet_packet_create(&data, sizeof(data) + 1, ENET_PACKET_FLAG_RELIABLE);
-	enet_host_broadcast(client, 0, packet);
 
-}
 
-void Net::sendData(void* data, size_t size) const
-{
-
-	ENetPacket* packet = enet_packet_create(data, size + 1, ENET_PACKET_FLAG_RELIABLE);
-	enet_host_broadcast(client, 0, packet);
-
-}
 
 
 
@@ -229,6 +235,7 @@ int Net::run() {
 
 
 }
+
 std::string Net::hex_to_strip(unsigned int input)        //////// O XRISTOS KAI H PANAGIA
 {
 	stringstream my_ss;					//convert decimal to hex
@@ -354,14 +361,20 @@ void Net::connectToPeer(const std::string ip, int id)
 void Net::anounceNewPeer(ENetPeer* newPeer, enet_uint32 ip, int id)
 {
 	
-	newP* p = new newP();
-	p->id = id;
-	p->ip = ip;
-	//sendData(p);
-	//createpayload(p, 1);
+	newP p;
+	p.id = id;
+	p.ip = ip;
+	union data payload;
+	payload.newp = p;
 	
 	
-
+	sendDataBroadcast(payload , NEWPEER );// here the new peer is gonna get the data from the broadcast it should ignore it todo on join function.
+	for (auto peer : peers) {	//TODO: tell the new peer who is already on the lobby 
+		p.id = peer.first;
+		p.ip = peer.second;
+		payload.newp = p;
+		sendDataToPeer(newPeer, payload, NEWPEER);
+	}
 }
 
 void Net::parseData(unsigned char* buffer, size_t size)
@@ -404,7 +417,7 @@ void Net::deletePeer(int id)
 
 void Net::validatePeer(enet_uint32 ip, int id) // this should be called when host announces a new peer so i validate it 
 {
-	/// TODO
+	
 	std::string ipStr = hex_to_strip(ip);
 
 	for (auto iter = newPeers.begin(); iter != newPeers.end(); iter++) {
@@ -418,29 +431,6 @@ void Net::validatePeer(enet_uint32 ip, int id) // this should be called when hos
 
 
 
-
-}
-
-void Net::serializeData(newP structure, int datatype)
-{
-
-	packet p;
-	p.type = NEWPEER;
-	p.newpeer = structure;
-	
-
-	std::stringstream ss; // any stream can be used
-	std::ios::binary;
-	{
-		cereal::PortableBinaryOutputArchive oarchive(ss); // Create an output archive		
-		oarchive(p);// Write the data to the archive
-		
-	} // archive goes out of scope, ensuring all contents are flushed
-	
-
-	std::string data = ss.str();
-	sendData(data.c_str() , data.length());
-	
 
 }
 

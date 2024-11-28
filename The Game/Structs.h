@@ -12,6 +12,7 @@ struct newP
 	{
 		archive(id , ip); // serialize things by passing them to the archive
 	}
+	newP() {};
 };
 
 
@@ -52,3 +53,14 @@ struct packet
 	packet() {};
 };
 
+union data {
+
+
+	newP newp{};
+
+
+
+
+
+
+};
