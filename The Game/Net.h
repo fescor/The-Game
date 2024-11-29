@@ -45,7 +45,10 @@ class Net : public GameObject {
 	void anounceLobbyPeers(ENetPeer* newPeer);
 	union data setPeerID();
 	
-	void parseData(unsigned char* buffer, size_t size );
+	void parseData(unsigned char* buffer, size_t size, ENetEvent& event );
+
+	void disconnect();
+
 
 	
 	void deletePeer(int id);

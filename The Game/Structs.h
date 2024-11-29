@@ -41,6 +41,7 @@ enum PACKETTYPE {
 	NEWPEER ,
 	SETID,
 	LOOBYPEER,
+	DISCONNECT,
 
 
 
@@ -74,6 +75,10 @@ struct packet
 			case LOOBYPEER:
 				archive(newpeer);
 				break;
+			case DISCONNECT:
+				archive(newpeer);
+				break;
+
 				
 
 		}

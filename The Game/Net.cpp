@@ -30,7 +30,7 @@ int Net::host()
 
 			case ENET_EVENT_TYPE_RECEIVE:
 
-				parseData(event.packet->data, event.packet->dataLength);
+				parseData(event.packet->data, event.packet->dataLength, event);
 				enet_packet_destroy(event.packet);
 
 				break;
@@ -78,7 +78,7 @@ int Net::join()
 					event.peer->data,
 					event.channelID);
 
-				parseData(event.packet->data, event.packet->dataLength);
+				parseData(event.packet->data, event.packet->dataLength, event);
 				
 
 
@@ -101,6 +101,9 @@ int Net::join()
 
 
 	}
+
+	disconnect();
+
 	
 	m_state->setOnline(false, false); //isos den xriazete
 
@@ -167,15 +170,19 @@ void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type)
 	switch (type)
 	{
 	case NEWPEER:
-		p.type = NEWPEER;
+		p.type = type;
 		p.newpeer = payload.newp;
 		break;
 	case SETID:
-		p.type = SETID;
+		p.type = type;
 		p.setid = payload.setid;
 		break;
 	case LOOBYPEER:
-		p.type = LOOBYPEER;
+		p.type = type;
+		p.newpeer = payload.newp;
+		break;
+	case DISCONNECT:
+		p.type = type;
 		p.newpeer = payload.newp;
 		break;
 
@@ -206,8 +213,13 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	switch (type)
 	{
 	case NEWPEER:
-		p.type = NEWPEER;
+		p.type = type;
 		p.newpeer = payload.newp;
+		break;
+	case DISCONNECT:
+		p.type = type;
+		p.newpeer = payload.newp;
+		break;
 	}
 
 	std::stringstream ss; // any stream can be used
@@ -430,7 +442,7 @@ union data Net::setPeerID()
 
 }
 
-void Net::parseData(unsigned char* buffer, size_t size)
+void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 {
 
 
@@ -461,6 +473,12 @@ void Net::parseData(unsigned char* buffer, size_t size)
 		peers.insert(pair<int, unsigned int>(p.newpeer.id, p.newpeer.ip));
 		validatePeer(p.newpeer.ip, p.newpeer.id);
 		break;
+	case DISCONNECT:
+
+		enet_peer_disconnect_now(event.peer , NULL);
+		
+
+
 	}
 
 	
@@ -470,6 +488,20 @@ void Net::parseData(unsigned char* buffer, size_t size)
 
 
 }
+
+void Net::disconnect()///telling everyone i am disconecting
+{
+	union data payload;
+	PEER peer;
+	peer.id = *m_state->getPlayer()->geto_id();
+	peer.ip = ENET_HOST_ANY;
+	payload.newp = peer;
+
+	sendDataBroadcast(payload, DISCONNECT);
+
+}
+
+
 
 void Net::deletePeer(int id)
 {
