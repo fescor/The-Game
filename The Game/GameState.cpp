@@ -33,8 +33,10 @@ int* GameState::connectpeer2player()
 
 void GameState::initNet()
 {
-
-	m_player = new Player("Player"); // i create my player instance when i go online to set  online things 
+	if (!m_player) {
+		m_player = new Player("Player"); // i create my player instance when i go online to set  online things 
+	}
+	
 	net = new Net(host);
 	//std::thread nt(&Net::run, net);
 	
@@ -125,6 +127,7 @@ void GameState::init()
 			mainscreen = new MainScreen();
 		}	
 		mainscreen->init();
+
 		
 		break;
 	case'L':
@@ -202,6 +205,7 @@ void GameState::update(float dt)
 
 		if (m_player) {
 			delete m_player;
+			m_player = nullptr;
 		}
 
 	}

@@ -474,10 +474,10 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		validatePeer(p.newpeer.ip, p.newpeer.id);
 		break;
 	case DISCONNECT:
-
+		
 		enet_peer_disconnect_now(event.peer , NULL);
 		
-
+		cout << "peer : " + std::to_string(p.newpeer.id) + " disconected " << endl;
 
 	}
 
@@ -491,14 +491,24 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 void Net::disconnect()///telling everyone i am disconecting
 {
+
 	union data payload;
 	PEER peer;
 	peer.id = *m_state->getPlayer()->geto_id();
 	peer.ip = ENET_HOST_ANY;
 	payload.newp = peer;
 
-	sendDataBroadcast(payload, DISCONNECT);
 
+	for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)
+	{
+		if (currentPeer->data = 0 ) {
+			sendDataToPeer(currentPeer , payload, DISCONNECT);// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
+			return;
+		}
+	}
+
+	//sendDataBroadcast(payload, DISCONNECT);
+	
 }
 
 
