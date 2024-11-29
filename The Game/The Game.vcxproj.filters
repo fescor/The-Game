@@ -63,6 +63,9 @@
     <ClCompile Include="..\lib\enet-1.3.18\host.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\lib\enet-1.3.18\peer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animations.h">

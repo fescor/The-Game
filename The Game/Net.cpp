@@ -478,7 +478,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		enet_peer_disconnect_now(event.peer , NULL);
 		
 		cout << "peer : " + std::to_string(p.newpeer.id) + " disconected " << endl;
-
+		break;
 	}
 
 	
@@ -501,7 +501,8 @@ void Net::disconnect()///telling everyone i am disconecting
 
 	for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)
 	{
-		if (currentPeer->data = 0 ) {
+		
+		if (*(int*)currentPeer->data == 0 ) { 
 			sendDataToPeer(currentPeer , payload, DISCONNECT);// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
 			return;
 		}
@@ -547,7 +548,7 @@ void Net::validatePeer(enet_uint32 ip, int id) // this should be called when hos
 			m_state->createPlayer(id);// create a player instance for the newpeer
 			for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)				
 			{
-				if (currentPeer->data = nullptr) {
+				if (currentPeer->data == nullptr) {
 					currentPeer->data = m_state->connectpeer2player();// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
 								
 				}
