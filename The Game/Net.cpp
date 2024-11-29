@@ -24,7 +24,7 @@ int Net::host()
 			case ENET_EVENT_TYPE_CONNECT:
 				cout << "A new client connected from %x:%u.\n", event.peer->address.host, event.peer->address.port;
 				
-				connectRoutine(event);
+				peerConnectRoutineHOST(event);
 
 				break;
 
@@ -54,7 +54,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	connectToPeer(LAPTOP_IP);
+	connectToHost(LAPTOP_IP);
 	
 	
 	while (online) {
@@ -65,8 +65,7 @@ int Net::join()
 				printf("A new client connected from %x:%u.\n",
 					event.peer->address.host,
 					event.peer->address.port);
-				//// TODO otan kaneis kapios connect prepei na to sindeo to enetpeer* me kapio peer apto to map mou (tha mou exei kanei broa)
-				newPeers.push_back(hex_to_strip(event.peer->address.host));
+					peerConnectRoutineJoin(event);
 
 
 
@@ -113,25 +112,25 @@ int Net::join()
 
 }
 
-void Net::connectRoutine(ENetEvent& event)
+void Net::peerConnectRoutineHOST(ENetEvent& event)
 {
-	maxpeerID++;
 
-	setID setid;
-	setid.id = maxpeerID;
-	union data payload;
-	payload.setid = setid;
+	sendDataToPeer(event.peer, setPeerID(), SETID); //here i send the peer that connected his online id 
+	
+	anounceLobbyPeers(event.peer);
 
-	sendDataToPeer(event.peer, payload , SETID);
 
-	anounceNewPeer(event.peer, event.peer->address.host, maxpeerID);
+	anounceNewPeer(event.peer->address.host, maxpeerID); // anounce to the lobby that someone connected
 
-	peers.insert(pair<int, unsigned int>(maxpeerID + 1, hex_to_intip(event.peer->address.host)));
+
+
+
+	peers.insert(pair<int, unsigned int>(maxpeerID,event.peer->address.host));// store the new peeer as a pair of (id , ip) 
 	
 
-	m_state->createPlayer(maxpeerID);
+	m_state->createPlayer(maxpeerID);// create a player instance for the newpeer
 
-	event.peer->data = m_state->connectpeer2player(); //afto simenei oti to peer pou ekane join einai conected me to m_id toy player pou eftiaksa (peer.data = player.o_id)
+	event.peer->data = m_state->connectpeer2player(); // save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
 	
 	
 
@@ -145,7 +144,23 @@ void Net::connectRoutine(ENetEvent& event)
 
 }
 
-void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type) ///overloading sendData ////
+void Net::peerConnectRoutineJoin(ENetEvent& event)
+{
+	for (auto peer : peers) {
+		if (peer.second == event.peer->address.host) {
+			
+			m_state->createPlayer(peer.first);// create a player instance for the newpeer
+			event.peer->data = m_state->connectpeer2player(); // save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
+			return;
+
+		}
+
+	}
+	newPeers.push_back(event.peer->address.host);
+
+}
+
+void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type) 
 {
 
 	packet p;
@@ -158,6 +173,10 @@ void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type) //
 	case SETID:
 		p.type = SETID;
 		p.setid = payload.setid;
+		break;
+	case LOOBYPEER:
+		p.type = LOOBYPEER;
+		p.newpeer = payload.newp;
 		break;
 
 	}
@@ -180,7 +199,6 @@ void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type) //
 	
 
 }
-
 
 void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 {
@@ -208,13 +226,6 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	cout << "sending some data " << endl;
 
 }
-
-
-
-
-
-
-
 
 int Net::run() {
 
@@ -285,14 +296,15 @@ int Net::hex_to_intip(unsigned int input)        //////// O XRISTOS KAI H PANAGI
 }
 
 
-void Net::connectToPeer(const std::string ip) // this is called when i connect to host
+void Net::connectToHost(const std::string ip) // this is called when i connect to host
 {
+	
 	ENetPeer* peer;																	// peer defins where we connect to so one peer for each player should be implemented here;
 	ENetAddress addressPeer;														// for every peer need to set the this method
 	ENetEvent event;
 	enet_address_set_host(&addressPeer, ip.c_str());
 	addressPeer.port = 7777;
-	
+
 	
 
 	peer = enet_host_connect(client, &addressPeer, 1, 0);
@@ -329,7 +341,7 @@ void Net::connectToPeer(const std::string ip) // this is called when i connect t
 	
 }
 
-void Net::connectToPeer(const std::string ip, int id)
+void Net::connectToPeer(const std::string ip, int id)// this should be called when i get a NEWP packet
 {
 	ENetPeer* peer;																	// peer defins where we connect to so one peer for each player should be implemented here;
 	ENetAddress addressPeer;														// for every peer need to set the this method
@@ -372,10 +384,10 @@ void Net::connectToPeer(const std::string ip, int id)
 	}
 }
 
-void Net::anounceNewPeer(ENetPeer* newPeer, enet_uint32 ip, int id)
+void Net::anounceNewPeer(enet_uint32 ip, int id)
 {
 	
-	newP p;
+	PEER p;
 	p.id = id;
 	p.ip = ip;
 	union data payload;
@@ -383,12 +395,39 @@ void Net::anounceNewPeer(ENetPeer* newPeer, enet_uint32 ip, int id)
 	
 	
 	sendDataBroadcast(payload , NEWPEER );// here the new peer is gonna get the data from the broadcast it should ignore it todo on join function.
+
+}
+
+void Net::anounceLobbyPeers(ENetPeer* newPeer)
+{
+	PEER p;
+	union data payload;
+	
+
 	for (auto peer : peers) {	//TODO: tell the new peer who is already on the lobby 
 		p.id = peer.first;
 		p.ip = peer.second;
 		payload.newp = p;
-		sendDataToPeer(newPeer, payload, NEWPEER);
+		sendDataToPeer(newPeer, payload, LOOBYPEER);
 	}
+
+}
+
+union data Net::setPeerID()
+{
+
+	maxpeerID++;
+
+	setID setid;
+	setid.id = maxpeerID;
+	union data payload;
+	payload.setid = setid;
+
+	
+	return payload;
+
+
+
 }
 
 void Net::parseData(unsigned char* buffer, size_t size)
@@ -411,10 +450,16 @@ void Net::parseData(unsigned char* buffer, size_t size)
 	switch (p.type)
 	{
 	case NEWPEER:
+		if (p.newpeer.id == *(m_state->getPlayer()->geto_id())) { break;}
 		cout << "msg type : " << p.type << endl << " peer id : " << p.newpeer.id << endl << " peer ip : " << hex_to_strip(p.newpeer.ip) << endl;
+		connectToPeer(hex_to_strip(p.newpeer.ip) , p.newpeer.id );
 		break;
 	case SETID:
 		setmyID(p.setid.id);
+		break;
+	case LOOBYPEER:
+		peers.insert(pair<int, unsigned int>(p.newpeer.id, p.newpeer.ip));
+		validatePeer(p.newpeer.ip, p.newpeer.id);
 		break;
 	}
 
@@ -443,28 +488,36 @@ void Net::setmyID(int id)
 {
 
 	m_state->getPlayer()->seto_id(id);
-
+	
+	cout << "HOST SET MY ONLINE ID TO : ";
+	
 
 }
 
 void Net::validatePeer(enet_uint32 ip, int id) // this should be called when host announces a new peer so i validate it 
 {
 	
-	std::string ipStr = hex_to_strip(ip);
+	
 
 	for (auto iter = newPeers.begin(); iter != newPeers.end(); iter++) {
-		if (*iter == ipStr) {
-			peers.insert(pair<int, unsigned int >(id, ip));
+		if (*iter == ip) {
+			
+			m_state->createPlayer(id);// create a player instance for the newpeer
+			for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)				
+			{
+				if (currentPeer->data = nullptr) {
+					currentPeer->data = m_state->connectpeer2player();// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
+								
+				}
+			}
 			newPeers.erase(iter);
+			
+
 		}
 	}
 
-
-
-
-
-
 }
+
 
 void Net::setOnline(bool a)
 {
@@ -475,6 +528,8 @@ bool Net::getOnline()
 {
 	return online;
 }
+
+
 
 Net::Net(bool host) {
 		

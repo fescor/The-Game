@@ -22,11 +22,12 @@ class Net : public GameObject {
 	ENetHost* client;
 	ENetAddress address;
 	
-	std::list < std::string> newPeers; // peers connected waiting for validation;
+	std::list <enet_uint32> newPeers; // peers connected waiting for validation;
 	int host();
 	int join();
 	
-	void connectRoutine(ENetEvent& event);
+	void peerConnectRoutineHOST(ENetEvent& event);
+	void peerConnectRoutineJoin(ENetEvent& event);
 
 
 	void sendDataToPeer(ENetPeer* peer , union data payload, PACKETTYPE type);
@@ -36,12 +37,16 @@ class Net : public GameObject {
 
 
 	
-	void connectToPeer(const std::string ip);
+	void connectToHost(const std::string ip);
+
 	void connectToPeer(const std::string ip, const int id);
 
-	void anounceNewPeer(ENetPeer * peer , enet_uint32 ip, int id);
+	void anounceNewPeer(enet_uint32 ip, int id);
+	void anounceLobbyPeers(ENetPeer* newPeer);
+	union data setPeerID();
 	
-	void parseData(unsigned char* buffer, size_t size);
+	void parseData(unsigned char* buffer, size_t size );
+
 	
 	void deletePeer(int id);
 	

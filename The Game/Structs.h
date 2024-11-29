@@ -1,7 +1,7 @@
 #include "enet/enet.h"
 #include "cereal/archives/binary.hpp"
 
-struct newP 
+struct PEER
 {
 	int id = 0;
 	enet_uint32 ip = 0;
@@ -12,7 +12,7 @@ struct newP
 	{
 		archive(id , ip); // serialize things by passing them to the archive
 	}
-	newP() {};
+	PEER() {};
 };
 
 struct setID
@@ -26,7 +26,8 @@ struct setID
 	{
 		archive(id); // serialize things by passing them to the archive
 	}
-	setID(){};
+
+	
 
 
 
@@ -39,6 +40,8 @@ struct setID
 enum PACKETTYPE {
 	NEWPEER ,
 	SETID,
+	LOOBYPEER,
+
 
 
 };
@@ -51,7 +54,7 @@ struct packet
 	union 
 	{
 		
-		newP newpeer;
+		PEER newpeer;
 		setID setid;
 		//vale edw ta alla structs(paketa)
 
@@ -68,6 +71,9 @@ struct packet
 			case SETID:
 				archive(setid);
 				break;
+			case LOOBYPEER:
+				archive(newpeer);
+				break;
 				
 
 		}
@@ -80,7 +86,8 @@ struct packet
 union data {
 
 
-	newP newp{};
+	PEER newp{};
+
 	setID setid;
 
 

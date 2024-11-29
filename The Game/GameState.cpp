@@ -34,6 +34,7 @@ int* GameState::connectpeer2player()
 void GameState::initNet()
 {
 
+	m_player = new Player("Player"); // i create my player instance when i go online to set  online things 
 	net = new Net(host);
 	//std::thread nt(&Net::run, net);
 	
@@ -196,7 +197,12 @@ void GameState::update(float dt)
 		
 		net->setOnline(false);
 		nt.join();
+
 		deleteNet();
+
+		if (m_player) {
+			delete m_player;
+		}
 
 	}
 	
