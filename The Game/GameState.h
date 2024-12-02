@@ -7,6 +7,7 @@
 
 
 
+
 class GameState {
 private:
 	std::string m_assets_path = "assets//";
