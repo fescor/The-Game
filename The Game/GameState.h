@@ -29,7 +29,7 @@ private:
 	bool online = false;
 	bool host = false;
 	
-
+	
 	
 
 

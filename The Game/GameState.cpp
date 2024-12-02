@@ -120,6 +120,7 @@ void GameState::init()
 {
 
 	
+	
 
 	switch (status) {
 	case 'M':

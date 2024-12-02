@@ -27,7 +27,16 @@ struct setID
 		archive(id); // serialize things by passing them to the archive
 	}
 
-	
+};
+struct dc
+{
+	int idc;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(id); // serialize things by passing them to the archive
+	}
 
 
 
@@ -57,6 +66,7 @@ struct packet
 		
 		PEER newpeer;
 		setID setid;
+		dc idc;
 		//vale edw ta alla structs(paketa)
 
 
@@ -76,7 +86,7 @@ struct packet
 				archive(newpeer);
 				break;
 			case DISCONNECT:
-				archive(newpeer);
+				archive(idc);
 				break;
 
 				
@@ -94,6 +104,8 @@ union data {
 	PEER newp{};
 
 	setID setid;
+
+	dc idc;
 
 
 

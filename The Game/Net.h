@@ -47,7 +47,7 @@ class Net : public GameObject {
 	
 	void parseData(unsigned char* buffer, size_t size, ENetEvent& event );
 
-	void disconnect();
+	void disconnect(ENetPeer* peer);
 
 
 	

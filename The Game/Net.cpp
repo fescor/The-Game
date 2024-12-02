@@ -66,7 +66,7 @@ int Net::join()
 					event.peer->address.host,
 					event.peer->address.port);
 					peerConnectRoutineJoin(event);
-
+					disconnect(event.peer);
 
 
 				break;
@@ -101,8 +101,8 @@ int Net::join()
 
 
 	}
-
-	disconnect();
+	
+	
 
 	
 	m_state->setOnline(false, false); //isos den xriazete
@@ -218,7 +218,7 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 		break;
 	case DISCONNECT:
 		p.type = type;
-		p.newpeer = payload.newp;
+		p.idc = payload.idc;
 		break;
 	}
 
@@ -475,9 +475,9 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		break;
 	case DISCONNECT:
 		
-		enet_peer_disconnect_now(event.peer , NULL);
 		
-		cout << "peer : " + std::to_string(p.newpeer.id) + " disconected " << endl;
+		
+		cout << "peer : " + std::to_string(p.idc.idc) + " disconected " << endl;
 		break;
 	}
 
@@ -489,16 +489,15 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 }
 
-void Net::disconnect()///telling everyone i am disconecting
+void Net::disconnect(ENetPeer* p)///telling everyone i am disconecting
 {
 
 	union data payload;
-	PEER peer;
-	peer.id = *m_state->getPlayer()->geto_id();
-	peer.ip = ENET_HOST_ANY;
-	payload.newp = peer;
+	dc dc;
+	dc.idc = *(int*)p->data;
+	payload.idc = dc;
 
-
+	
 	for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)
 	{
 		
@@ -507,7 +506,8 @@ void Net::disconnect()///telling everyone i am disconecting
 			return;
 		}
 	}
-
+	
+	//sendDataToPeer(p, payload, DISCONNECT);
 	//sendDataBroadcast(payload, DISCONNECT);
 	
 }
