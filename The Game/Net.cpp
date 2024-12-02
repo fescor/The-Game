@@ -25,7 +25,7 @@ int Net::host()
 				cout << "A new client connected from %x:%u.\n", event.peer->address.host, event.peer->address.port;
 				
 				peerConnectRoutineHOST(event);
-
+				
 				break;
 
 			case ENET_EVENT_TYPE_RECEIVE:
@@ -39,7 +39,7 @@ int Net::host()
 
 				cout << *(int*)event.peer->data, "\n disconnected.\n";
 
-				deletePeer(*(int*)event.peer->data);
+				//deletePeer(*(int*)event.peer->data);
 				event.peer->data = NULL;
 
 			}
@@ -55,6 +55,7 @@ int Net::join()
 {	
 	ENetEvent event;
 	connectToHost(LAPTOP_IP);
+	disconnect();
 	
 	
 	while (online) {
@@ -66,7 +67,7 @@ int Net::join()
 					event.peer->address.host,
 					event.peer->address.port);
 					peerConnectRoutineJoin(event);
-					disconnect(event.peer);
+					
 
 
 				break;
@@ -181,10 +182,7 @@ void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type)
 		p.type = type;
 		p.newpeer = payload.newp;
 		break;
-	case DISCONNECT:
-		p.type = type;
-		p.newpeer = payload.newp;
-		break;
+	
 
 	}
 
@@ -475,6 +473,19 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		break;
 	case DISCONNECT:
 		
+
+		
+		for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)
+		{
+
+			if (*(int*)currentPeer->data == p.idc.idc) {
+				enet_peer_disconnect_now(currentPeer, 420 );					// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
+				return;
+			}
+
+		}
+		deletePeer(p.idc.idc);
+
 		
 		
 		cout << "peer : " + std::to_string(p.idc.idc) + " disconected " << endl;
@@ -489,15 +500,15 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 }
 
-void Net::disconnect(ENetPeer* p)///telling everyone i am disconecting
+void Net::disconnect()///telling everyone i am disconecting
 {
 
 	union data payload;
 	dc dc;
-	dc.idc = *(int*)p->data;
+	dc.idc = 12;
 	payload.idc = dc;
 
-	
+	/*
 	for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)
 	{
 		
@@ -505,10 +516,12 @@ void Net::disconnect(ENetPeer* p)///telling everyone i am disconecting
 			sendDataToPeer(currentPeer , payload, DISCONNECT);// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
 			return;
 		}
+		
 	}
+	*/
 	
 	//sendDataToPeer(p, payload, DISCONNECT);
-	//sendDataBroadcast(payload, DISCONNECT);
+	sendDataBroadcast(payload, DISCONNECT);
 	
 }
 
@@ -524,6 +537,7 @@ void Net::deletePeer(int id)
 			
 		}
 	}
+
 
 }
 
