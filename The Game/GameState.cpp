@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "MainScreen.h"
 #include "Net.h"
+#include <portaudio.h>
 
 
 void GameState::createPlayer(const int id) // this should be called by net only
@@ -136,9 +137,14 @@ void GameState::init()
 
 	}
 	
-		
-	
-	
+	audiohandler = new AudioHandler();
+	//prosorina edw mexri to multiplayer
+	//Audiomanager starts working
+	//audiomanager.audioInit(); 
+	if (audiohandler-> audioInit()) {
+		audiohandler-> countAudioDevices();
+		audiohandler-> listAudioDevices();
+	}
 	
 
 

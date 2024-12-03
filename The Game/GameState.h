@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <string>
+#include "AudioHandler.h"
 
 
 
@@ -21,6 +22,10 @@ private:
 	class Level* m_current_level = 0;
 	class MainScreen* mainscreen = 0;
 
+	//AUDIO//
+	//dimiourgia pointer gia antikeimeno audiomanager
+	class AudioHandler* audiohandler = nullptr;
+
 	
 	////// NET VARS //////
 
@@ -28,8 +33,6 @@ private:
 	std::vector<Player*> o_players;// a pointer to a vector called o_players that contains pointers to player objects
 	bool online = false;
 	bool host = false;
-	
-
 	
 
 
@@ -73,7 +76,6 @@ public:
 	/////////////////////////////////////////////////////
 
 
-	
 	void setStatus(char s);
 	
 	char getStatus();

@@ -116,8 +116,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\enet-1.3.18;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);enet64.lib;sggd.lib;ws2_32.lib;winmm.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\enet-1.3.18;portaudio_x64.lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);enet64.lib;sggd.lib;ws2_32.lib;winmm.lib;portaudio_x64.lib;</AdditionalDependencies>
       <OptimizeReferences>
       </OptimizeReferences>
     </Link>
@@ -140,14 +140,15 @@
       <OptimizeReferences>
       </OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\enet-1.3.18;</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);enet64.lib;sggd.lib;ws2_32.lib;winmm.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\enet-1.3.18;portaudio_x64.lib;</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);enet64.lib;sggd.lib;ws2_32.lib;winmm.lib;portaudio_x64.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\lib\enet-1.3.18\host.c" />
     <ClCompile Include="..\lib\enet-1.3.18\peer.c" />
     <ClCompile Include="Asteroid.cpp" />
+    <ClCompile Include="AudioHandler.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Bullets.cpp" />
     <ClCompile Include="Explosion.cpp" />
@@ -166,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="Animations.h" />
     <ClInclude Include="Asteroid.h" />
+    <ClInclude Include="AudioHandler.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="box.h" />
     <ClInclude Include="Bullets.h" />

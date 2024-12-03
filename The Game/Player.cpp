@@ -121,7 +121,7 @@ void Player::update(float dt)
 	else {
 		flag = false;
 	}
-	cout << angle ,  "/n";
+	//cout << angle ,  "/n";
 	m_pos_y -= sin(radians(angle)) * (speed * delta_time);												//blocking player from going outside the map 
 																										//those multipliers are given from a greater force of the universe
 	m_pos_x += cos(radians(angle)) * (speed * delta_time);
