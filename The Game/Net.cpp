@@ -54,8 +54,8 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	connectToHost(LAPTOP_IP);
-	disconnect();
+	connectToHost(PC_IP);
+	
 	
 	
 	while (online) {
@@ -99,6 +99,14 @@ int Net::join()
 
 			}
 		}
+		if (!m_state->getOnline()) {
+			disconnect();
+			online = false;
+			
+			break;
+
+		}
+		
 
 
 	}
@@ -328,7 +336,7 @@ void Net::connectToHost(const std::string ip) // this is called when i connect t
 
 
 		cout << "conection succeded ";
-		online = true;
+		
 		
 		peers.insert(pair<int, unsigned int>(0, peer->address.host));
 
@@ -371,7 +379,7 @@ void Net::connectToPeer(const std::string ip, int id)// this should be called wh
 
 
 		cout << "conection succeded ";
-		online = true;
+		
 		
 		peers.insert(pair<int, unsigned int>(id, peer->address.host));
 
@@ -475,15 +483,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		
 
 		
-		for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)
-		{
 
-			if (*(int*)currentPeer->data == p.idc.idc) {
-				enet_peer_disconnect_now(currentPeer, 420 );					// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
-				return;
-			}
-
-		}
 		deletePeer(p.idc.idc);
 
 		
@@ -505,23 +505,15 @@ void Net::disconnect()///telling everyone i am disconecting
 
 	union data payload;
 	dc dc;
-	dc.idc = 12;
+	dc.idc = *(int*)m_state->getPlayer()->geto_id();
 	payload.idc = dc;
 
-	/*
-	for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)
-	{
-		
-		if (*(int*)currentPeer->data == 0 ) { 
-			sendDataToPeer(currentPeer , payload, DISCONNECT);// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
-			return;
-		}
-		
-	}
-	*/
+
 	
 	//sendDataToPeer(p, payload, DISCONNECT);
 	sendDataBroadcast(payload, DISCONNECT);
+	enet_host_flush(client);
+	
 	
 }
 
