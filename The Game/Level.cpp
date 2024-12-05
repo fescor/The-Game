@@ -494,6 +494,15 @@ void Level::update(float dt)
 	}
 
 
+	for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
+
+		if (iter->second->isActive()) { iter->second->update(dt, true); }
+
+	}
+
+
+
+
 	
 	for (auto& asteroids : m_asteroids) {
 		asteroids.second->update(dt);
@@ -589,6 +598,11 @@ void Level::draw()
 	if (m_state->getPlayer()->isActive()) {
 		
 		m_state->getPlayer()->draw();
+	}
+	for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
+
+		if (iter->second->isActive()) { iter->second->draw(); }
+
 	}
 	
 	for (auto& planet: m_planets ) {

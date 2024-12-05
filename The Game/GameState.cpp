@@ -5,30 +5,23 @@
 #include "Net.h"
 
 
+
 void GameState::createPlayer(const int id) // this should be called by net only
 {
-	o_players.push_back(new Player(id));
+	
+	o_players[id] = std::make_unique<Player>(id);
 
 }
 
 void GameState::deletePlayer(const int id) // this should be called by net only 
 {
-	for (auto iter = o_players.begin(); iter != o_players.end(); iter++) {
-		if (*(*iter)->geto_id() == id) {
-			delete *(iter);
-			o_players.erase(iter);
-			return;
-
-		}
-
-	}
+	o_players.erase(id); // dont need to delete smart pointer sees out of scope and deletes it self
 
 }
 
-int* GameState::connectpeer2player()
+int* GameState::connectpeer2player(int id)
 {
-	return o_players.back()->geto_id();
-	
+	return o_players.find(id)->second->geto_id();
 }
 
 void GameState::initNet()
@@ -249,7 +242,17 @@ void GameState::startLevel()
 		m_player = new Player("Player");
 	}
 	
-	m_player->init();
+	m_player->init(false);
+	
+	for (auto iter = o_players.begin(); iter != o_players.end(); iter++) {
+
+		if (iter->first) { iter->second->init(true); }
+	}
+
+
+
+	
+
 }
 
 GameState* GameState::getInstance()
@@ -269,6 +272,21 @@ std::string GameState::getFullAssetPath(const std::string& asset)
 {
 	return m_assets_path + asset;
 }
+
+void GameState::getp_movePacket(int id , pMOVE packet)
+{
+
+	o_players.find(id)->second->insertPlayerPacket(packet);
+
+
+}
+
+const std::map<int , std::unique_ptr<Player>>& GameState::geto_playersmap()// is this okey do i need to have shared pointers?
+{
+	return o_players;
+}
+
+
 
 
 

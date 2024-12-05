@@ -1,5 +1,25 @@
+#pragma once
 #include "enet/enet.h"
 #include "cereal/archives/binary.hpp"
+
+struct pMOVE
+{
+	int id = 0;
+	float angle = .0;
+	float speed = .0;
+	float x = .0;
+	float y = .0;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(id, angle , speed , x , y); // serialize things by passing them to the archive
+	}
+
+
+
+};
+
 
 struct PEER
 {
@@ -51,6 +71,7 @@ enum PACKETTYPE {
 	SETID,
 	LOOBYPEER,
 	DISCONNECT,
+	PMOVE, 
 
 
 
@@ -67,7 +88,8 @@ struct packet
 		PEER newpeer;
 		setID setid;
 		dc idc;
-		//vale edw ta alla structs(paketa)
+		pMOVE pmove;
+		
 
 
 	};
@@ -88,6 +110,10 @@ struct packet
 			case DISCONNECT:
 				archive(idc);
 				break;
+			case PMOVE:
+				archive(pmove);
+				break;
+
 
 				
 
@@ -98,7 +124,7 @@ struct packet
 	packet() {};
 };
 
-union data {
+typedef union data {
 
 
 	PEER newp{};
@@ -107,8 +133,10 @@ union data {
 
 	dc idc;
 
+	pMOVE pmove;
 
 
 
 
-};
+
+}Data;

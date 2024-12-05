@@ -1,8 +1,7 @@
 #include "Player.h"
 #include <sgg/graphics.h>
-
 #include "GameState.h"
-
+#include "Net.h"
 #include "setcolor.h"
 #include <math.h>
 #include "Bullets.h"
@@ -40,6 +39,21 @@ void Player::loadExplosionSprites()
 		sprites_explosion.push_back(m_state->getFullAssetPath("explosion//explosion" + to_string(i) + ".png"));
 		sprites_explosion.push_back(m_state->getFullAssetPath("explosion//explosion" + to_string(i) + ".png"));
 	}
+}
+
+void Player::update(float dt, bool online)
+{
+	auto iter = q_packets.begin();
+	
+	angle = iter->angle;
+	speed = iter->speed;
+
+	m_pos_x = iter->x;
+	m_pos_y = iter->y;
+
+
+
+	q_packets.pop_front();
 }
 
 void Player::Activateshield()
@@ -122,8 +136,8 @@ void Player::update(float dt)
 		flag = false;
 	}
 	cout << angle ,  "/n";
-	m_pos_y -= sin(radians(angle)) * (speed * delta_time);												//blocking player from going outside the map 
-																										//those multipliers are given from a greater force of the universe
+	m_pos_y -= sin(radians(angle)) * (speed * delta_time);												
+																										
 	m_pos_x += cos(radians(angle)) * (speed * delta_time);
 
 
@@ -159,7 +173,12 @@ void Player::update(float dt)
 		//graphics::playSound(m_state->getFullAssetPath("shoot2.mp3"), 1.0f, true);
 
 	}
-		
+	
+
+	
+	
+	m_state->getNet()->addpMOVEToQueue(o_id , angle , speed , m_pos_x , m_pos_y);
+
 		
 	
 	
@@ -170,7 +189,7 @@ float Player::getAngle()
 	return angle;
 }
 
-void Player::init()
+void Player::init(bool online)
 {
 	e = new Explosion(m_pos_x, m_pos_y);
 	e->init();
@@ -195,16 +214,26 @@ void Player::init()
 
 
 	//init player_box properties
-	m_pos_x = 5.0f;
-	m_pos_y = 5.0f;
+	if (online) { //spawn  position for online players
+		m_pos_x = 7.0;
+		m_pos_y = 7.0;
+	}
+	else {
+		m_pos_x = 5.0f;
+		m_pos_y = 5.0f;
+
+	}
+
 	//m_width /= 1.5f;
 	//m_height /= 1.5f;
+	
 	//player brush properties
 	SETCOLOR(m_brush_player.fill_color, 1.0f, 1.0f, 1.0f);
 	m_brush_player.fill_opacity = 1.0f;
 	m_brush_player.fill_secondary_opacity = 0.0f;
 	m_brush_player.outline_opacity = 1.0f;
 	m_brush_player.texture = m_state->getFullAssetPath("spaceship" + to_string(m_state->getSpaceship()) + ".png");
+
 	//shield brush properties
 	SETCOLOR(m_brush_shield.fill_secondary_color, 0, 0, 255);
 	SETCOLOR(m_brush_shield.fill_color, 0, 0, 255);
@@ -217,6 +246,7 @@ void Player::init()
 	loadExplosionSprites();
 
 }
+
 
 float Player::getX()
 {
@@ -276,9 +306,16 @@ int* Player::geto_id()
 	return &o_id;
 }
 
+void Player::insertPlayerPacket(pMOVE packet)
+{
+	q_packets.push_back(packet);
+
+}
+
 Player::Player(int online_id)
 {
 	o_id = online_id;
+	
 }
 
 float Player::getY()

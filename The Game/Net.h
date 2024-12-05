@@ -6,10 +6,12 @@
 #include <list>
 #include <map>
 #include <fstream>
-#include "Structs.h"
 #include "cereal/archives/binary.hpp"
 #include "cereal/archives/portable_binary.hpp"
-#include "Player.h"
+#include <mutex>
+#include <queue>
+#include "Structs.h"
+
 
 
 
@@ -17,11 +19,14 @@
 using namespace std;
 class Net : public GameObject {
 
-	std::map<int , unsigned int> peers;
+	std::mutex net_mutex;
+	
+	map<int , unsigned int> peers;
 	bool online = false;
 	ENetHost* client;
 	ENetAddress address;
 	
+	std::queue<union data*> p_packets;
 	std::list <enet_uint32> newPeers; // peers connected waiting for validation;
 	int host();
 	int join();
@@ -73,11 +78,16 @@ class Net : public GameObject {
 	bool _host = false;
 
 	public:
+
+		
+		
 		Net(bool host);
 		int run();
 		
 		void setOnline(bool a);
 		bool getOnline();
+		void addpMOVEToQueue(int o_id , float angle , float speed , float x , float y);
+		
 
 		~Net();
 

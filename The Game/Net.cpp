@@ -1,13 +1,13 @@
 #include "net.h"
-#include <enet/enet.h>
-#include <iostream>
 #include <string>
 #include <winsock2.h>
 #include <sstream>
+#include "Player.h"
+
 
 #define PC_IP "10.124.68.23"
 #define LAPTOP_IP "10.124.68.24"
-//TODO : implement corectly getting a conection from a peer when in join validating the peer and joining to one 
+//TODO :setup to test the movments of an online lobby 
 
 
 
@@ -16,31 +16,45 @@ using namespace std;
 int Net::host()
 {
 	ENetEvent event;
+	
 
 	while (online) {
+		if (p_packets.size()) {
+
+
+			net_mutex.lock();
+			Data p = *(p_packets.front());
+			p_packets.pop();
+			net_mutex.unlock();
+
+			sendDataBroadcast(p, PMOVE);
+			enet_host_flush(client);
+			
+
+		}
+
 		if (enet_host_service(client, &event, 0) > 0) {
 			switch (event.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT:
-				cout << "A new client connected from %x:%u.\n", event.peer->address.host, event.peer->address.port;
-				
+
 				peerConnectRoutineHOST(event);
-				
 				break;
 
 			case ENET_EVENT_TYPE_RECEIVE:
 
 				parseData(event.packet->data, event.packet->dataLength, event);
 				enet_packet_destroy(event.packet);
-
 				break;
 
 			case ENET_EVENT_TYPE_DISCONNECT:
 
-				cout << *(int*)event.peer->data, "\n disconnected.\n";
+				if (auto search = peers.find(*(int*)event.peer->data); search != peers.end()) {
+					if (event.peer->data != nullptr) { deletePeer(*(int*)event.peer->data); }
+				}
+				cout << "A peer disconnected from enet" << endl;
 
-				//deletePeer(*(int*)event.peer->data);
-				event.peer->data = NULL;
+				event.peer->data = nullptr;
 
 			}
 		}
@@ -54,7 +68,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	connectToHost(PC_IP);
+	connectToHost(LAPTOP_IP);
 	
 	
 	
@@ -63,43 +77,30 @@ int Net::join()
 			switch (event.type)
 			{
 			case ENET_EVENT_TYPE_CONNECT:
-				printf("A new client connected from %x:%u.\n",
-					event.peer->address.host,
-					event.peer->address.port);
-					peerConnectRoutineJoin(event);
-					
 
-
+				peerConnectRoutineJoin(event);
 				break;
 
 			case ENET_EVENT_TYPE_RECEIVE:
-				printf("A packet of length %u containing %s was received from %s on channel %u.\n",
-					event.packet->dataLength,
-					event.packet->data,
-					event.peer->data,
-					event.channelID);
-
-				parseData(event.packet->data, event.packet->dataLength, event);
 				
-
-
-
-				/* Clean up the packet now that we're done using it. */
+				parseData(event.packet->data, event.packet->dataLength, event);
 				enet_packet_destroy(event.packet);
-
 				break;
 
-			case ENET_EVENT_TYPE_DISCONNECT:/// TO DO HANDLE DC
-				printf("%s disconnected.\n", event.peer->data);
+			case ENET_EVENT_TYPE_DISCONNECT:
+				
+				if (auto search = peers.find(*(int*)event.peer->data); search != peers.end()) {
+					if (event.peer->data != nullptr) { deletePeer(*(int*)event.peer->data);}
+				}
+				cout << "A peer disconnected from enet" << endl;
 
-				/* Reset the peer's client information. */
-
-				event.peer->data = NULL;
+				event.peer->data = nullptr;
 
 
 			}
 		}
 		if (!m_state->getOnline()) {
+			
 			disconnect();
 			online = false;
 			
@@ -142,15 +143,15 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 
 	m_state->createPlayer(maxpeerID);// create a player instance for the newpeer
 
-	event.peer->data = m_state->connectpeer2player(); // save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
+	event.peer->data = m_state->connectpeer2player(maxpeerID); // save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
 	
 	
 
 
-	cout << peers.begin()->first<< endl;
+	cout << "A new Player connected with ID :  " + std::to_string(peers.begin()->first) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
 
 
-	cout << hex_to_strip(event.peer->address.host) << endl;
+	
 
 
 
@@ -159,10 +160,11 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 void Net::peerConnectRoutineJoin(ENetEvent& event)
 {
 	for (auto peer : peers) {
-		if (peer.second == event.peer->address.host) {
+		if (peer.second == event.peer->address.host) {// here i check to see if the peer conected is already stored in my peers list(host announced it to me before it connected) 
+														//so i should find its ip stored
 			
 			m_state->createPlayer(peer.first);// create a player instance for the newpeer
-			event.peer->data = m_state->connectpeer2player(); // save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
+			event.peer->data = m_state->connectpeer2player(peer.first); // save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
 			return;
 
 		}
@@ -226,6 +228,11 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 		p.type = type;
 		p.idc = payload.idc;
 		break;
+	case PMOVE:
+		p.type = type;
+		p.pmove = payload.pmove;
+		break;
+
 	}
 
 	std::stringstream ss; // any stream can be used
@@ -326,7 +333,7 @@ void Net::connectToHost(const std::string ip) // this is called when i connect t
 	
 
 	peer = enet_host_connect(client, &addressPeer, 1, 0);
-	if (peer == nullptr) {   // vale diaforetika returns gia kathe enedexomeno
+	if (peer == nullptr) {  
 		cout << " peer is not available ";
 		m_state->setOnline(false, false);
 		enet_host_destroy(client);
@@ -335,19 +342,19 @@ void Net::connectToHost(const std::string ip) // this is called when i connect t
 	if (enet_host_service(client, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
 
 
-		cout << "conection succeded ";
+		cout << "conection succeded " << endl;
 		
 		
 		peers.insert(pair<int, unsigned int>(0, peer->address.host));
 
 		m_state->createPlayer(0);
 
-		event.peer->data = m_state->connectpeer2player();
+		event.peer->data = m_state->connectpeer2player(0);
 
 		return;
 	}
 	else {
-		cout << "conection failed"; // afto den to thelw na vgenei apthn SINARTHSH EPIDI DEN KATAFERA NA KANW CONNECT
+		cout << "conection failed" << endl; // afto den to thelw na vgenei apthn SINARTHSH EPIDI DEN KATAFERA NA KANW CONNECT
 		enet_peer_reset(peer);
 
 		//here need some return
@@ -369,7 +376,7 @@ void Net::connectToPeer(const std::string ip, int id)// this should be called wh
 
 
 	peer = enet_host_connect(client, &addressPeer, 1, 0);
-	if (peer == nullptr) {   // vale diaforetika returns gia kathe enedexomeno
+	if (peer == nullptr) {  
 		cout << " peer is not available ";
 		m_state->setOnline(false, false);
 		enet_host_destroy(client);
@@ -385,7 +392,7 @@ void Net::connectToPeer(const std::string ip, int id)// this should be called wh
 
 		m_state->createPlayer(id);
 
-		event.peer->data = m_state->connectpeer2player();
+		event.peer->data = m_state->connectpeer2player(id);
 
 		return;
 
@@ -468,28 +475,31 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 	switch (p.type)
 	{
 	case NEWPEER:
+
 		if (p.newpeer.id == *(m_state->getPlayer()->geto_id())) { break;}
 		cout << "msg type : " << p.type << endl << " peer id : " << p.newpeer.id << endl << " peer ip : " << hex_to_strip(p.newpeer.ip) << endl;
-		connectToPeer(hex_to_strip(p.newpeer.ip) , p.newpeer.id );
+		connectToPeer(hex_to_strip(p.newpeer.ip) , p.newpeer.id);
 		break;
 	case SETID:
+
 		setmyID(p.setid.id);
 		break;
 	case LOOBYPEER:
+
 		peers.insert(pair<int, unsigned int>(p.newpeer.id, p.newpeer.ip));
 		validatePeer(p.newpeer.ip, p.newpeer.id);
 		break;
 	case DISCONNECT:
-		
-
-		
 
 		deletePeer(p.idc.idc);
-
-		
-		
-		cout << "peer : " + std::to_string(p.idc.idc) + " disconected " << endl;
 		break;
+	case PMOVE:
+
+		m_state->getp_movePacket(p.pmove.id, p.pmove);
+		
+		break;
+		
+
 	}
 
 	
@@ -525,6 +535,7 @@ void Net::deletePeer(int id)
 		if (iter->first == id) {
 			m_state->deletePlayer(iter->first);
 			peers.erase(iter);
+			cout << "Player with ID : " + std::to_string(id) + " disconected " << endl;
 			return;
 			
 		}
@@ -538,7 +549,7 @@ void Net::setmyID(int id)
 
 	m_state->getPlayer()->seto_id(id);
 	
-	cout << "HOST SET MY ONLINE ID TO : ";
+	cout << "HOST SET MY ONLINE ID TO : " + *(int*)m_state->getPlayer()->geto_id();
 	
 
 }
@@ -555,7 +566,7 @@ void Net::validatePeer(enet_uint32 ip, int id) // this should be called when hos
 			for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)				
 			{
 				if (currentPeer->data == nullptr) {
-					currentPeer->data = m_state->connectpeer2player();// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
+					currentPeer->data = m_state->connectpeer2player(id);// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
 								
 				}
 			}
@@ -577,6 +588,28 @@ bool Net::getOnline()
 {
 	return online;
 }
+
+void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y)
+{
+	pMOVE packet;
+	packet.id = o_id;
+	packet.angle = angle;
+	packet.speed = speed;
+	packet.x = x;
+	packet.y = y;
+
+	union data *payload = new union data();
+	payload->pmove = packet;
+	
+
+
+	net_mutex.lock();
+	p_packets.push(payload);
+	net_mutex.unlock();
+
+
+}
+
 
 
 

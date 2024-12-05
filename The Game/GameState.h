@@ -4,7 +4,11 @@
 #include <chrono>
 #include <thread>
 #include <string>
-#include <portaudio.h> 
+#include <map>
+#include <memory>
+#include "Structs.h"
+//#include "Net.h"
+
 
 
 
@@ -25,9 +29,11 @@ private:
 	////// NET VARS //////
 
 	class Net* net = nullptr;
-	std::vector<Player*> o_players;// a pointer to a vector called o_players that contains pointers to player objects
+	//std::vector<Player*> o_players;// a pointer to a vector called o_players that contains pointers to player objects
+	std::map<int , std::unique_ptr<Player> > o_players; //amma pernaei to map se allh sinartish malon thelei sharedpointer
 	bool online = false;
 	bool host = false;
+	
 	
 	
 	
@@ -69,7 +75,7 @@ public:
 	/////THIS FUNCTIONS SHOULD BE CALLED BY NET ONLY/////
 	void createPlayer(const int id);
 	void deletePlayer(const int id);
-	int* connectpeer2player();
+	int* connectpeer2player(int id);
 	/////////////////////////////////////////////////////
 
 
@@ -97,6 +103,9 @@ public:
 
 	class Player* getPlayer() { return m_player; }
 	class Level* getLevel() { return m_current_level; }
+	class Net* getNet() { return net ; }
+	void getp_movePacket(int id , struct pMOVE packet);
+	const std::map<int, std::unique_ptr<Player>>& geto_playersmap();
 	
 
 };
