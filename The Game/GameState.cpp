@@ -137,13 +137,13 @@ void GameState::init()
 
 	}
 	
+	//ksekinaei h audiohandler otan ginei to multiplayer tha ksekinaei ekei 
 	audiohandler = new AudioHandler();
-	//prosorina edw mexri to multiplayer
-	//Audiomanager starts working
-	//audiomanager.audioInit(); 
+	
 	if (audiohandler-> audioInit()) {
 		audiohandler-> countAudioDevices();
 		audiohandler-> listAudioDevices();
+		audiohandler->ShowDefaultDevices();
 	}
 	
 

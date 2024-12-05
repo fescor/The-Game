@@ -116,7 +116,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\enet-1.3.18;portaudio_x64.lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\enet-1.3.18;</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);enet64.lib;sggd.lib;ws2_32.lib;winmm.lib;portaudio_x64.lib;</AdditionalDependencies>
       <OptimizeReferences>
       </OptimizeReferences>
@@ -140,7 +140,7 @@
       <OptimizeReferences>
       </OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\enet-1.3.18;portaudio_x64.lib;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)lib;$(SolutionDir)lib\enet-1.3.18;</AdditionalLibraryDirectories>
       <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);enet64.lib;sggd.lib;ws2_32.lib;winmm.lib;portaudio_x64.lib;</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
