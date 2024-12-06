@@ -7,6 +7,7 @@
 
 #define PC_IP "10.124.68.23"
 #define LAPTOP_IP "10.124.68.24"
+#define AGLOU_PC "10.124.68.113"
 //TODO :setup to test the movments of an online lobby 
 
 
@@ -68,7 +69,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	connectToHost(LAPTOP_IP);
+	connectToHost(AGLOU_PC);
 	
 	
 	
@@ -479,6 +480,8 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		if (p.newpeer.id == *(m_state->getPlayer()->geto_id())) { break;}
 		cout << "msg type : " << p.type << endl << " peer id : " << p.newpeer.id << endl << " peer ip : " << hex_to_strip(p.newpeer.ip) << endl;
 		connectToPeer(hex_to_strip(p.newpeer.ip) , p.newpeer.id);
+
+
 		break;
 	case SETID:
 
@@ -495,9 +498,10 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		break;
 	case PMOVE:
 
-		m_state->getp_movePacket(p.pmove.id, p.pmove);
-		
+		//m_state->getp_movePacket(p.pmove.id, p.pmove);
+		cout << "this is a broadcast" << endl;
 		break;
+	
 		
 
 	}
@@ -598,7 +602,9 @@ void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y)
 	packet.x = x;
 	packet.y = y;
 
-	union data *payload = new union data();
+	
+	std::shared_ptr<Data> payload(new Data);
+
 	payload->pmove = packet;
 	
 

@@ -176,8 +176,10 @@ void Player::update(float dt)
 	
 
 	
+	if (m_state->getOnline()) {
+		m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y);
+	}
 	
-	m_state->getNet()->addpMOVEToQueue(o_id , angle , speed , m_pos_x , m_pos_y);
 
 		
 	

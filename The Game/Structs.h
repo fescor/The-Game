@@ -74,7 +74,6 @@ enum PACKETTYPE {
 	PMOVE, 
 
 
-
 };
 
 
@@ -114,7 +113,6 @@ struct packet
 				archive(pmove);
 				break;
 
-
 				
 
 		}
@@ -135,7 +133,7 @@ typedef union data {
 
 	pMOVE pmove;
 
-
+	
 
 
 

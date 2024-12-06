@@ -11,6 +11,7 @@
 #include <mutex>
 #include <queue>
 #include "Structs.h"
+#include <memory>
 
 
 
@@ -26,7 +27,7 @@ class Net : public GameObject {
 	ENetHost* client;
 	ENetAddress address;
 	
-	std::queue<union data*> p_packets;
+	std::queue< std::shared_ptr<Data>> p_packets;
 	std::list <enet_uint32> newPeers; // peers connected waiting for validation;
 	int host();
 	int join();
