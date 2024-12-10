@@ -8,6 +8,7 @@
 #define PC_IP "10.124.68.23"
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
+#define BABUSUS "10.124.68.39"
 //TODO :  on join function host destroy is called for some  reason check that the broadcast works and and cout id are not corrects BUT are stored corectly !
 
 
@@ -159,18 +160,23 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 void Net::peerConnectRoutineJoin(ENetEvent& event)
 {
 
+	
 
-
-	for (auto peer : peers) {
+	for (auto peer : peers2beConnected) {
 		if (peer.second == event.peer->address.host) {
 
+
 			connectedPeers[peer.first] = event.peer;
+			
 			//*(connectedPeers[peer.first]) = *(event.peer);
 			m_state->createPlayer(peer.first);
 
-			event.peer->data = m_state->connectpeer2player(peer.first);
+			
 			connectedPeers[peer.first]->data = m_state->connectpeer2player(peer.first);
-			peers.erase(peer.first);
+			peers2beConnected.erase(peer.first);
+			
+
+			cout << "A new Player connected with ID :  " + std::to_string(peer.first) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
 			return;
 
 
@@ -179,8 +185,8 @@ void Net::peerConnectRoutineJoin(ENetEvent& event)
 
 
 	}
-	newPeers.push_back(event.peer->address.host);
-
+	newPeers[event.peer->address.host] =  event.peer;
+	return;
 
 
 
@@ -585,7 +591,7 @@ void Net::setmyID(int id)
 
 	m_state->getPlayer()->seto_id(id);
 	
-	cout << "HOST SET MY ONLINE ID TO : " + *(int*)m_state->getPlayer()->geto_id();
+	cout << "HOST SET MY ONLINE ID TO : " + to_string(*(int*)m_state->getPlayer()->geto_id())<< endl;
 	
 
 }
@@ -593,26 +599,21 @@ void Net::setmyID(int id)
 void Net::validatePeer(enet_uint32 ip, int id, ENetEvent & event) // this should be called when host announces a new peer so i validate it 
 {
 	
-	
+	if (newPeers.find(ip) != newPeers.end()) {
+		
+		connectedPeers[id] = newPeers.find(ip)->second;
+		newPeers.erase(ip);
+		m_state->createPlayer(id);
 
-	for (auto iter = newPeers.begin(); iter != newPeers.end(); iter++) {
-		if (*iter == ip) {
-			
-			connectedPeers[id] = event.peer;
-			//*(connectedPeers[id]) = *(event.peer);
-			m_state->createPlayer(id);
+		connectedPeers[id]->data = m_state->connectpeer2player(id);
+		cout << "A new Player connected with ID :  " + std::to_string(id) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+		return;
 
-			if (event.peer->data == nullptr) {
-				event.peer->data = m_state->connectpeer2player(id);
-				connectedPeers[id]->data = m_state->connectpeer2player(id);
-			}
-			newPeers.erase(iter);
-			return;
-			
 
-		}
 	}
-	peers.insert(pair<int, unsigned int>(id, ip));
+
+	
+	peers2beConnected.insert(pair<int, unsigned int>(id, ip));
 
 }
 

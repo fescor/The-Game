@@ -23,13 +23,13 @@ class Net : public GameObject {
 	std::mutex net_mutex;
 	map<int,ENetPeer*> connectedPeers;
 
-	map<int , unsigned int> peers;
+	map<int , unsigned int> peers2beConnected;
 	bool online = false;
 	ENetHost* client;
 	ENetAddress address;
 	
 	std::queue< std::shared_ptr<Data>> p_packets;
-	std::list <enet_uint32> newPeers; // peers connected waiting for validation;
+	map<enet_uint32 , ENetPeer*> newPeers; // peers connected waiting for validation;
 	int host();
 	int join();
 	
