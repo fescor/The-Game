@@ -53,6 +53,7 @@ public:
 	float getAngle();
 	float getX();
 	float getY();
+	float getSpeed();
 	std::string returnBulletsCount();
 	void changeBulletCount(int v);
 	void update(float dt)  override;

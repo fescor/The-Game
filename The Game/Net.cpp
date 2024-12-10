@@ -9,7 +9,7 @@
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.39"
-//TODO :  on join function host destroy is called for some  reason check that the broadcast works and and cout id are not corrects BUT are stored corectly !
+//TODO :  fix on join when unable to join to host wird stuff happen
 
 
 
@@ -73,6 +73,19 @@ int Net::join()
 	
 	
 	while (online) {
+		if (p_packets.size()) {
+
+
+			net_mutex.lock();
+			Data p = *(p_packets.front());
+			p_packets.pop();
+			net_mutex.unlock();
+
+			sendDataBroadcast(p, PMOVE);
+			enet_host_flush(client);
+
+
+		}
 		if (enet_host_service(client, &event, 0) > 0) {
 			switch (event.type)
 			{

@@ -6,6 +6,8 @@
 #include <chrono>
 #include <minmax.h>
 #include "Planet.h"
+#include "Net.h"
+#include "Player.h"
 
 
 using namespace std;
@@ -27,39 +29,41 @@ void MainScreen::hover()// here implement hover on menus for all cases
 
 	switch (selector)
 	{
-	case 0:
-	case 1:
-	case 2:
-	case 3:
-	case 4:
-	case 5:
-	case 6:
-	case 7:
-	case 8:
-	case 11:
-	case 12:
-		
-			if (graphics::getKeyState(graphics::SCANCODE_W)) {
-				graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
-				moveup();
-				return;
+	case PLAY:
+	case CDIFICULTY:
+	case CSPACESHIP:
+	case CONTROLS:
+	case ONLINE:
+	case CD_EASY:
+	case CD_HARD:
+	case CD_AREUSURE:
+	case CD_SURVAVAL:
+	case CREATE_LOBBY:
+	case JOIN_LOBBY:
+	case SEND_BROADCAST:
+	case DC:
 
-			}
+		if (graphics::getKeyState(graphics::SCANCODE_W)) {
+			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
+			moveup();
+			return;
 
-			if (graphics::getKeyState(graphics::SCANCODE_S)) {
-				graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
-				movedown();
-				return;
+		}
 
-			}
-			if (graphics::getKeyState(graphics::SCANCODE_SPACE)) {
-				graphics::playSound(m_state->getFullAssetPath("select2.mp3"), 1.0f, false);
-				select();
+		if (graphics::getKeyState(graphics::SCANCODE_S)) {
+			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
+			movedown();
+			return;
 
-				return;
-			}
-			break;
-	case 9:
+		}
+		if (graphics::getKeyState(graphics::SCANCODE_SPACE)) {
+			graphics::playSound(m_state->getFullAssetPath("select2.mp3"), 1.0f, false);
+			select();
+
+			return;
+		}
+		break;
+	case SELECT_SPACESHIP:
 		if (graphics::getKeyState(graphics::SCANCODE_A)) {
 			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
 			moveleft();
@@ -78,11 +82,10 @@ void MainScreen::hover()// here implement hover on menus for all cases
 
 			return;
 		}
-		
+
 		break;
-	case 10:
-	case 13:
-	
+	case SELECT_CONTROLS:
+
 		if (graphics::getKeyState(graphics::SCANCODE_SPACE)) {
 			graphics::playSound(m_state->getFullAssetPath("select2.mp3"), 1.0f, false);
 			select();
@@ -92,15 +95,11 @@ void MainScreen::hover()// here implement hover on menus for all cases
 
 		break;
 
-	
+
+
+
 
 	}
-
-	
-	
-	
-	
-	
 
 }
 
@@ -119,20 +118,25 @@ void MainScreen::moveup()
 		
 
 			
-			if (selector == 0) {
-				selector = 4;
+			if (selector == PLAY) {
+				selector = ONLINE;
 				
 				return;
 			}
-			if (selector == 5) {
-				selector = 8;
+			if (selector == CD_EASY) {
+				selector = CD_SURVAVAL;
 				
 				return;
 
 			}
-			if (selector == 11) {
-				selector = 12;
+			if (selector == CREATE_LOBBY) {
+				selector = JOIN_LOBBY;
 				return;
+			}
+			if (selector == DC) {
+				selector = SEND_BROADCAST;
+				return;
+
 			}
 
 			
@@ -145,24 +149,27 @@ void MainScreen::moveup()
 void MainScreen::movedown()
 {
 		
-			if (selector == 4) {
-				selector = 0;
+			if (selector == ONLINE) {
+				selector = PLAY;
 			
 
 				return;
 
 			}
-			if (selector == 8) {
-				selector = 5;
+			if (selector == CD_SURVAVAL) {
+				selector = CD_EASY;
 		
 				return;
 			}
-			if (selector == 12) {
-				selector = 11;
+			if (selector == JOIN_LOBBY) {
+				selector = CREATE_LOBBY;
 				return;
 			}
-			
-		
+			if (selector == SEND_BROADCAST)
+			{
+				selector = DC;
+				return;
+			}
 			selector++;
 			return;
 		
@@ -224,70 +231,76 @@ void MainScreen::select()
 
 
 			switch (selector) {
-			case 0:
+			case PLAY:
 
 				m_state->setStatus('L');
 				m_state->init();
 				break;
-			case 1:
+			case CDIFICULTY:
 
-				selector = 5;  
+				selector = CD_EASY;  
 
 				break;
-			case 2:
-				selector = 9;
+			case CSPACESHIP:
+				selector = SELECT_SPACESHIP;
 		
 				break;
-			case 3:
-				selector = 10;
+			case CONTROLS:
+				selector = SELECT_CONTROLS;
 				break;
-			case 5:
+			case CD_EASY:
 				m_state->setdificultyLVL(0);
-				selector = 0;
+				selector = PLAY;
 				
 
 				break;
-			case 6:
+			case CD_HARD:
 				m_state->setdificultyLVL(1);
-				selector = 0;
+				selector = PLAY;
 
 				break;
 
-			case 7:
+			case CD_AREUSURE:
 				m_state->setdificultyLVL(2);
-				selector = 0;
+				selector = PLAY;
 
 
 				break;
-			case 8:
+			case CD_SURVAVAL:
 				m_state->setdificultyLVL(3);
-				selector = 0;
+				selector = PLAY;
 				break;
-			case 9:
+			case SELECT_SPACESHIP:
 
 
 				m_state->setSpaceship(spaceshipSelector);
-				selector = 0;
+				selector = PLAY;
 
 				break;
-			case 10:
-				selector = 0;
+			case SELECT_CONTROLS:
+				selector = PLAY;
 				break;
-			case 4:
-				selector = 11;
+			case ONLINE:
+				selector = CREATE_LOBBY;
 				
 				break;
-			case 11: // host a game
-				selector = 13;
+			case CREATE_LOBBY: // host a game
+				selector = DC;
 				m_state->setOnline(true, true);
 				break;
-			case 12:// join a game 
-				selector = 13;
+			case JOIN_LOBBY:// join a game 
+				selector = DC;
 				m_state->setOnline(true , false);
 				break;
-			case 13:
-				selector = 0;
+			case DC:
+				selector = PLAY;
 				m_state->setOnline(false, false);
+				break;
+			case SEND_BROADCAST:
+				//IMPLEMENT SENDING BROADCAST WITH THE QPACKETS IMPLAMANTATION
+				m_state->getNet()->addpMOVEToQueue(*(m_state->getPlayer()->geto_id()), m_state->getPlayer()->getAngle(), m_state->getPlayer()->getSpeed(),
+					m_state->getPlayer()->getX(), m_state->getPlayer()->getY());
+
 				break;
 
 			}
@@ -359,7 +372,7 @@ void MainScreen::draw()
 	graphics::setFont(m_state->getFullAssetPath("font.ttf"));
 	m_main_text.fill_opacity = 1.0f;
 	switch (selector) {
-	case 0:
+	case PLAY:
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "START", m_main_text);
 
@@ -372,7 +385,7 @@ void MainScreen::draw()
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 9.0f, 2.0f, "ONLINE", m_main_text);
 
 		break;
-	case 1:
+	case CDIFICULTY:
 
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "START", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
@@ -384,7 +397,7 @@ void MainScreen::draw()
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 9.0f, 2.0f, "ONLINE", m_main_text);
 
 		break;
-	case 2:
+	case CSPACESHIP:
 
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "START", m_main_text);
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.0f, 2.0f, "CHANGE DIFICULTY", m_main_text);
@@ -395,7 +408,7 @@ void MainScreen::draw()
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 9.0f, 2.0f, "ONLINE", m_main_text);
 
 		break;
-	case 3:
+	case CONTROLS:
 
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "START", m_main_text);
 
@@ -405,21 +418,21 @@ void MainScreen::draw()
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 7.0f, 2.0f, "CONTROLS", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 9.0f, 2.0f, "ONLINE", m_main_text);
-			break;
-	case 4:
+		break;
+	case ONLINE:
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "START", m_main_text);
 
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.0f, 2.0f, "CHANGE DIFICULTY", m_main_text);
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 5.0f, 2.0f, "CHOOSE SPACESHIP", m_main_text);
-		
-			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 7.0f, 2.0f, "CONTROLS", m_main_text);
-		
-			SETCOLOR(m_main_text.fill_color, 255, 0, 0)
-			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 9.0f, 2.0f, "ONLINE", m_main_text);
-			SETCOLOR(m_main_text.fill_color, 255, 255, 255)
-		break;
 
-	case 5:
+		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 7.0f, 2.0f, "CONTROLS", m_main_text);
+
+		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 9.0f, 2.0f, "ONLINE", m_main_text);
+		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+			break;
+
+	case CD_EASY:
 
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "EASY", m_main_text);
@@ -440,7 +453,7 @@ void MainScreen::draw()
 
 		break;
 
-	case 6:
+	case CD_HARD:
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "EASY", m_main_text);
 
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
@@ -458,7 +471,7 @@ void MainScreen::draw()
 
 
 		break;
-	case 7:
+	case CD_AREUSURE:
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "EASY", m_main_text);
 
 
@@ -479,7 +492,7 @@ void MainScreen::draw()
 
 
 		break;
-	case 8:
+	case CD_SURVAVAL:
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "EASY", m_main_text);
 
 
@@ -498,7 +511,7 @@ void MainScreen::draw()
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 6.0f, 2.0f, "SURVIVAL", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
 			break;
-	case 9:
+	case SELECT_SPACESHIP:
 
 
 		drawSpaceShip(spaceshipSelector);
@@ -507,7 +520,7 @@ void MainScreen::draw()
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255);
 
 		break;
-	case 10:
+	case SELECT_CONTROLS:
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0);
 
 		m_keys.outline_opacity = 0.0f;
@@ -518,26 +531,33 @@ void MainScreen::draw()
 		graphics::drawText(10.0f, m_state->getCanvasHeight() * 0.5 + 5.0f, 2.0f, "SPACE TO SHOOT", m_main_text);
 		break;
 
-	case 11:
+	case CREATE_LOBBY:
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 , 2.0f, "CREATE LOBBY", m_main_text);
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "CREATE LOBBY", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.0f, 2.0f, "JOIN GAME", m_main_text);
-		
-		break;
-	case 12:
-		
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 , 2.0f, "CREATE LOBBY", m_main_text);
-		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.0f, 2.0f, "JOIN GAME", m_main_text);
-		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
-		break;
-	case 13:
-		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 , 2.0f, "DISCONECT", m_main_text);
-		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
-		break;
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.0f, 2.0f, "JOIN GAME", m_main_text);
 
+		break;
+	case JOIN_LOBBY:
+
+		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "CREATE LOBBY", m_main_text);
+		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.0f, 2.0f, "JOIN GAME", m_main_text);
+		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+			break;
+	case DC:
+		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "DISCONECT", m_main_text);
+		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.f, 2.0f, "SEND BROADCAST", m_main_text);
+			break;
+
+	case SEND_BROADCAST:
+		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "DISCONECT", m_main_text);
+		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.f, 2.0f, "SEND BROADCAST", m_main_text);
+		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+			break;
 
 	}
 

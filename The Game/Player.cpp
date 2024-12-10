@@ -325,6 +325,11 @@ float Player::getY()
 	return m_pos_y;
 }
 
+float Player::getSpeed()
+{
+	return speed;
+}
+
 Player::~Player()
 {
 	if (e) {
