@@ -51,18 +51,8 @@ int Net::host()
 				break;
 
 			case ENET_EVENT_TYPE_DISCONNECT:
-				/*
-				if (auto search = peers.find(*(int*)event.peer->data); search != peers.end()) {
-					if (event.peer->data != nullptr) { deletePeer(*(int*)event.peer->data); }
-				}
-				*/
-				deletePeer(*(int*)event.peer->data);
-
-				/*
-				if (event.peer->data != nullptr && connectedPeers.find(*(int*)event.peer->data) != connectedPeers.end()) 
-				{ connectedPeers.erase(connectedPeers.find(*(int*)event.peer->data));}
-				cout << "A peer disconnected from enet" << endl;
-				*/
+				
+				cout << "enet_peer disconected" << endl;
 				event.peer->data = nullptr;
 
 			}
@@ -99,11 +89,7 @@ int Net::join()
 
 			case ENET_EVENT_TYPE_DISCONNECT:
 				
-				if (auto search = peers.find(*(int*)event.peer->data); search != peers.end()) {
-					if (event.peer->data != nullptr) { deletePeer(*(int*)event.peer->data);}
-				}
-				cout << "A peer disconnected from enet" << endl;
-
+				cout << "enet peer disconnected " << endl;
 				event.peer->data = nullptr;
 
 
@@ -278,14 +264,14 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	std::string data = ss.str();
 	
 	ENetPacket* packet = enet_packet_create(data.c_str(), data.length() + 1, ENET_PACKET_FLAG_RELIABLE);
-	enet_host_broadcast(client, 0, packet);
+	//enet_host_broadcast(client, 0, packet);
 
-	/*
+	
 	for (auto peer : connectedPeers)
 	{
-		enet_peer_send(peer.second.get(), 0, packet);		
+		enet_peer_send(peer.second, 0, packet);		
 	}
-	*/
+	
 	
 	
 
@@ -543,7 +529,8 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 	case DISCONNECT:
 
 		enet_peer_disconnect(event.peer , 0);
-		//deletePeer(p.idc.idc);
+		deletePeer(p.idc.idc);
+
 		break;
 	case PMOVE:
 
