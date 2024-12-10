@@ -8,7 +8,7 @@
 #define PC_IP "10.124.68.23"
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
-//TODO :setup to test the movments of an online lobby 
+//TODO :  on join function host destroy is called for some  reason check that the broadcast works and and cout id are not corrects BUT are stored corectly !
 
 
 
@@ -16,6 +16,7 @@ using namespace std;
 
 int Net::host()
 {
+	
 	ENetEvent event;
 	
 
@@ -34,6 +35,7 @@ int Net::host()
 
 		}
 
+
 		if (enet_host_service(client, &event, 0) > 0) {
 			switch (event.type)
 			{
@@ -49,12 +51,18 @@ int Net::host()
 				break;
 
 			case ENET_EVENT_TYPE_DISCONNECT:
-
+				/*
 				if (auto search = peers.find(*(int*)event.peer->data); search != peers.end()) {
 					if (event.peer->data != nullptr) { deletePeer(*(int*)event.peer->data); }
 				}
-				cout << "A peer disconnected from enet" << endl;
+				*/
+				deletePeer(*(int*)event.peer->data);
 
+				/*
+				if (event.peer->data != nullptr && connectedPeers.find(*(int*)event.peer->data) != connectedPeers.end()) 
+				{ connectedPeers.erase(connectedPeers.find(*(int*)event.peer->data));}
+				cout << "A peer disconnected from enet" << endl;
+				*/
 				event.peer->data = nullptr;
 
 			}
@@ -86,6 +94,7 @@ int Net::join()
 				
 				parseData(event.packet->data, event.packet->dataLength, event);
 				enet_packet_destroy(event.packet);
+				
 				break;
 
 			case ENET_EVENT_TYPE_DISCONNECT:
@@ -137,19 +146,20 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 	anounceNewPeer(event.peer->address.host, maxpeerID); // anounce to the lobby that someone connected
 
 
+	connectedPeers[maxpeerID] = shared_ptr<ENetPeer>(new ENetPeer);
+	*(connectedPeers[maxpeerID]) = *(event.peer);
 
-
-	peers.insert(pair<int, unsigned int>(maxpeerID,event.peer->address.host));// store the new peeer as a pair of (id , ip) 
+	//peers.insert(pair<int, unsigned int>(maxpeerID,event.peer->address.host));// store the new peeer as a pair of (id , ip) 
 	
 
 	m_state->createPlayer(maxpeerID);// create a player instance for the newpeer
 
 	event.peer->data = m_state->connectpeer2player(maxpeerID); // save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
-	
+	connectedPeers[maxpeerID]->data = m_state->connectpeer2player(maxpeerID);
 	
 
 
-	cout << "A new Player connected with ID :  " + std::to_string(peers.begin()->first) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+	cout << "A new Player connected with ID :  " + std::to_string(maxpeerID) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
 
 
 	
@@ -160,18 +170,36 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 
 void Net::peerConnectRoutineJoin(ENetEvent& event)
 {
+
+
+
 	for (auto peer : peers) {
-		if (peer.second == event.peer->address.host) {// here i check to see if the peer conected is already stored in my peers list(host announced it to me before it connected) 
-														//so i should find its ip stored
-			
-			m_state->createPlayer(peer.first);// create a player instance for the newpeer
-			event.peer->data = m_state->connectpeer2player(peer.first); // save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
+		if (peer.second == event.peer->address.host) {
+
+			connectedPeers[peer.first] = shared_ptr<ENetPeer>(new ENetPeer);
+			*(connectedPeers[peer.first]) = *(event.peer);
+			m_state->createPlayer(peer.first);
+
+			event.peer->data = m_state->connectpeer2player(peer.first);
+			connectedPeers[peer.first]->data = m_state->connectpeer2player(peer.first);
+			peers.erase(peer.first);
 			return;
+
+
 
 		}
 
+
 	}
 	newPeers.push_back(event.peer->address.host);
+
+
+
+
+
+
+
+	
 
 }
 
@@ -248,7 +276,13 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	std::string data = ss.str();
 	
 	ENetPacket* packet = enet_packet_create(data.c_str(), data.length() + 1, ENET_PACKET_FLAG_RELIABLE);
-	enet_host_broadcast(client, 0, packet);
+	//enet_host_broadcast(client, 0, packet);
+
+	for (auto peer : connectedPeers)
+	{
+		enet_peer_send(peer.second.get(), 0, packet);		
+	}
+
 	cout << "sending some data " << endl;
 
 }
@@ -346,11 +380,16 @@ void Net::connectToHost(const std::string ip) // this is called when i connect t
 		cout << "conection succeded " << endl;
 		
 		
-		peers.insert(pair<int, unsigned int>(0, peer->address.host));
+		//peers.insert(pair<int, unsigned int>(0, peer->address.host));
+		
+		connectedPeers[0] = shared_ptr<ENetPeer>(new ENetPeer);
+		*(connectedPeers[0]) = *(event.peer);
+
 
 		m_state->createPlayer(0);
 
 		event.peer->data = m_state->connectpeer2player(0);
+		connectedPeers[0]->data = m_state->connectpeer2player(0);
 
 		return;
 	}
@@ -389,11 +428,15 @@ void Net::connectToPeer(const std::string ip, int id)// this should be called wh
 		cout << "conection succeded ";
 		
 		
-		peers.insert(pair<int, unsigned int>(id, peer->address.host));
+		//peers.insert(pair<int, unsigned int>(id, peer->address.host));
 
+		connectedPeers[id] = shared_ptr<ENetPeer>(new ENetPeer);
+		*(connectedPeers[id]) = *(event.peer);
+		
 		m_state->createPlayer(id);
 
 		event.peer->data = m_state->connectpeer2player(id);
+		connectedPeers[id]->data = m_state->connectpeer2player(id);
 
 		return;
 
@@ -430,9 +473,9 @@ void Net::anounceLobbyPeers(ENetPeer* newPeer)
 	union data payload;
 	
 
-	for (auto peer : peers) {	//TODO: tell the new peer who is already on the lobby 
+	for (auto peer : connectedPeers) {	//TODO: tell the new peer who is already on the lobby 
 		p.id = peer.first;
-		p.ip = peer.second;
+		p.ip = peer.second->address.host;
 		payload.newp = p;
 		sendDataToPeer(newPeer, payload, LOOBYPEER);
 	}
@@ -487,14 +530,14 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 		setmyID(p.setid.id);
 		break;
-	case LOOBYPEER:
+	case LOOBYPEER:// here i want to store the info of the peer in newPeers and when the conection comes validate it(not here validation) 
 
-		peers.insert(pair<int, unsigned int>(p.newpeer.id, p.newpeer.ip));
-		validatePeer(p.newpeer.ip, p.newpeer.id);
+		validatePeer(p.newpeer.ip, p.newpeer.id, event);
 		break;
 	case DISCONNECT:
 
-		deletePeer(p.idc.idc);
+		enet_peer_disconnect(event.peer , 0);
+		//deletePeer(p.idc.idc);
 		break;
 	case PMOVE:
 
@@ -535,15 +578,11 @@ void Net::disconnect()///telling everyone i am disconecting
 
 void Net::deletePeer(int id)
 {
-	for (auto iter = peers.begin(); iter != peers.end(); iter++) {
-		if (iter->first == id) {
-			m_state->deletePlayer(iter->first);
-			peers.erase(iter);
-			cout << "Player with ID : " + std::to_string(id) + " disconected " << endl;
-			return;
-			
-		}
-	}
+
+	m_state->deletePlayer(id);
+	connectedPeers.erase(connectedPeers.find(id));
+	cout << "Player with ID : " + std::to_string(id) + " disconected " << endl;
+
 
 
 }
@@ -558,7 +597,7 @@ void Net::setmyID(int id)
 
 }
 
-void Net::validatePeer(enet_uint32 ip, int id) // this should be called when host announces a new peer so i validate it 
+void Net::validatePeer(enet_uint32 ip, int id, ENetEvent & event) // this should be called when host announces a new peer so i validate it 
 {
 	
 	
@@ -566,19 +605,21 @@ void Net::validatePeer(enet_uint32 ip, int id) // this should be called when hos
 	for (auto iter = newPeers.begin(); iter != newPeers.end(); iter++) {
 		if (*iter == ip) {
 			
-			m_state->createPlayer(id);// create a player instance for the newpeer
-			for (ENetPeer* currentPeer = client->peers; currentPeer < &client->peers[client->peerCount]; ++currentPeer)				
-			{
-				if (currentPeer->data == nullptr) {
-					currentPeer->data = m_state->connectpeer2player(id);// save the o_id of the new peer at his (enet) data field, every time i have a packet i can id it by the data field
-								
-				}
+			connectedPeers[id] = shared_ptr<ENetPeer>(new ENetPeer);
+			*(connectedPeers[id]) = *(event.peer);
+			m_state->createPlayer(id);
+
+			if (event.peer->data == nullptr) {
+				event.peer->data = m_state->connectpeer2player(id);
+				connectedPeers[id]->data = m_state->connectpeer2player(id);
 			}
 			newPeers.erase(iter);
+			return;
 			
 
 		}
 	}
+	peers.insert(pair<int, unsigned int>(id, ip));
 
 }
 

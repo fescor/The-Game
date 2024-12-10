@@ -21,7 +21,8 @@ using namespace std;
 class Net : public GameObject {
 
 	std::mutex net_mutex;
-	
+	map<int, shared_ptr<ENetPeer>> connectedPeers;
+
 	map<int , unsigned int> peers;
 	bool online = false;
 	ENetHost* client;
@@ -69,7 +70,7 @@ class Net : public GameObject {
 	///JOIN FUNCTIONS
 
 	void setmyID(int id);
-	void validatePeer(enet_uint32 ip, int id);
+	void validatePeer(enet_uint32 ip, int id, ENetEvent & event);
 
 
 	
