@@ -21,7 +21,7 @@ using namespace std;
 class Net : public GameObject {
 
 	std::mutex net_mutex;
-	map<int, shared_ptr<ENetPeer>> connectedPeers;
+	map<int,ENetPeer*> connectedPeers;
 
 	map<int , unsigned int> peers;
 	bool online = false;

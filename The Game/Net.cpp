@@ -77,7 +77,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	connectToHost(AGLOU_PC);
+	connectToHost(LAPTOP_IP);
 	
 	
 	
@@ -146,8 +146,10 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 	anounceNewPeer(event.peer->address.host, maxpeerID); // anounce to the lobby that someone connected
 
 
-	connectedPeers[maxpeerID] = shared_ptr<ENetPeer>(new ENetPeer);
-	*(connectedPeers[maxpeerID]) = *(event.peer);
+	//connectedPeers[maxpeerID] = shared_ptr<ENetPeer>(new ENetPeer);
+	connectedPeers[maxpeerID] = event.peer;
+
+	//*(connectedPeers[maxpeerID]) = *(event.peer);
 
 	//peers.insert(pair<int, unsigned int>(maxpeerID,event.peer->address.host));// store the new peeer as a pair of (id , ip) 
 	
@@ -176,8 +178,8 @@ void Net::peerConnectRoutineJoin(ENetEvent& event)
 	for (auto peer : peers) {
 		if (peer.second == event.peer->address.host) {
 
-			connectedPeers[peer.first] = shared_ptr<ENetPeer>(new ENetPeer);
-			*(connectedPeers[peer.first]) = *(event.peer);
+			connectedPeers[peer.first] = event.peer;
+			//*(connectedPeers[peer.first]) = *(event.peer);
 			m_state->createPlayer(peer.first);
 
 			event.peer->data = m_state->connectpeer2player(peer.first);
@@ -276,12 +278,16 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	std::string data = ss.str();
 	
 	ENetPacket* packet = enet_packet_create(data.c_str(), data.length() + 1, ENET_PACKET_FLAG_RELIABLE);
-	//enet_host_broadcast(client, 0, packet);
+	enet_host_broadcast(client, 0, packet);
 
+	/*
 	for (auto peer : connectedPeers)
 	{
 		enet_peer_send(peer.second.get(), 0, packet);		
 	}
+	*/
+	
+	
 
 	cout << "sending some data " << endl;
 
@@ -382,8 +388,8 @@ void Net::connectToHost(const std::string ip) // this is called when i connect t
 		
 		//peers.insert(pair<int, unsigned int>(0, peer->address.host));
 		
-		connectedPeers[0] = shared_ptr<ENetPeer>(new ENetPeer);
-		*(connectedPeers[0]) = *(event.peer);
+		connectedPeers[0] = event.peer;
+		//*(connectedPeers[0]) = *(event.peer);
 
 
 		m_state->createPlayer(0);
@@ -430,8 +436,8 @@ void Net::connectToPeer(const std::string ip, int id)// this should be called wh
 		
 		//peers.insert(pair<int, unsigned int>(id, peer->address.host));
 
-		connectedPeers[id] = shared_ptr<ENetPeer>(new ENetPeer);
-		*(connectedPeers[id]) = *(event.peer);
+		connectedPeers[id] = event.peer;
+		//*(connectedPeers[id]) = *(event.peer);
 		
 		m_state->createPlayer(id);
 
@@ -605,8 +611,8 @@ void Net::validatePeer(enet_uint32 ip, int id, ENetEvent & event) // this should
 	for (auto iter = newPeers.begin(); iter != newPeers.end(); iter++) {
 		if (*iter == ip) {
 			
-			connectedPeers[id] = shared_ptr<ENetPeer>(new ENetPeer);
-			*(connectedPeers[id]) = *(event.peer);
+			connectedPeers[id] = event.peer;
+			//*(connectedPeers[id]) = *(event.peer);
 			m_state->createPlayer(id);
 
 			if (event.peer->data == nullptr) {
