@@ -46,16 +46,16 @@ void Player::update(float dt, bool online)
 	if (!q_packets.empty()) {
 
 		m_state->getMutex().lock();
-		auto iter = q_packets.begin();
+		pMOVE move = *(q_packets.begin());
 		q_packets.pop_front();
 		m_state->getMutex().unlock();
 
 
-		angle = iter->angle;
-		speed = iter->speed;
+		angle = move.angle;
+		speed = move.speed;
 
-		m_pos_x = iter->x;
-		m_pos_y = iter->y;
+		m_pos_x = move.x;
+		m_pos_y = move.y;
 
 
 	}
