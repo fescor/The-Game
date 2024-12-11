@@ -6,24 +6,29 @@
 #include <string>
 #include <map>
 #include <memory>
+#include <mutex>
 #include "Structs.h"
 //#include "Net.h"
 
 
 
 
+
 class GameState {
 private:
+
+	std::mutex gameState_mutex;
+
 	std::string m_assets_path = "assets//";
 	float m_canvas_width = 30.0f;
 	float m_canvas_height = 20.0f;
-	//mainScreen* mainscreen = 0;
+	
 	static GameState* m_uniqe_instance;
 	
 
-	class Player* m_player = 0;
-	class Level* m_current_level = 0;
-	class MainScreen* mainscreen = 0;
+	class Player* m_player = nullptr;
+	class Level* m_current_level = nullptr;
+	class MainScreen* mainscreen = nullptr;
 
 	
 	////// NET VARS //////
@@ -81,8 +86,9 @@ public:
 
 	
 	void setStatus(char s);
-	
 	char getStatus();
+
+
 	GameState();
 	float m_global_offset_x = 0.0f;  //borw na kanw friend class ton pexti kai na exw private ta offset o pextis ta pernei me get/set
 	float m_global_offset_y = 0.0f;
@@ -104,8 +110,11 @@ public:
 	class Player* getPlayer() { return m_player; }
 	class Level* getLevel() { return m_current_level; }
 	class Net* getNet() { return net ; }
-	void getp_movePacket(int id , struct pMOVE packet);
+	void insertOPlayersPmove(int id , struct pMOVE packet);
 	const std::map<int, std::unique_ptr<Player>>& geto_playersmap();
+
+
+	std::mutex& getMutex();
 	
 
 };

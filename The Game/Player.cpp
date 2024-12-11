@@ -43,17 +43,23 @@ void Player::loadExplosionSprites()
 
 void Player::update(float dt, bool online)
 {
-	auto iter = q_packets.begin();
-	
-	angle = iter->angle;
-	speed = iter->speed;
+	if (!q_packets.empty()) {
 
-	m_pos_x = iter->x;
-	m_pos_y = iter->y;
-
+		m_state->getMutex().lock();
+		auto iter = q_packets.begin();
+		q_packets.pop_front();
+		m_state->getMutex().unlock();
 
 
-	q_packets.pop_front();
+		angle = iter->angle;
+		speed = iter->speed;
+
+		m_pos_x = iter->x;
+		m_pos_y = iter->y;
+
+
+	}
+
 }
 
 void Player::Activateshield()
@@ -78,14 +84,18 @@ void Player::update(float dt)
 	float delta_time = dt / 2000.0f;
 	
 	if (graphics::getKeyState(graphics::SCANCODE_A)) {
+		
+		PreviousFrameAngle = angle;
 		angle += pow(velocity, 2)/2 * delta_time;
+		isAngleIdle = false;
 		
 	}
 	
 	if (graphics::getKeyState(graphics::SCANCODE_D)) {
 		
+		PreviousFrameAngle = angle;
 		angle -= pow(velocity, 2)/2 * delta_time;
-		
+		isAngleIdle = false;
 		
 	}
 	
@@ -100,7 +110,7 @@ void Player::update(float dt)
 			speed = 28.0f;
 		}
 		
-	
+		
 	}
 	else {		
 				speed -= delta_time*velocity;
@@ -135,7 +145,7 @@ void Player::update(float dt)
 	else {
 		flag = false;
 	}
-	cout << angle ,  "/n";
+	
 	m_pos_y -= sin(radians(angle)) * (speed * delta_time);												
 																										
 	m_pos_x += cos(radians(angle)) * (speed * delta_time);
@@ -169,17 +179,14 @@ void Player::update(float dt)
 
 	
 		
-	if (speed != 0.0f) {
-		//graphics::playSound(m_state->getFullAssetPath("shoot2.mp3"), 1.0f, true);
-
-	}
+	
 	
 
 	
-	if (m_state->getOnline()) {
+	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
 		m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y);
 	}
-	
+	isAngleIdle = true;
 
 		
 	
@@ -208,6 +215,8 @@ void Player::init(bool online)
 	
 
 	angle = 90.0f;
+	if (!online) { PreviousFrameAngle = 90.0f; }
+	
 	speed = 0;
 	sprite_counter = 0;
 	shield = false;
@@ -298,6 +307,58 @@ void Player::draw()
 
 }
 
+void Player::draw(bool online)
+{
+	if (shield && shieldFramecounter < 1000) {
+		graphics::drawDisk(m_pos_x + m_state->m_global_offset_x, m_pos_y + m_state->m_global_offset_y, 2.0f, m_brush_shield);
+		shieldFramecounter++;
+	}
+	else {
+		shieldFramecounter = 0;
+		shield = false;
+	}
+
+
+	m_brush_player.outline_opacity = 0.0f;
+	graphics::setOrientation(angle - 90.0f);
+	graphics::drawRect(m_pos_x + m_state->m_global_offset_x, m_pos_y + m_state->m_global_offset_y, 2.0f, 2.0f, m_brush_player);
+	graphics::resetPose();
+
+	if (explosion) {// implement it corectly for online players
+		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
+
+		if (e->sprite_counter > 14) {
+			explosion = false;
+			e->sprite_counter = 1;
+
+
+
+		}
+		else {
+			e->draw();
+		}
+
+
+
+
+
+
+
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+}
+
 void Player::seto_id(int i)
 {
 	o_id = i;
@@ -310,7 +371,9 @@ int* Player::geto_id()
 
 void Player::insertPlayerPacket(pMOVE packet)
 {
+	m_state->getMutex().lock();
 	q_packets.push_back(packet);
+	m_state->getMutex().unlock();
 
 }
 

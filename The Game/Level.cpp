@@ -496,7 +496,9 @@ void Level::update(float dt)
 
 	for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
 
-		if (iter->second->isActive()) { iter->second->update(dt, true); }
+		if (iter->second->isActive()) { 
+			iter->second->update(dt, true); 
+		}
 
 	}
 
@@ -601,7 +603,7 @@ void Level::draw()
 	}
 	for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
 
-		if (iter->second->isActive()) { iter->second->draw(); }
+		if (iter->second->isActive()) { iter->second->draw(true); }
 
 	}
 	

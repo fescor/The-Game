@@ -168,16 +168,20 @@ void GameState::update(float dt)
 	if (dt > 500) {
 		return;
 	}
+
+	if (status == 'L' && m_current_level == nullptr) {
+
+		init();
+
+	}
 	
 	
 	switch (status) {
 	case 'M':
-		
-
-
 		mainscreen->update(dt);
-
+		
 		break;
+
 	case'L':
 		if (!m_current_level) {
 			framecounter++;
@@ -273,7 +277,7 @@ std::string GameState::getFullAssetPath(const std::string& asset)
 	return m_assets_path + asset;
 }
 
-void GameState::getp_movePacket(int id , pMOVE packet)
+void GameState::insertOPlayersPmove(int id , pMOVE packet)
 {
 
 	o_players.find(id)->second->insertPlayerPacket(packet);
@@ -284,6 +288,11 @@ void GameState::getp_movePacket(int id , pMOVE packet)
 const std::map<int , std::unique_ptr<Player>>& GameState::geto_playersmap()// is this okey do i need to have shared pointers?
 {
 	return o_players;
+}
+
+std::mutex& GameState::getMutex()
+{
+	return gameState_mutex;
 }
 
 

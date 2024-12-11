@@ -16,6 +16,7 @@ public:
 	virtual void init() {}
 	virtual void init(bool online) {}
 	virtual void draw() {}
+	virtual void draw(bool online) {}
 
 	virtual  ~GameObject() {}
 	bool isActive() { return m_active; }

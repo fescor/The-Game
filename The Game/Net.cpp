@@ -9,7 +9,7 @@
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.39"
-//TODO :  fix on join when unable to join to host wird stuff happen
+//TODO :  fix on join when unable to join to host wird stuff happen , IMPLEMENT START GAME MSG SO HOST STARTS GAME
 
 
 
@@ -33,6 +33,15 @@ int Net::host()
 			sendDataBroadcast(p, PMOVE);
 			enet_host_flush(client);
 			
+
+		}
+		if (m_state->getStatus() == 'L') {
+			
+			Data d;
+			startG g;
+			d.strtg =  g;
+
+			sendDataBroadcast(d , START_GAME);
 
 		}
 
@@ -268,7 +277,10 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 		p.type = type;
 		p.pmove = payload.pmove;
 		break;
-
+	case START_GAME:
+		p.type = type;
+		p.strtg = payload.strtg;
+		break;
 	}
 
 	std::stringstream ss; // any stream can be used
@@ -283,18 +295,18 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	std::string data = ss.str();
 	
 	ENetPacket* packet = enet_packet_create(data.c_str(), data.length() + 1, ENET_PACKET_FLAG_RELIABLE);
-	//enet_host_broadcast(client, 0, packet);
+	enet_host_broadcast(client, 0, packet);
 
 	
-	for (auto peer : connectedPeers)
-	{
-		enet_peer_send(peer.second, 0, packet);		
+	if (type == PMOVE) {
+		cout << "sending some data " + std::to_string(i) << endl;
+		i += 1;
 	}
 	
 	
 	
 
-	cout << "sending some data " << endl;
+	
 
 }
 
@@ -553,8 +565,16 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		break;
 	case PMOVE:
 
-		//m_state->getp_movePacket(p.pmove.id, p.pmove);
+		m_state->insertOPlayersPmove(p.pmove.id, p.pmove);
 		cout << "this is a broadcast" << endl;
+		break;
+	case START_GAME:
+
+		if (!_host) {
+			m_state->setStatus('L');
+
+		}
+
 		break;
 	
 		
@@ -662,6 +682,11 @@ void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y)
 	net_mutex.unlock();
 
 
+}
+
+bool Net::isHost()
+{
+	return _host;
 }
 
 

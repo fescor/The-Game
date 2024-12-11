@@ -19,6 +19,8 @@
 
 using namespace std;
 class Net : public GameObject {
+	int i = 0;
+
 
 	std::mutex net_mutex;
 	map<int,ENetPeer*> connectedPeers;
@@ -89,7 +91,7 @@ class Net : public GameObject {
 		void setOnline(bool a);
 		bool getOnline();
 		void addpMOVEToQueue(int o_id , float angle , float speed , float x , float y);
-		
+		bool isHost();
 
 		~Net();
 

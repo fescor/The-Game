@@ -226,7 +226,7 @@ void MainScreen::moveright()
 void MainScreen::select()
 {
 	
-			/// TO DO VALE ENUM DEN KATALAVENEI KANEIS TI GINETE EDW
+			
 			
 
 
@@ -234,7 +234,7 @@ void MainScreen::select()
 			case PLAY:
 
 				m_state->setStatus('L');
-				m_state->init();
+				
 				break;
 			case CDIFICULTY:
 
@@ -298,8 +298,15 @@ void MainScreen::select()
 				break;
 			case SEND_BROADCAST:
 				//IMPLEMENT SENDING BROADCAST WITH THE QPACKETS IMPLAMANTATION
+				/*
 				m_state->getNet()->addpMOVEToQueue(*(m_state->getPlayer()->geto_id()), m_state->getPlayer()->getAngle(), m_state->getPlayer()->getSpeed(),
 					m_state->getPlayer()->getX(), m_state->getPlayer()->getY());
+				*/
+				if (m_state->getNet()->isHost()) {
+					m_state->setStatus('L');
+				}
+				
+				
 
 				break;
 
@@ -330,22 +337,12 @@ MainScreen::MainScreen()
 
 void MainScreen::update(float dt)
 {
-
-
-		
+	
 		float sleep_time = 100.0f;
-		
 
-
-
-		hover();
-
-		
+		hover();	
 		std::this_thread::sleep_for(std::chrono::duration<float, milli>(sleep_time));
 		
-		
-		
-
 }
 
 void MainScreen::init()
@@ -549,13 +546,13 @@ void MainScreen::draw()
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "DISCONECT", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
-			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.f, 2.0f, "SEND BROADCAST", m_main_text);
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.f, 2.0f, "START GAME", m_main_text);
 			break;
 
 	case SEND_BROADCAST:
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "DISCONECT", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
-			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.f, 2.0f, "SEND BROADCAST", m_main_text);
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.f, 2.0f, "START GAME", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
 			break;
 

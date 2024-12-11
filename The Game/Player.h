@@ -11,6 +11,8 @@
 
 class Player : public GameObject, public Box , public Health
 {
+
+	bool isAngleIdle = true;
 	std::list<pMOVE> q_packets;
 
 	graphics::Brush m_brush_shield;
@@ -24,6 +26,7 @@ class Player : public GameObject, public Box , public Health
 	void loadExplosionSprites();
 	const float velocity = 2.0f*12.0f;
 	float angle;
+	float PreviousFrameAngle;
 	float speed ;
 	int sprite_counter ;
 	
@@ -60,6 +63,7 @@ public:
 	void update(float dt, bool online) override;
 	void init(bool online) override;
 	void draw() 	override;
+	void draw(bool online) override;
 
 
 

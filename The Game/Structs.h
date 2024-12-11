@@ -19,6 +19,21 @@ struct pMOVE
 
 
 };
+struct startG {
+
+	float timeinfo = 0.0f;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(timeinfo); // serialize things by passing them to the archive
+	}
+
+
+
+
+
+};
 
 
 struct PEER
@@ -72,6 +87,7 @@ enum PACKETTYPE {
 	LOOBYPEER,
 	DISCONNECT,
 	PMOVE, 
+	START_GAME,
 
 
 };
@@ -88,7 +104,7 @@ struct packet
 		setID setid;
 		dc idc;
 		pMOVE pmove;
-		
+		startG strtg;
 
 
 	};
@@ -112,6 +128,9 @@ struct packet
 			case PMOVE:
 				archive(pmove);
 				break;
+			case START_GAME:
+				archive(strtg);
+				break;
 
 				
 
@@ -132,6 +151,8 @@ typedef union data {
 	dc idc;
 
 	pMOVE pmove;
+
+	startG strtg;
 
 	
 
