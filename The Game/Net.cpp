@@ -35,6 +35,10 @@ int Net::host()
 			
 
 		}
+		if (graphics::getKeyState(graphics::SCANCODE_G)) {
+
+			break;
+		}
 		if (m_state->getStatus() == 'L') {
 			
 			Data d;
