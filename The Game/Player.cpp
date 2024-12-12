@@ -14,8 +14,6 @@ using namespace std;
 #define TURN_LEFT  1
 #define TURN_RIGHT  2
 #define IDLE 0
-#define ACCELERATE 3
-#define DECELARATE 4
 
 void Player::fire()
 {
@@ -77,36 +75,8 @@ void Player::update(float dt, bool online)
 			break;
 
 		}
-		switch (move.speed) {
-		case IDLE:
 		
-			speed -= delta_time * velocity;
-			if (speed < 0.0f) {
-				speed = 0.0f;
-			}
-			break;
-		case ACCELERATE:
-			speed += delta_time * velocity;
-
-			if (speed > 28.0f) {
-				speed = 28.0f;
-			}
-
-
-			break;
-		case DECELARATE:
-			speed -= 2 * delta_time * velocity;
-			if (speed < 0.0f) {
-				speed = 0.0f;
-			}
-
-
-			break;
-
-
-		}
-		
-		//speed = move.speed;
+		speed = move.speed;
 
 
 		m_pos_y -= sin(radians(angle)) * (speed * delta_time);
@@ -144,7 +114,6 @@ void Player::update(float dt)
 	bool f1 = false;
 	float delta_time = dt / 2000.0f;
 	int o_angle = IDLE;
-	int o_speed = IDLE;
 	if (graphics::getKeyState(graphics::SCANCODE_A)) {
 		
 		PreviousFrameAngle = angle;
@@ -173,7 +142,7 @@ void Player::update(float dt)
 		if (speed > 28.0f) {
 			speed = 28.0f;
 		}
-		o_speed = ACCELERATE;
+		
 		
 	}
 	else {		
@@ -194,7 +163,6 @@ void Player::update(float dt)
 		if (speed < 0.0f) {
 			speed = 0.0f;
 		}
-		o_speed = DECELARATE;
 	}
 
 	if (graphics::getKeyState(graphics::SCANCODE_SPACE))
@@ -249,7 +217,7 @@ void Player::update(float dt)
 
 	
 	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
-		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, o_speed, m_pos_x, m_pos_y , packetcounter_send);
+		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y , packetcounter_send);
 		packetcounter_send++;
 	}
 	isAngleIdle = true;

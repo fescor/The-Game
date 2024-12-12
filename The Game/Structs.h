@@ -6,7 +6,7 @@ struct pMOVE
 {
 	int id = 0;
 	int angle = 0;
-	int speed = 0;
+	float speed = .0;
 	float x = .0;
 	float y = .0;
 	unsigned long fc = 0;
