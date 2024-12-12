@@ -90,7 +90,7 @@ class Net : public GameObject {
 		
 		void setOnline(bool a);
 		bool getOnline();
-		void addpMOVEToQueue(int o_id , float angle , float speed , float x , float y);
+		void addpMOVEToQueue(int o_id , float angle , float speed , float x , float y , unsigned long framecounter);
 		bool isHost();
 
 		~Net();

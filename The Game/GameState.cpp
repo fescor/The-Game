@@ -250,7 +250,7 @@ void GameState::startLevel()
 	
 	for (auto iter = o_players.begin(); iter != o_players.end(); iter++) {
 
-		if (iter->first) { iter->second->init(true); }
+		if (iter->second) { iter->second->init(true); }
 	}
 
 

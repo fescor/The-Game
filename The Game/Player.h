@@ -13,7 +13,7 @@ class Player : public GameObject, public Box , public Health
 {
 
 	bool isAngleIdle = true;
-	std::list<pMOVE> q_packets;
+	
 
 	graphics::Brush m_brush_shield;
 	graphics::Brush m_explosion_brush;
@@ -38,7 +38,8 @@ class Player : public GameObject, public Box , public Health
 	////////NET VAL////////
 	int o_id = 0;
 	bool o_obj = false;
-
+	std::list<pMOVE> q_packets;
+	unsigned long online_prev_framecounter = 0;
 
 
 

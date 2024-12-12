@@ -9,11 +9,12 @@ struct pMOVE
 	float speed = .0;
 	float x = .0;
 	float y = .0;
+	unsigned long fc = 0;
 
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(id, angle , speed , x , y); // serialize things by passing them to the archive
+		archive(id, angle , speed , x , y , fc); // serialize things by passing them to the archive
 	}
 
 

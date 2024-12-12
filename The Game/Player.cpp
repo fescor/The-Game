@@ -50,12 +50,18 @@ void Player::update(float dt, bool online)
 		q_packets.pop_front();
 		m_state->getMutex().unlock();
 
+		if (move.fc < online_prev_framecounter || move.fc - 1 != online_prev_framecounter) {
+			cout << " FRAMECOUNTER ANOMALY DETECTED " << endl;
+		}
+
 
 		angle = move.angle;
 		speed = move.speed;
 
 		m_pos_x = move.x;
 		m_pos_y = move.y;
+
+		online_prev_framecounter = move.fc;
 
 
 	}
@@ -184,7 +190,7 @@ void Player::update(float dt)
 
 	
 	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
-		m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y);
+		m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y , m_state->framecounter);
 	}
 	isAngleIdle = true;
 

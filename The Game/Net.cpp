@@ -661,7 +661,7 @@ bool Net::getOnline()
 	return online;
 }
 
-void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y)
+void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y, unsigned long framecounter)
 {
 	pMOVE packet;
 	packet.id = o_id;
@@ -669,6 +669,7 @@ void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y)
 	packet.speed = speed;
 	packet.x = x;
 	packet.y = y;
+	packet.fc = framecounter;
 
 	
 	std::shared_ptr<Data> payload(new Data);
