@@ -39,7 +39,8 @@ class Player : public GameObject, public Box , public Health
 	int o_id = 0;
 	bool o_obj = false;
 	std::list<pMOVE> q_packets;
-	unsigned long online_prev_framecounter = 0;
+	unsigned long online_prev_packetcounter = 0;
+	unsigned long packetcounter_send = 0;
 
 
 
