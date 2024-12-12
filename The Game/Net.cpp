@@ -661,7 +661,7 @@ bool Net::getOnline()
 	return online;
 }
 
-void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y, unsigned long framecounter)
+void Net::addpMOVEToQueue(int o_id, int angle, float speed, float x, float y, unsigned long framecounter)
 {
 	pMOVE packet;
 	packet.id = o_id;

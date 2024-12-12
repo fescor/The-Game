@@ -11,6 +11,9 @@
 #include <cmath>
 
 using namespace std;
+#define TURN_LEFT  1
+#define TURN_RIGHT  2
+#define IDLE 0
 
 void Player::fire()
 {
@@ -43,6 +46,9 @@ void Player::loadExplosionSprites()
 
 void Player::update(float dt, bool online)
 {
+
+	float delta_time = dt / 2000.0f;
+
 	if (!q_packets.empty()) {
 
 		m_state->getMutex().lock();
@@ -54,13 +60,32 @@ void Player::update(float dt, bool online)
 			cout << " FRAMECOUNTER ANOMALY DETECTED " << endl;
 		}
 
+		switch (move.angle) {
+		case IDLE:
+			break;
+		case TURN_LEFT:
+			
+			angle += pow(velocity, 2) / 2 * delta_time;
+			
+			break;
+		case TURN_RIGHT:
+			
+			angle -= pow(velocity, 2) / 2 * delta_time;
+			
+			break;
 
-		angle = move.angle;
+		}
+		
 		speed = move.speed;
 
+
+		m_pos_y -= sin(radians(angle)) * (speed * delta_time);
+
+		m_pos_x += cos(radians(angle)) * (speed * delta_time);
+		/*
 		m_pos_x = move.x;
 		m_pos_y = move.y;
-
+		*/
 		online_prev_packetcounter = move.fc;
 
 
@@ -88,12 +113,14 @@ void Player::update(float dt)
 {
 	bool f1 = false;
 	float delta_time = dt / 2000.0f;
-	
+	int o_angle = IDLE;
 	if (graphics::getKeyState(graphics::SCANCODE_A)) {
 		
 		PreviousFrameAngle = angle;
 		angle += pow(velocity, 2)/2 * delta_time;
 		isAngleIdle = false;
+		
+		o_angle = TURN_LEFT;
 		
 	}
 	
@@ -102,7 +129,7 @@ void Player::update(float dt)
 		PreviousFrameAngle = angle;
 		angle -= pow(velocity, 2)/2 * delta_time;
 		isAngleIdle = false;
-		
+		o_angle = TURN_RIGHT;
 	}
 	
 	if (graphics::getKeyState(graphics::SCANCODE_W)) {
@@ -190,7 +217,7 @@ void Player::update(float dt)
 
 	
 	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
-		m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y , packetcounter_send);
+		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y , packetcounter_send);
 		packetcounter_send++;
 	}
 	isAngleIdle = true;
