@@ -46,9 +46,9 @@ class Net : public GameObject {
 
 
 	
-	void connectToHost(const std::string ip);
+	bool connectToHost(const std::string ip);
 
-	void connectToPeer(const std::string ip, const int id);
+	bool connectToPeer(const std::string ip, const int id);
 
 	void anounceNewPeer(enet_uint32 ip, int id);
 	void anounceLobbyPeers(ENetPeer* newPeer);

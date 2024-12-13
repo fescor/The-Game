@@ -205,6 +205,7 @@ void GameState::update(float dt)
 			delete m_player;
 			m_player = nullptr;
 		}
+		mainscreen->setSelector(CREATE_LOBBY);
 
 	}
 	

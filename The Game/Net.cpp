@@ -9,7 +9,7 @@
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.39"
-//TODO :  fix on join when unable to join to host wird stuff happen , IMPLEMENT START GAME MSG SO HOST STARTS GAME
+//TODO :  fix on join when unable to join to host wird stuff happen 
 
 
 
@@ -81,7 +81,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	connectToHost(LAPTOP_IP);
+	if (!connectToHost(LAPTOP_IP)) {online = false;}
 	
 	
 	
@@ -383,7 +383,7 @@ int Net::hex_to_intip(unsigned int input)        //////// O XRISTOS KAI H PANAGI
 }
 
 
-void Net::connectToHost(const std::string ip) // this is called when i connect to host
+bool Net::connectToHost(const std::string ip) // this is called when i connect to host
 {
 	
 	ENetPeer* peer;																	// peer defins where we connect to so one peer for each player should be implemented here;
@@ -397,9 +397,9 @@ void Net::connectToHost(const std::string ip) // this is called when i connect t
 	peer = enet_host_connect(client, &addressPeer, 1, 0);
 	if (peer == nullptr) {  
 		cout << " peer is not available ";
-		m_state->setOnline(false, false);
-		enet_host_destroy(client);
-		return ;
+		//m_state->setOnline(false, false);
+		//enet_host_destroy(client);
+		return false;
 	}
 	if (enet_host_service(client, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
 
@@ -418,22 +418,22 @@ void Net::connectToHost(const std::string ip) // this is called when i connect t
 		event.peer->data = m_state->connectpeer2player(0);
 		connectedPeers[0]->data = m_state->connectpeer2player(0);
 
-		return;
+		return true;
 	}
 	else {
 		cout << "conection failed" << endl; // afto den to thelw na vgenei apthn SINARTHSH EPIDI DEN KATAFERA NA KANW CONNECT
 		enet_peer_reset(peer);
 
 		//here need some return
-		m_state->setOnline(false, false);
-		enet_host_destroy(client);
-		return ;
+		//m_state->setOnline(false, false);
+		//enet_host_destroy(client);
+		return false;
 
 	}
 	
 }
 
-void Net::connectToPeer(const std::string ip, int id)// this should be called when i get a NEWP packet
+bool Net::connectToPeer(const std::string ip, int id)// this should be called when i get a NEWP packet
 {
 	ENetPeer* peer;																	// peer defins where we connect to so one peer for each player should be implemented here;
 	ENetAddress addressPeer;														// for every peer need to set the this method
@@ -447,7 +447,7 @@ void Net::connectToPeer(const std::string ip, int id)// this should be called wh
 		cout << " peer is not available ";
 		m_state->setOnline(false, false);
 		enet_host_destroy(client);
-		return;
+		return false;
 	}
 	if (enet_host_service(client, &event, 5000) > 0 && event.type == ENET_EVENT_TYPE_CONNECT) {
 
@@ -465,7 +465,7 @@ void Net::connectToPeer(const std::string ip, int id)// this should be called wh
 		event.peer->data = m_state->connectpeer2player(id);
 		connectedPeers[id]->data = m_state->connectpeer2player(id);
 
-		return;
+		return true;
 
 	}
 	else {
@@ -475,7 +475,7 @@ void Net::connectToPeer(const std::string ip, int id)// this should be called wh
 		//here need some return
 		m_state->setOnline(false, false);
 		enet_host_destroy(client);
-		return;
+		return false;
 
 	}
 }
@@ -616,7 +616,7 @@ void Net::deletePeer(int id)
 {
 
 	m_state->deletePlayer(id);
-	connectedPeers.erase(connectedPeers.find(id));
+	if (!connectedPeers.empty()) { connectedPeers.erase(id); }
 	cout << "Player with ID : " + std::to_string(id) + " disconected " << endl;
 
 
