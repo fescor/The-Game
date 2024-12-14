@@ -140,10 +140,11 @@ void GameState::init()
 	//ksekinaei h audiohandler otan ginei to multiplayer tha ksekinaei ekei 
 	audiohandler = new AudioHandler();
 	
-	if (audiohandler-> audioInit()) {
+	if (audiohandler->audioInit()) {
 		audiohandler-> countAudioDevices();
-		audiohandler-> listAudioDevices();
+		//audiohandler-> listAudioDevices();
 		audiohandler->ShowDefaultDevices();
+		audiohandler->AudioRecorder(10, "test.raw"); // sto sugkekrimeno test pou kanw h sunarthsh zhtaei ton xrono ths ixografisis kai to onoma tou arxeiou
 	}
 	
 
