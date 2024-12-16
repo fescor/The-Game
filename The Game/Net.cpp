@@ -22,23 +22,23 @@ int Net::host()
 	
 
 	while (online) {
-		if (p_packets.size()) {
+		if (!p_packets.empty()) {
 
 
-			net_mutex.lock();
-			Data p = *(p_packets.front());
-			p_packets.pop();
-			net_mutex.unlock();
+			
+			//m_state->getMutex().lock();
+			Data p;
+			p_packets.try_pop(p);
+			//p_packets.pop();
+			//m_state->getMutex().unlock();
+			
 
 			sendDataBroadcast(p, PMOVE);
 			enet_host_flush(client);
 			
 
 		}
-		if (graphics::getKeyState(graphics::SCANCODE_G)) {
 
-			break;
-		}
 		if (m_state->getStatus() == 'L') {
 			
 			Data d;
@@ -73,6 +73,8 @@ int Net::host()
 		}
 	
 	}
+	
+
 	m_state->setOnline(false, false);
 	enet_host_destroy(client);
 	return 0;
@@ -86,13 +88,14 @@ int Net::join()
 	
 	
 	while (online) {
-		if (p_packets.size()) {
+		if (!p_packets.empty()) {
 
 
-			net_mutex.lock();
-			Data p = *(p_packets.front());
-			p_packets.pop();
-			net_mutex.unlock();
+			//m_state->getMutex().lock();
+			Data p;
+			p_packets.try_pop(p);
+			//p_packets.pop();
+			//m_state->getMutex().unlock();
 
 			sendDataBroadcast(p, PMOVE);
 			enet_host_flush(client);
@@ -302,10 +305,7 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	enet_host_broadcast(client, 0, packet);
 
 	
-	if (type == PMOVE) {
-		cout << "sending some data " + std::to_string(i) << endl;
-		i += 1;
-	}
+
 	
 	
 	
@@ -569,8 +569,8 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		break;
 	case PMOVE:
 
-		m_state->insertOPlayersPmove(p.pmove.id, p.pmove);
-		cout << "this is a broadcast" << endl;
+		m_state->insertOPlayersPmove(p.pmove);
+		//cout << "this is a broadcast" << endl;
 		break;
 	case START_GAME:
 
@@ -665,7 +665,7 @@ bool Net::getOnline()
 	return online;
 }
 
-void Net::addpMOVEToQueue(int o_id, int angle, float speed, float x, float y, unsigned long framecounter)
+void Net::addpMOVEToQueue(int o_id, int angle, float speed, float x, float y, unsigned long framecounter)// this is called by game thread
 {
 	pMOVE packet;
 	packet.id = o_id;
@@ -676,15 +676,15 @@ void Net::addpMOVEToQueue(int o_id, int angle, float speed, float x, float y, un
 	packet.fc = framecounter;
 
 	
-	std::shared_ptr<Data> payload(new Data);
+	Data payload;
 
-	payload->pmove = packet;
+	payload.pmove = packet;
 	
 
 
-	net_mutex.lock();
+	//m_state->getMutex().lock();
 	p_packets.push(payload);
-	net_mutex.unlock();
+	//m_state->getMutex().unlock();
 
 
 }
@@ -692,6 +692,11 @@ void Net::addpMOVEToQueue(int o_id, int angle, float speed, float x, float y, un
 bool Net::isHost()
 {
 	return _host;
+}
+
+std::mutex& Net::getMutex()
+{
+	return net_mutex;
 }
 
 

@@ -7,6 +7,8 @@
 #include "Explosion.h"
 #include "Minimap.h"
 #include "Structs.h"
+#include <ppl.h>
+#include <concurrent_queue.h>
 
 
 class Player : public GameObject, public Box , public Health
@@ -38,8 +40,11 @@ class Player : public GameObject, public Box , public Health
 	////////NET VAL////////
 	int o_id = 0;
 	bool o_obj = false;
-	std::list<pMOVE> q_packets;
-	unsigned long online_prev_packetcounter = 0;
+	//std::list<pMOVE> q_packets;
+	concurrency::concurrent_queue<pMOVE> q_packets;
+	//std::atomic< std::list<pMOVE> > buffer;
+
+	unsigned long prev_framecounter = 0;
 	unsigned long packetcounter_send = 0;
 
 

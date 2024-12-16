@@ -17,7 +17,7 @@
 class GameState {
 private:
 
-	std::mutex gameState_mutex;
+	std::mutex mutex;
 
 	std::string m_assets_path = "assets//";
 	float m_canvas_width = 30.0f;
@@ -110,7 +110,7 @@ public:
 	class Player* getPlayer() { return m_player; }
 	class Level* getLevel() { return m_current_level; }
 	class Net* getNet() { return net ; }
-	void insertOPlayersPmove(int id , struct pMOVE packet);
+	void insertOPlayersPmove(struct pMOVE packet);
 	const std::map<int, std::unique_ptr<Player>>& geto_playersmap();
 
 

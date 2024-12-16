@@ -12,6 +12,8 @@
 #include <queue>
 #include "Structs.h"
 #include <memory>
+#include <ppl.h>
+#include <concurrent_queue.h>
 
 
 
@@ -30,7 +32,8 @@ class Net : public GameObject {
 	ENetHost* client;
 	ENetAddress address;
 	
-	std::queue< std::shared_ptr<Data>> p_packets;
+	concurrency::concurrent_queue<Data> p_packets;
+
 	map<enet_uint32 , ENetPeer*> newPeers; // peers connected waiting for validation;
 	int host();
 	int join();
@@ -92,7 +95,7 @@ class Net : public GameObject {
 		bool getOnline();
 		void addpMOVEToQueue(int o_id , int angle , float speed , float x , float y , unsigned long framecounter);
 		bool isHost();
-
+		std::mutex& getMutex();
 		~Net();
 
 };

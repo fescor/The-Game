@@ -10,9 +10,10 @@
 #include "util.h"
 #include <cmath>
 
+
 using namespace std;
-#define TURN_LEFT  1
-#define TURN_RIGHT  2
+#define TURN_LEFT 1
+#define TURN_RIGHT 2
 #define IDLE 0
 
 void Player::fire()
@@ -51,14 +52,14 @@ void Player::update(float dt, bool online)
 
 	if (!q_packets.empty()) {
 
-		m_state->getMutex().lock();
-		pMOVE move = *(q_packets.begin());
-		q_packets.pop_front();
-		m_state->getMutex().unlock();
+		//m_state->getMutex().lock();
+		pMOVE move;
+		q_packets.try_pop(move);
+		
+		//q_packets.pop_front();
+		//m_state->getMutex().unlock();
 
-		if (move.fc < online_prev_packetcounter || move.fc - 1 != online_prev_packetcounter) {
-			cout << " FRAMECOUNTER ANOMALY DETECTED " << endl;
-		}
+		
 
 		switch (move.angle) {
 		case IDLE:
@@ -86,10 +87,15 @@ void Player::update(float dt, bool online)
 		m_pos_x = move.x;
 		m_pos_y = move.y;
 		*/
-		online_prev_packetcounter = move.fc;
+		if ((m_state->framecounter - prev_framecounter) != 1) { cout << to_string(m_state->framecounter - prev_framecounter) << endl; }
+		prev_framecounter = m_state->framecounter;
+
+		return;
 
 
 	}
+	
+
 
 }
 
@@ -403,13 +409,16 @@ int* Player::geto_id()
 	return &o_id;
 }
 
-void Player::insertPlayerPacket(pMOVE packet)
+void Player::insertPlayerPacket(pMOVE packet)// this is called by net thread.
 {
-	m_state->getMutex().lock();
-	q_packets.push_back(packet);
-	m_state->getMutex().unlock();
+	
+	//m_state->getMutex().lock();
+	q_packets.push(packet);
+	//m_state->getMutex().unlock();
 
 }
+
+
 
 Player::Player(int online_id)
 {

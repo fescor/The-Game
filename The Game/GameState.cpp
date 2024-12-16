@@ -278,10 +278,10 @@ std::string GameState::getFullAssetPath(const std::string& asset)
 	return m_assets_path + asset;
 }
 
-void GameState::insertOPlayersPmove(int id , pMOVE packet)
+void GameState::insertOPlayersPmove(pMOVE packet)
 {
 
-	o_players.find(id)->second->insertPlayerPacket(packet);
+	o_players.find(packet.id)->second->insertPlayerPacket(packet);
 
 
 }
@@ -293,7 +293,7 @@ const std::map<int , std::unique_ptr<Player>>& GameState::geto_playersmap()// is
 
 std::mutex& GameState::getMutex()
 {
-	return gameState_mutex;
+	return mutex;
 }
 
 
