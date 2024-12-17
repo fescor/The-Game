@@ -59,10 +59,17 @@ void Player::update(float dt, bool online)
 		//q_packets.pop_front();
 		//m_state->getMutex().unlock();
 
+		if (graphics::getKeyState(graphics::SCANCODE_B))
+		{
+			cout << "breakpoint" << endl;
+		}
+
+
 		
 
 		switch (move.angle) {
 		case IDLE:
+
 			break;
 		case TURN_LEFT:
 			

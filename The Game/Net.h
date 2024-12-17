@@ -21,7 +21,9 @@
 
 using namespace std;
 class Net : public GameObject {
-	int i = 0;
+	
+	bool inGame = false; // this tells if the lobby is in game or not
+
 
 
 	std::mutex net_mutex;

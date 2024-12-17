@@ -9,7 +9,7 @@
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.39"
-//TODO :  fix on join when unable to join to host wird stuff happen 
+//TODO :  wierd stuff happening on movment from peer(connecting to host) 
 
 
 
@@ -39,13 +39,17 @@ int Net::host()
 
 		}
 
-		if (m_state->getStatus() == 'L') {
+		if (m_state->getStatus() == 'L' && !inGame) {
 			
 			Data d;
 			startG g;
 			d.strtg =  g;
 
 			sendDataBroadcast(d , START_GAME);
+
+
+			inGame = true;
+
 
 		}
 
@@ -304,11 +308,12 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 	ENetPacket* packet = enet_packet_create(data.c_str(), data.length() + 1, ENET_PACKET_FLAG_RELIABLE);
 	enet_host_broadcast(client, 0, packet);
 
-	
 
 	
 	
-	
+	if (type == START_GAME) {
+		cout << "sending START GAME msg" << endl;
+	}
 
 	
 
