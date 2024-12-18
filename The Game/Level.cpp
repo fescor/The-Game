@@ -10,7 +10,7 @@
 #include <cmath>
 #include <math.h>
 #include "util.h"
-
+#include "Net.h"
 #include <vector>
 using namespace std;
 
@@ -92,6 +92,11 @@ bool Level::inView(float x, float y)// checking for collisions is very expensive
 	}
 
 	return false;
+}
+
+bool Level::allPlayersLoadedLevel()
+{
+	return m_state->getPlayersLoadedLevel() == m_state->geto_playersmap().size();
 }
 
 
@@ -686,6 +691,17 @@ void Level::draw()
 	
 
 	m_minimap->draw();
+	
+	if (m_state->getOnline()) {
+		m_state->getNet()->sendLoadedLevelMSG(*(m_state->getPlayer()->geto_id()));
+		while (!allPlayersLoadedLevel()) {
+
+		}
+	}
+
+
+
+
 
 	
 }

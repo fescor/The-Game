@@ -291,6 +291,16 @@ const std::map<int , std::unique_ptr<Player>>& GameState::geto_playersmap()// is
 	return o_players;
 }
 
+int GameState::getPlayersLoadedLevel()
+{
+	return playersLoadedLevel;
+}
+
+void GameState::playerLoadedLevel()
+{
+	playersLoadedLevel++;
+}
+
 std::mutex& GameState::getMutex()
 {
 	return mutex;

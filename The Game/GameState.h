@@ -35,9 +35,10 @@ private:
 
 	class Net* net = nullptr;
 	//std::vector<Player*> o_players;// a pointer to a vector called o_players that contains pointers to player objects
-	std::map<int , std::unique_ptr<Player> > o_players; //amma pernaei to map se allh sinartish malon thelei sharedpointer
+	std::map<int , std::unique_ptr<Player>> o_players; //amma pernaei to map se allh sinartish malon thelei sharedpointer
 	bool online = false;
 	bool host = false;
+	int playersLoadedLevel = 0;
 	
 	
 	
@@ -112,7 +113,8 @@ public:
 	class Net* getNet() { return net ; }
 	void insertOPlayersPmove(struct pMOVE packet);
 	const std::map<int, std::unique_ptr<Player>>& geto_playersmap();
-
+	int getPlayersLoadedLevel();
+	void playerLoadedLevel();
 
 	std::mutex& getMutex();
 	

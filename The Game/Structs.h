@@ -10,12 +10,27 @@ struct pMOVE
 	float x = .0;
 	float y = .0;
 	unsigned long fc = 0;
+	
 
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(id, angle , speed , x , y , fc); // serialize things by passing them to the archive
+		archive(id, angle , speed , x , y , fc ); // serialize things by passing them to the archive
 	}
+
+
+
+};
+struct Loaded {
+
+	int id = 0;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(id); 
+	}
+
 
 
 
@@ -89,6 +104,7 @@ enum PACKETTYPE {
 	DISCONNECT,
 	PMOVE, 
 	START_GAME,
+	LOADED_LEVEL,
 
 
 };
@@ -106,6 +122,7 @@ struct packet
 		dc idc;
 		pMOVE pmove;
 		startG strtg;
+		Loaded loaded_level;
 
 
 	};
@@ -132,6 +149,9 @@ struct packet
 			case START_GAME:
 				archive(strtg);
 				break;
+			case LOADED_LEVEL:
+				archive(loaded_level);
+				break;
 
 				
 
@@ -155,6 +175,7 @@ typedef union data {
 
 	startG strtg;
 
+	Loaded loaded_level;
 	
 
 

@@ -78,6 +78,7 @@ public:
 	int* geto_id();
 	///this is called by net to add a packet to the o_player's packet qeue
 	void insertPlayerPacket(pMOVE packet);
+	
 
 	Player(int online_id);
 	~Player();

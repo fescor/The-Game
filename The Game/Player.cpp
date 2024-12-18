@@ -54,7 +54,9 @@ void Player::update(float dt, bool online)
 
 		//m_state->getMutex().lock();
 		pMOVE move;
-		q_packets.try_pop(move);
+		if (!q_packets.try_pop(move)) {
+			cout << "failed to pop move" << endl;
+		}
 		
 		//q_packets.pop_front();
 		//m_state->getMutex().unlock();
@@ -150,8 +152,8 @@ void Player::update(float dt)
 
 		
 		
-		speed += delta_time * velocity;
-
+		//speed += delta_time * velocity;
+		speed += velocity;
 		if (speed > 28.0f) {
 			speed = 28.0f;
 		}
@@ -230,7 +232,7 @@ void Player::update(float dt)
 
 	
 	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
-		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y , packetcounter_send);
+		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y , m_state->framecounter);
 		packetcounter_send++;
 	}
 	isAngleIdle = true;

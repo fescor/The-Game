@@ -573,9 +573,12 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 		break;
 	case PMOVE:
+		if (_host = true) {
 
+
+		}
 		m_state->insertOPlayersPmove(p.pmove);
-		//cout << "this is a broadcast" << endl;
+		cout << "RECIEVED MOVE PACKET AT FRAME " + to_string(m_state->framecounter) << endl;
 		break;
 	case START_GAME:
 
@@ -585,9 +588,11 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		}
 
 		break;
-	
-		
 
+	case LOADED_LEVEL:
+
+		m_state->playerLoadedLevel();
+		break;
 	}
 
 	
@@ -697,6 +702,22 @@ void Net::addpMOVEToQueue(int o_id, int angle, float speed, float x, float y, un
 bool Net::isHost()
 {
 	return _host;
+}
+
+void Net::sendLoadedLevelMSG(int o_id)
+{
+
+
+	Loaded l;
+	l.id = o_id;
+	Data payload;
+	payload.loaded_level = l;
+
+
+
+	sendDataBroadcast(payload , LOADED_LEVEL);
+
+
 }
 
 std::mutex& Net::getMutex()

@@ -74,6 +74,9 @@ class Level : public GameObject
 	int siege = 1;
 	int score = 0;
 	bool efyges = false;
+
+	bool allPlayersLoadedLevel();
+
 	
 
 public:
