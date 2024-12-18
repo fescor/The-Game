@@ -692,7 +692,7 @@ void Level::draw()
 
 	m_minimap->draw();
 	
-	if (m_state->getOnline()) {
+	if (m_state->getOnline() && !allPlayersLoadedLevel()) {
 		m_state->getNet()->sendLoadedLevelMSG(*(m_state->getPlayer()->geto_id()));
 		while (!allPlayersLoadedLevel()) {
 
