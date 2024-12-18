@@ -96,7 +96,7 @@ bool Level::inView(float x, float y)// checking for collisions is very expensive
 
 bool Level::allPlayersLoadedLevel()
 {
-	return m_state->getPlayersLoadedLevel() == m_state->geto_playersmap().size();
+	return m_state->geto_playersmap().size() == m_state->getPlayersLoadedLevel()  ;
 }
 
 
@@ -692,11 +692,16 @@ void Level::draw()
 
 	m_minimap->draw();
 	
+	
 	if (m_state->getOnline() && !allPlayersLoadedLevel()) {
 		m_state->getNet()->sendLoadedLevelMSG(*(m_state->getPlayer()->geto_id()));
 		while (!allPlayersLoadedLevel()) {
 
 		}
+	}
+	else if (m_state->getOnline()) { // here cuz if i am the last one to load the game i still whant to alert the other i loaded 
+
+		m_state->getNet()->sendLoadedLevelMSG(*(m_state->getPlayer()->geto_id()));
 	}
 
 
