@@ -292,6 +292,9 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 		p.type = type;
 		p.strtg = payload.strtg;
 		break;
+	case LOADED_LEVEL:
+		p.type = type;
+		p.loaded_level = payload.loaded_level;
 	}
 
 	std::stringstream ss; // any stream can be used
@@ -716,6 +719,7 @@ void Net::sendLoadedLevelMSG(int o_id)
 
 
 	sendDataBroadcast(payload , LOADED_LEVEL);
+	cout << "sending i loaded" << endl;
 
 
 }
