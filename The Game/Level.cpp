@@ -693,16 +693,14 @@ void Level::draw()
 	m_minimap->draw();
 	
 	
-	if (m_state->getOnline() && !allPlayersLoadedLevel()) {
+	if (m_state->getOnline() && !gameLoaded) {
 		m_state->getNet()->sendLoadedLevelMSG(*(m_state->getPlayer()->geto_id()));
 		while (!allPlayersLoadedLevel()) {
 
 		}
+		gameLoaded = true;
 	}
-	else if (m_state->getOnline()) { // here cuz if i am the last one to load the game i still whant to alert the other i loaded 
-
-		m_state->getNet()->sendLoadedLevelMSG(*(m_state->getPlayer()->geto_id()));
-	}
+	
 
 
 

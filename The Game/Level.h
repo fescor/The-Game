@@ -76,7 +76,7 @@ class Level : public GameObject
 	bool efyges = false;
 
 	bool allPlayersLoadedLevel();
-	
+	bool gameLoaded = false;
 
 	
 
