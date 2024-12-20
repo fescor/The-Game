@@ -5,11 +5,12 @@
 #include "Player.h"
 
 
+
 #define PC_IP "10.124.68.23"
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.39"
-//TODO :  wierd stuff happening on movment from peer(connecting to host) 
+//TODO :  wierd stuff happening on movment from peer(connecting to host)  , implement sending the level info like mapping planets to every one as host and peers getting this datta and init the level
 
 
 
@@ -39,13 +40,14 @@ int Net::host()
 
 		}
 
-		if (m_state->getStatus() == 'L' && !inGame) {
+		if (m_state->loadedLevel() && !inGame) {
 			
 			Data d;
-			startG g;
-			d.strtg =  g;
+			d.strtg = createSGDtata();
+			
 
 			sendDataBroadcast(d , START_GAME);
+
 
 
 			inGame = true;
@@ -230,7 +232,7 @@ void Net::peerConnectRoutineJoin(ENetEvent& event)
 
 }
 
-void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type) 
+void Net::sendDataToPeer(ENetPeer* peer, union Data payload, PACKETTYPE type) 
 {
 
 	packet p;
@@ -271,7 +273,7 @@ void Net::sendDataToPeer(ENetPeer* peer, union data payload, PACKETTYPE type)
 
 }
 
-void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
+void Net::sendDataBroadcast(union Data payload, PACKETTYPE type)
 {
 	packet p;
 	switch (type)
@@ -296,6 +298,7 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 		p.type = type;
 		p.loaded_level = payload.loaded_level;
 		break;
+
 	}
 
 	std::stringstream ss; // any stream can be used
@@ -315,8 +318,8 @@ void Net::sendDataBroadcast(union data payload, PACKETTYPE type)
 
 	
 	
-	if (type == START_GAME) {
-		cout << "sending START GAME msg" << endl;
+	if (type != PMOVE) {
+		cout << "sending " + to_string(type) +  " MSG" << endl;
 	}
 
 	
@@ -495,7 +498,7 @@ void Net::anounceNewPeer(enet_uint32 ip, int id)
 	PEER p;
 	p.id = id;
 	p.ip = ip;
-	union data payload;
+	union Data payload;
 	payload.newp = p;
 	
 	
@@ -506,7 +509,7 @@ void Net::anounceNewPeer(enet_uint32 ip, int id)
 void Net::anounceLobbyPeers(ENetPeer* newPeer)
 {
 	PEER p;
-	union data payload;
+	union Data payload;
 	
 
 	for (auto peer : connectedPeers) {	//TODO: tell the new peer who is already on the lobby 
@@ -518,14 +521,14 @@ void Net::anounceLobbyPeers(ENetPeer* newPeer)
 
 }
 
-union data Net::setPeerID()
+union Data Net::setPeerID()
 {
 
 	maxpeerID++;
 
 	setID setid;
 	setid.id = maxpeerID;
-	union data payload;
+	union Data payload;
 	payload.setid = setid;
 
 	
@@ -586,6 +589,8 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 		break;
 	case START_GAME:
 
+		m_state->setMapData(p.strtg);
+
 		if (!_host) {
 			m_state->setStatus('L');
 
@@ -597,6 +602,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 		m_state->playerLoadedLevel();
 		break;
+
 	}
 
 	
@@ -610,7 +616,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 void Net::disconnect()///telling everyone i am disconecting
 {
 
-	union data payload;
+	union Data payload;
 	dc dc;
 	dc.idc = *(int*)m_state->getPlayer()->geto_id();
 	payload.idc = dc;
@@ -636,6 +642,15 @@ void Net::deletePeer(int id)
 
 
 }
+
+startG Net::createSGDtata()
+{
+	startG strg = m_state->getMapData();
+	strg.timeinfo = 0.0f;
+
+	return strg;
+}
+
 
 void Net::setmyID(int id)
 {
@@ -728,6 +743,17 @@ void Net::sendLoadedLevelMSG(int o_id)
 std::mutex& Net::getMutex()
 {
 	return net_mutex;
+}
+
+void Net::setinGame(bool ig)
+{
+	
+	inGame = ig;
+}
+
+bool Net::getinGame()
+{
+	return inGame;
 }
 
 

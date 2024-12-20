@@ -39,6 +39,8 @@ private:
 	bool online = false;
 	bool host = false;
 	int playersLoadedLevel = 0;
+
+	startG mapinfo = {};
 	
 	
 	
@@ -114,8 +116,16 @@ public:
 	class Net* getNet() { return net ; }
 	void insertOPlayersPmove(struct pMOVE packet);
 	const std::map<int, std::unique_ptr<Player>>& geto_playersmap();
-	int getPlayersLoadedLevel();
-	void playerLoadedLevel();
+	int getPlayersLoadedLevel();// get the numbers of connected players that have loaded the level in their local machine
+	void playerLoadedLevel(); // increases the number of connected players that have loaded the level in their local machine
+
+	bool loadedLevel();// is the level has loaded on the local machine 
+
+	bool amHost();
+	struct startG getMapData();
+	void setMapData(startG strg);
+	
+	
 
 	std::mutex& getMutex();
 	

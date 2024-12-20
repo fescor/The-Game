@@ -130,11 +130,21 @@ void Level::createGameObjects()
 	
 	
 		
-	
-	for (int i = 0; i < token_x.size(); i++) {
-		//m_tokens.push_back(new Tokens(token_type[i], token_x[i], token_y[i]));
-		m_tokens[i] = new Tokens(token_type[i], token_x[i], token_y[i]);
+	if (m_state->amHost()) {
+		for (int i = 0; i < token_x.size(); i++) {
+			//m_tokens.push_back(new Tokens(token_type[i], token_x[i], token_y[i]));
+			m_tokens[i] = new Tokens(token_type[i], token_x[i], token_y[i], i);
+		}
+
 	}
+	else {
+		for (int i = 0; i < token_x.size(); i++) {
+			//m_tokens.push_back(new Tokens(token_type[i], token_x[i], token_y[i]));
+			m_tokens[i] = new Tokens(token_type[i], token_x[i], token_y[i], m_state->getMapData().token_oid[i]);
+		}
+
+	}
+	
 	
 	
 	
@@ -348,6 +358,14 @@ void Level::mapPlanets()
 		*/
 		iter->second->m_pos_x = map1x[index];
 		iter->second->m_pos_y =  map1y[index];
+		if (m_state->amHost()) {
+			iter->second->setoid(index);
+		}
+		else {
+			iter->second->setoid(m_state->getMapData().planet_oid[index]);
+		}
+		
+		
 		index++;
 	}
 }
@@ -389,9 +407,12 @@ Background* Level::getBackground()
 
 Level::Level(const std::string& name)
 {
-	readMap(m_state->getFullAssetPath("vectors.txt"));
-	readTokens(m_state->getFullAssetPath("tokens.txt"));
 
+	if (m_state->amHost()) {
+
+		readMap(m_state->getFullAssetPath("vectors.txt"));
+		readTokens(m_state->getFullAssetPath("tokens.txt"));
+	}
 
 	
 }
@@ -596,6 +617,62 @@ void Level::init()
 	
 }
 
+void Level::init(startG mapinfo)
+{
+	efyges = false;
+	levelDiffuculty = m_state->getdificultyLVL();
+	switch (levelDiffuculty) {
+	case 0:
+		bulletDMG = 1;
+		AcollisionDMG = 2;
+		break;
+	case 1:
+		bulletDMG = 1;
+		AcollisionDMG = 5;
+		break;
+	case 2:
+		bulletDMG = 5;
+		AcollisionDMG = 5;
+		break;
+	case 3:
+		bulletDMG = 1;
+		AcollisionDMG = 2;
+		break;
+
+	}
+	for (int i = 0; i < sizeof(mapinfo.map_x) / sizeof(mapinfo.map_x[0]); i++) {
+
+		map1x.push_back(mapinfo.map_x[i]);
+		map1y.push_back(mapinfo.map_y[i]);
+		planet_level.push_back(mapinfo.planet_lvl[i]);
+
+
+	}
+	for (int i = 0; i < sizeof(mapinfo.token_x) / sizeof(mapinfo.token_x[0]); i++) {
+
+		token_x.push_back(mapinfo.token_x[i]);
+		token_y.push_back(mapinfo.token_y[i]);
+		token_type.push_back(mapinfo.token_type[i]);
+
+	}
+
+
+
+	score = 0;
+	createGameObjects();
+	mapPlanets();
+	m_background = new Background();
+	m_minimap = new Minimap();
+	m_minimap->init();
+	m_background->init();
+	initObjects();
+
+
+
+
+
+}
+
 void Level::draw()
 {
 	
@@ -695,10 +772,11 @@ void Level::draw()
 	
 	if (m_state->getOnline() && !gameLoaded) {
 		m_state->getNet()->sendLoadedLevelMSG(*(m_state->getPlayer()->geto_id()));
+		gameLoaded = true;
 		while (!allPlayersLoadedLevel()) {
 
 		}
-		gameLoaded = true;
+		
 	}
 	
 
@@ -707,6 +785,21 @@ void Level::draw()
 
 
 	
+}
+
+bool Level::getGameLoadedStatus()
+{
+	return gameLoaded;
+}
+
+std::unordered_map<int, Planet*>& Level::getm_planets()
+{
+	return m_planets;
+}
+
+std::unordered_map<int, Tokens*>& Level::getm_tokens()
+{
+	return m_tokens;
 }
 
 void Level::restart() 

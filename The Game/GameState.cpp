@@ -172,6 +172,7 @@ void GameState::update(float dt)
 	if (status == 'L' && m_current_level == nullptr) {
 
 		init();
+		
 
 	}
 	
@@ -179,6 +180,10 @@ void GameState::update(float dt)
 	switch (status) {
 	case 'M':
 		mainscreen->update(dt);
+		if (getNet()) {
+			getNet()->setinGame(false);
+		}
+		
 		
 		break;
 
@@ -239,8 +244,13 @@ void GameState::startLevel()
 		m_current_level = new Level();
 	}
 	
+	if (host) {
+		m_current_level->init();
+	}
+	else {
+		m_current_level->init(mapinfo);
+	}
 	
-	m_current_level->init();
 	
 
 	if (!m_player) {
@@ -300,6 +310,62 @@ void GameState::playerLoadedLevel()
 {
 	playersLoadedLevel++;
 }
+
+bool GameState::loadedLevel()
+{
+	if (m_current_level) {
+		return getLevel()->getGameLoadedStatus();
+	}
+	return false;
+}
+	
+	
+
+bool GameState::amHost()
+{
+	return host;
+}
+
+startG GameState::getMapData()
+{
+	startG strg;
+	
+	std::unordered_map<int, Planet*> planets = getLevel()->getm_planets();
+	int i = 0;
+	for (auto key : planets) {
+		strg.map_x[i] = key.second->m_pos_x;
+		strg.map_y[i] = key.second->m_pos_y;
+		strg.planet_lvl[i] = key.second->getlevel();
+		strg.planet_oid[i] = key.second->getoid();
+
+		i++;
+
+	}
+	std::unordered_map<int, Tokens*> tokens = getLevel()->getm_tokens();
+	i = 0;
+	for (auto key : tokens) {
+
+		strg.token_x[i] = key.second->m_pos_x;
+		strg.token_y[i] = key.second->m_pos_y;
+		strg.token_type[i] = key.second->getType();
+		strg.token_oid[i] = key.second->getoid();
+		i++;
+
+
+	}
+	return strg;
+	
+}
+
+void GameState::setMapData(startG strg)
+{
+
+	mapinfo = strg;
+
+
+}
+
+
 
 std::mutex& GameState::getMutex()
 {

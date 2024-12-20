@@ -99,7 +99,11 @@ public:
 	void Pshoot(Bullet* b);
 	void update(float dt)  override;
 	void init() 	override;
+	void init(startG mapnifo);
 	void draw() 	override;
+	bool getGameLoadedStatus();
+	std::unordered_map<int, Planet*>& getm_planets();
+	std::unordered_map<int, Tokens*>& getm_tokens();
 	~Level();
 
 };

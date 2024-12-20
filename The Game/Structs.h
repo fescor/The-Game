@@ -39,13 +39,20 @@ struct startG {
 
 	float timeinfo = 0.0f;
 
+	int map_x[35];
+	int map_y[35];
+	int planet_lvl[35];
+	int planet_oid[35];
+	int token_x[12];
+	int token_y[12];
+	char token_type[12];
+	int token_oid[12];
+
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(timeinfo); // serialize things by passing them to the archive
+		archive( timeinfo , map_x, map_y, planet_lvl, planet_oid, token_x, token_y, token_type, token_oid); // serialize things by passing them to the archive
 	}
-
-
 
 
 
@@ -105,6 +112,8 @@ enum PACKETTYPE {
 	PMOVE, 
 	START_GAME,
 	LOADED_LEVEL,
+	MAP_INFO,
+
 
 
 };
@@ -123,6 +132,8 @@ struct packet
 		pMOVE pmove;
 		startG strtg;
 		Loaded loaded_level;
+		
+
 
 
 	};
@@ -155,6 +166,8 @@ struct packet
 
 				
 
+				
+
 		}
 		
 	}
@@ -162,7 +175,7 @@ struct packet
 	packet() {};
 };
 
-typedef union data {
+union Data {
 
 
 	PEER newp{};
@@ -176,8 +189,5 @@ typedef union data {
 	startG strtg;
 
 	Loaded loaded_level;
-	
 
-
-
-}Data;
+};

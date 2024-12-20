@@ -44,9 +44,9 @@ class Net : public GameObject {
 	void peerConnectRoutineJoin(ENetEvent& event);
 
 
-	void sendDataToPeer(ENetPeer* peer , union data payload, PACKETTYPE type);
+	void sendDataToPeer(ENetPeer* peer , union Data payload, PACKETTYPE type);
 
-	void sendDataBroadcast(union data payload, PACKETTYPE type);
+	void sendDataBroadcast(union Data payload, PACKETTYPE type);
 
 
 
@@ -57,7 +57,7 @@ class Net : public GameObject {
 
 	void anounceNewPeer(enet_uint32 ip, int id);
 	void anounceLobbyPeers(ENetPeer* newPeer);
-	union data setPeerID();
+	union Data setPeerID();
 	
 	void parseData(unsigned char* buffer, size_t size, ENetEvent& event );
 
@@ -66,7 +66,9 @@ class Net : public GameObject {
 
 	
 	void deletePeer(int id);
+
 	
+	startG createSGDtata();
 	
 	
 	
@@ -99,6 +101,8 @@ class Net : public GameObject {
 		bool isHost();
 		void sendLoadedLevelMSG(int o_id);
 		std::mutex& getMutex();
+		void setinGame(bool ig);
+		bool getinGame();
 		~Net();
 
 };

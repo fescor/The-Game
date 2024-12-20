@@ -127,6 +127,8 @@ void Planet::draw()
 	//m_planet_brush.texture = m_state->getFullAssetPath("planet2.png");
 	//graphics::drawRect(m_pos_x + m_state->m_global_offset_x, m_pos_y + m_state->m_global_offset_y, 4.0f, 4.0f, m_planet_brush);
 	graphics::drawRect(m_pos_x + m_state->m_global_offset_x + 0.02f, m_pos_y + m_state->m_global_offset_y - 2.5f, 3.0f, 0.2f, m_planet_healthbar);
+
+
 	//SETCOLOR(m_planet_healthbar.fill_color ,50, 205, 50)
 
 
@@ -193,6 +195,16 @@ void Planet::draw()
 
 	
 
+}
+
+void Planet::setoid(int oid)
+{
+	o_id = oid;
+}
+
+int Planet::getoid()
+{
+	return o_id;
 }
 
 Planet::~Planet()

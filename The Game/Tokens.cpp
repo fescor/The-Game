@@ -2,11 +2,12 @@
 #include "setcolor.h"
 
 
-Tokens::Tokens(char t, float x , float y)
+Tokens::Tokens(char t, float x , float y, int oid)
 {
 	this->type = t;
 	m_pos_x = x;
 	m_pos_y = y;
+	o_id = oid;
 }
 
 char Tokens::getType()
@@ -46,4 +47,9 @@ void Tokens::draw()
 	graphics::drawRect(m_pos_x + m_state->m_global_offset_x, m_pos_y + m_state->m_global_offset_y, 1.0f, 1.0f, m_brush_token);
 
 
+}
+
+int Tokens::getoid()
+{
+	return o_id;
 }
