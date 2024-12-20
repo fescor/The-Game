@@ -122,8 +122,11 @@ public:
 	bool loadedLevel();// is the level has loaded on the local machine 
 
 	bool amHost();
-	struct startG getMapData();
-	void setMapData(startG strg);
+	struct startG getMapData();// net takes the map data to be send to peers
+	void setMapData(startG strg);//game takes the map data to be loaded 
+
+	struct startG getMapInfo();// access the stored map data recieved from host 
+
 	
 	
 

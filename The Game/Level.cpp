@@ -140,7 +140,7 @@ void Level::createGameObjects()
 	else {
 		for (int i = 0; i < token_x.size(); i++) {
 			//m_tokens.push_back(new Tokens(token_type[i], token_x[i], token_y[i]));
-			m_tokens[i] = new Tokens(token_type[i], token_x[i], token_y[i], m_state->getMapData().token_oid[i]);
+			m_tokens[i] = new Tokens(token_type[i], token_x[i], token_y[i], m_state->getMapInfo().token_oid[i]);
 		}
 
 	}
@@ -362,7 +362,7 @@ void Level::mapPlanets()
 			iter->second->setoid(index);
 		}
 		else {
-			iter->second->setoid(m_state->getMapData().planet_oid[index]);
+			iter->second->setoid(m_state->getMapInfo().planet_oid[index]);
 		}
 		
 		

@@ -365,6 +365,11 @@ void GameState::setMapData(startG strg)
 
 }
 
+startG GameState::getMapInfo()
+{
+	return mapinfo;
+}
+
 
 
 std::mutex& GameState::getMutex()
