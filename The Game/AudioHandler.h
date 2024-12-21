@@ -7,15 +7,18 @@ class AudioHandler {
 private:
 	bool initialized;
 	PaStream* stream = nullptr;
+
+
 	
 public:
 	
 	AudioHandler();   // Constructor
 	~AudioHandler(); //katastrofeas
 	bool audioInit(); // portaudio initialization
-	int countAudioDevices() const;    // Get the number of audio devices
-	void listAudioDevices() const;	  // List audio devices 
-	void ShowDefaultDevices() const;
-	bool AudioRecorder(int durationSeconds, const std::string& filename);
-	
+	void startAudio();
+	void stopAudio();
+	void  ShowDefaultDevices() const;
+	//bool AudioRecorder(int durationSeconds, const std::string& filename);
+	static int audioCallback(const void* inputbuffer, void* outputbuffer, unsigned long framsPerBuffer, const PaStreamCallbackTimeInfo* timeinfo, PaStreamCallbackFlags statusflag, void* userData);
+
 };

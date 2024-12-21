@@ -141,10 +141,11 @@ void GameState::init()
 	audiohandler = new AudioHandler();
 	
 	if (audiohandler->audioInit()) {
-		audiohandler-> countAudioDevices();
-		//audiohandler-> listAudioDevices();
 		audiohandler->ShowDefaultDevices();
-		audiohandler->AudioRecorder(10, "test.raw"); // sto sugkekrimeno test pou kanw h sunarthsh zhtaei ton xrono ths ixografisis kai to onoma tou arxeiou
+		audiohandler->startAudio();
+		audiohandler->stopAudio();
+		
+
 	}
 	
 

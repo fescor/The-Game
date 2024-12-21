@@ -6,9 +6,10 @@
 using namespace std;
 
 
+
 // Constructor implementation
 AudioHandler::AudioHandler() {
-	
+	AudioHandler::audioInit();
 }
 
 //katastrofeas
@@ -39,42 +40,7 @@ bool AudioHandler::audioInit() {
 	return true;
 
 }
-//epistrefei ton arithmo twn suskeuwn hxou 
-int AudioHandler::countAudioDevices() const {
-	if (!initialized) {
-		std:std::cerr << "Portaudio not initialized" << std::endl;
-		return -1;
-	}
-	int devc = Pa_GetDeviceCount();
-	if (devc < 0) {
-		std::cerr << "Error retrieving device count: " << Pa_GetErrorText(devc) << std::endl;
-		return -1;
-	}
-	std::cout << "You have " << devc << "devices" << std::endl;
-	return devc;
-}
 
-void AudioHandler::listAudioDevices() const {
-	int devc = Pa_GetDeviceCount();
-	
-	if (!initialized) {
-	std:std::cerr << "Portaudio not initialized" << std::endl;
-		return ;
-	}
-
-	if (devc <= 0) {
-		std::cerr << "No audio devices" << std::endl;
-	}
-	for (int i = 0; i < devc; i++) {
-
-		const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(i);
-		if (deviceInfo) {
-			std::cout << "Device " << i << ": " << deviceInfo->name << std::endl;
-		}
-	}
-}
-
-//apo edw briskei swsta tis default suskeues pou xrisimopoiei (toulaxiston sto diko mou) 
 void AudioHandler::ShowDefaultDevices() const {
 	if (!initialized) {
 		cerr << "Portaudio not initialized." << endl;
@@ -104,6 +70,101 @@ void AudioHandler::ShowDefaultDevices() const {
 	}
 }
 
+
+void AudioHandler::startAudio(){
+	if (!initialized) {
+		cerr << "Portaudio not initialized." << endl;
+		return ;
+	}
+
+	PaError err; 
+
+	PaStreamParameters inputparametr, outputparametr; 
+
+	inputparametr.device = Pa_GetDefaultInputDevice(); //get default mic as input device
+	if (inputparametr.device == paNoDevice) {
+		std::cerr << "Cant find default input device." << std::endl;
+		return;
+	}
+
+	inputparametr.channelCount = 2; //stereo audio
+	inputparametr.sampleFormat = paFloat32; // 32-bit floating-point samples
+	inputparametr.suggestedLatency = Pa_GetDeviceInfo(inputparametr.device)->defaultLowInputLatency;
+	inputparametr.hostApiSpecificStreamInfo = nullptr;
+
+	outputparametr.device = Pa_GetDefaultOutputDevice(); // get default speakers as output device
+	//PaDeviceIndex outputparametr.device = Pa_GetDefaultOutputDevice();
+	if (outputparametr.device == paNoDevice) {
+		std::cerr << "Cant find default output device." << std::endl;
+		return;
+	}
+	outputparametr.channelCount = 2;
+	outputparametr.sampleFormat = paFloat32;
+	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
+	outputparametr.hostApiSpecificStreamInfo = nullptr; 
+
+	//open audio stream 
+	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 44100, 256, paClipOff, audioCallback, nullptr);
+	if (err != paNoError) {
+		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
+		return; 
+	}
+	//start audio stream 
+	err = Pa_StartStream(stream);
+	if (err != paNoError) {
+		std::cerr << "Fail to start stream" << Pa_GetErrorText(err) << std::endl; 
+		return;
+	}
+	else {
+		std::cout << "Audio stream just started!" << std::endl;
+	}
+
+}
+
+//stop stream and playblack 
+
+void AudioHandler::stopAudio() {
+	if (stream) {
+		//stop audio stream
+		PaError err =  Pa_StopStream(stream);
+		if (err != paNoError) {
+			std::cerr << "Fail to stop audio stream." << Pa_GetErrorText(err) << std::endl;
+			return;
+		}
+
+		//close audio stream
+		err = Pa_CloseStream(stream); 
+		if (err != paNoError) {
+			std::cerr << "Fail to close audio stream." << Pa_GetErrorText(err) << std::endl;
+			return;
+		}
+
+		stream = nullptr;
+		std::cout << "Audio stream just stopped and closed!" << std::endl;
+
+	}
+}
+
+//call back function for processing audio 
+int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer,unsigned long framesPerBuffer,const PaStreamCallbackTimeInfo* timeInfo,PaStreamCallbackFlags statusFlags,void* userData) {
+	const float* in = static_cast<const float*>(inputBuffer); //input data 
+	float* out = static_cast<float*>(outputBuffer); //output data
+	if (inputBuffer) {
+		//if input buffer is available copy it directly 
+		for (unsigned long i = 0; i < framesPerBuffer; i++) {
+			out[i] = in[i];// real time playback for mic 
+		}
+	}
+	else {
+		//if no input fill output with silence 
+		for (unsigned long i = 0; i < framesPerBuffer; i++) {
+			out[i] = 0.0f;
+		}
+	}
+
+	return paContinue; // continue the audiostream
+}
+/*
 //prospatheia gia record apo to default input kai save se arxeio 
 
 bool AudioHandler::AudioRecorder(int durationSeconds,const std::string& filename) {
@@ -125,7 +186,7 @@ bool AudioHandler::AudioRecorder(int durationSeconds,const std::string& filename
 	const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(inputpar.device);
 	inputpar.channelCount = 1; // Mono recording
 	inputpar.sampleFormat = paInt16; // 16-bit integer format
-	inputpar.suggestedLatency = deviceInfo->defaultLowInputLatency;
+	inputpar.suggestedLatency = deviceInfo->defaultLowInputLatency; 
 	inputpar.hostApiSpecificStreamInfo = nullptr;
 
 	const int sampleRate = 44100; //standar sample rate
@@ -136,6 +197,7 @@ bool AudioHandler::AudioRecorder(int durationSeconds,const std::string& filename
 	PaError err = Pa_OpenStream(&stream, &inputpar, nullptr, sampleRate, framesPerBuffer, paClipOff, nullptr, nullptr);
 	if (err != paNoError) {
 		std::cerr << "Failed to open audio stream: " << Pa_GetErrorText(err) << std::endl;
+		Pa_CloseStream(stream); //kleinw an ginei mlkia
 		return false;
 	}
 	else
@@ -192,3 +254,4 @@ bool AudioHandler::AudioRecorder(int durationSeconds,const std::string& filename
 		return true;
 	}
 }
+*/
