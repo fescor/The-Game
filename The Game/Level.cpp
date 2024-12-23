@@ -656,7 +656,7 @@ void Level::init(startG mapinfo)
 
 	}
 	
-	for (int i = 0; i < m_state->geto_playersmap().size(); i++) {
+	for (int i = 0; i < m_state->geto_playersmap().size() + 1; i++) {
 		if (mapinfo.posPlayer[i][0] == *(m_state->getPlayer()->geto_id())) {
 			m_state->getPlayer()->m_pos_x = mapinfo.posPlayer[i][1];
 			m_state->getPlayer()->m_pos_y = mapinfo.posPlayer[i][2];
