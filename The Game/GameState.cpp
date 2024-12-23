@@ -244,12 +244,7 @@ void GameState::startLevel()
 		m_current_level = new Level();
 	}
 	
-	if (host) {
-		m_current_level->init();
-	}
-	else {
-		m_current_level->init(mapinfo);
-	}
+
 	
 	
 
@@ -264,7 +259,12 @@ void GameState::startLevel()
 		if (iter->second) { iter->second->init(true); }
 	}
 
-
+	if (host) {
+		m_current_level->init();
+	}
+	else {
+		m_current_level->init(mapinfo);
+	}
 
 	
 

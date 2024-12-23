@@ -264,7 +264,7 @@ void Player::init(bool online)
 	
 
 	angle = 90.0f;
-	if (!online) { PreviousFrameAngle = 90.0f; }
+	PreviousFrameAngle = 90.0f; 
 	
 	speed = 0;
 	sprite_counter = 0;
@@ -274,15 +274,10 @@ void Player::init(bool online)
 
 
 	//init player_box properties
-	if (online) { //spawn  position for online players
-		m_pos_x = 7.0;
-		m_pos_y = 7.0;
-	}
-	else {
-		m_pos_x = 5.0f;
-		m_pos_y = 5.0f;
-
-	}
+	m_pos_x = 5.0;
+	m_pos_y = 5.0;
+	
+	
 
 	//m_width /= 1.5f;
 	//m_height /= 1.5f;
