@@ -69,7 +69,7 @@ struct startG {
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive( timeinfo , map_x, map_y, planet_lvl, planet_oid, token_x, token_y, token_type, token_oid); // serialize things by passing them to the archive
+		archive( timeinfo , map_x, map_y, planet_lvl, planet_oid, token_x, token_y, token_type, token_oid , posPlayer); // serialize things by passing them to the archive
 	}
 	
 
