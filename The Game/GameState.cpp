@@ -372,10 +372,6 @@ startG GameState::getMapInfo()
 
 
 
-std::mutex& GameState::getMutex()
-{
-	return mutex;
-}
 
 
 

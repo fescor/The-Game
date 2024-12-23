@@ -10,8 +10,8 @@
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.39"
-//TODO :  wierd stuff happening on movment from peer(connecting to host)  , implement sending the level info like mapping planets to every one as host and peers getting this datta and init the level
-
+//TODO :  wierd stuff happening on movment from peer(connecting to host) 
+//TODO : when host wait for the peer to send i loaded msg if the peer dc in that time the host will wait forever FIX!
 
 
 using namespace std;
@@ -250,6 +250,10 @@ void Net::sendDataToPeer(ENetPeer* peer, union Data payload, PACKETTYPE type)
 		p.type = type;
 		p.newpeer = payload.newp;
 		break;
+	case PLAYER_INFO:
+		p.type = type;
+
+		p.pi = payload.pi;
 	
 
 	}
@@ -419,8 +423,7 @@ bool Net::connectToHost(const std::string ip) // this is called when i connect t
 		cout << "conection succeded " << endl;
 		
 		
-		//peers.insert(pair<int, unsigned int>(0, peer->address.host));
-		
+
 		connectedPeers[0] = event.peer;
 		//*(connectedPeers[0]) = *(event.peer);
 
@@ -568,6 +571,9 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 	case SETID:
 
 		setmyID(p.setid.id);
+
+
+
 		break;
 	case LOOBYPEER:// here i want to store the info of the peer in newPeers and when the conection comes validate it(not here validation) 
 
@@ -647,8 +653,51 @@ startG Net::createSGDtata()
 {
 	startG strg = m_state->getMapData();
 	strg.timeinfo = 0.0f;
+	int i = 1;		
+	// this is the pos of the host
+	strg.posPlayer[0][0] = 0;									
+	strg.posPlayer[0][1] = m_state->getPlayer()->m_pos_x;
+	strg.posPlayer[0][2] = m_state->getPlayer()->m_pos_y;
+	
+
+	// this is the pos of connected peer i give them(as host)
+	for (auto key : connectedPeers) {
+		if (i % 2 ) {
+			strg.posPlayer[i][0] = key.first;
+			strg.posPlayer[i][1] = m_state->getPlayer()->m_pos_x + (i * 2);
+			strg.posPlayer[i][2] = m_state->getPlayer()->m_pos_y + (i * 2);
+
+		}
+		else {
+			strg.posPlayer[i][0] = key.first;
+			strg.posPlayer[i][1] = m_state->getPlayer()->m_pos_x - (i * 2);
+			strg.posPlayer[i][2] = m_state->getPlayer()->m_pos_y - (i * 2);
+		
+		}
+		
+		i++;
+	}
 
 	return strg;
+}
+
+void Net::sendPlayerInfo()
+{
+	Data d;
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 

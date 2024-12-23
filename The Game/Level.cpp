@@ -655,6 +655,15 @@ void Level::init(startG mapinfo)
 		token_type.push_back(mapinfo.token_type[i]);
 
 	}
+	
+	for (int i = 0; i < m_state->geto_playersmap().size(); i++) {
+		m_state->geto_playersmap().find(mapinfo.posPlayer[i][0])->second->m_pos_x = mapinfo.posPlayer[i][1];
+		m_state->geto_playersmap().find(mapinfo.posPlayer[i][0])->second->m_pos_y = mapinfo.posPlayer[i][2];
+		
+	}
+
+
+
 
 
 

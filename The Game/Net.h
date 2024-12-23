@@ -69,6 +69,7 @@ class Net : public GameObject {
 
 	
 	startG createSGDtata();
+	void sendPlayerInfo();
 	
 	
 	

@@ -17,7 +17,7 @@
 class GameState {
 private:
 
-	std::mutex mutex;
+	
 
 	std::string m_assets_path = "assets//";
 	float m_canvas_width = 30.0f;
@@ -130,7 +130,7 @@ public:
 	
 	
 
-	std::mutex& getMutex();
+	
 	
 
 };
