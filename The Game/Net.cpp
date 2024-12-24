@@ -11,7 +11,7 @@
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.39"
 //TODO :  wierd stuff happening on movment from peer(connecting to host) 
-//TODO : when host wait for the peer to send i loaded msg if the peer dc in that time the host will wait forever FIX!
+
 //TODO : bug when on join function i try to join a game again (havent restarded the client it is stuck and wont load the game)
 
 
@@ -592,6 +592,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 		enet_peer_disconnect(event.peer , 0);
 		deletePeer(p.idc.idc);
+		event.peer->data = nullptr;
 
 		break;
 	case PMOVE:

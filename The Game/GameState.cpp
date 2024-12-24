@@ -54,7 +54,10 @@ void GameState::setMainpointerNull()
 
 void GameState::setLevelpointerNull()
 {
-	m_current_level = nullptr;
+	if (m_current_level) {
+		m_current_level = nullptr;
+	}
+	
 }
 
 
@@ -211,7 +214,11 @@ void GameState::update(float dt)
 			delete m_player;
 			m_player = nullptr;
 		}
-		getLevel()->deleteLevel();
+
+		if (m_current_level) {
+			getLevel()->deleteLevel();
+		}
+		
 		mainscreen->setSelector(CREATE_LOBBY);
 
 	}
