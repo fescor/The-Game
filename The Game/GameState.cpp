@@ -259,11 +259,11 @@ void GameState::startLevel()
 		if (iter->second) { iter->second->init(true); }
 	}
 
-	if (host) {
-		m_current_level->init();
+	if (!amHost()) {
+		m_current_level->init(mapinfo);
 	}
 	else {
-		m_current_level->init(mapinfo);
+		m_current_level->init();
 	}
 
 	
@@ -365,9 +365,71 @@ void GameState::setMapData(startG strg)
 
 }
 
-startG GameState::getMapInfo()
+startG& GameState::getMapInfo()
 {
 	return mapinfo;
+}
+
+void GameState::createMapInfoData()
+{
+
+
+	std::unordered_map<int, Planet*> planets = getLevel()->getm_planets();
+	int i = 0;
+	for (auto key : planets) {
+		mapinfo.map_x[i] = key.second->m_pos_x;
+		mapinfo.map_y[i] = key.second->m_pos_y;
+		mapinfo.planet_lvl[i] = key.second->getlevel();
+		mapinfo.planet_oid[i] = key.second->getoid();
+
+		i++;
+
+	}
+	std::unordered_map<int, Tokens*> tokens = getLevel()->getm_tokens();
+	i = 0;
+	for (auto key : tokens) {
+
+		mapinfo.token_x[i] = key.second->m_pos_x;
+		mapinfo.token_y[i] = key.second->m_pos_y;
+		mapinfo.token_type[i] = key.second->getType();
+		mapinfo.token_oid[i] = key.second->getoid();
+		i++;
+
+
+	}
+
+
+
+
+
+	mapinfo.timeinfo = 0.0f;
+	i = 1;
+	// this is the pos of the host
+	mapinfo.posPlayer[0][0] = 0;
+	mapinfo.posPlayer[0][1] = getPlayer()->m_pos_x;
+	mapinfo.posPlayer[0][2] = getPlayer()->m_pos_y;
+
+
+	// this is the pos of connected peer i give them(as host)
+	for (auto iter = o_players.begin(); iter != o_players.end(); iter++) {
+		if (i % 2) {
+			mapinfo.posPlayer[i][0] = iter->first;
+			mapinfo.posPlayer[i][1] = getPlayer()->m_pos_x + (i * 2);
+			mapinfo.posPlayer[i][2] = getPlayer()->m_pos_y + (i * 2);
+
+		}
+		else {
+			mapinfo.posPlayer[i][0] = iter->first;
+			mapinfo.posPlayer[i][1] = getPlayer()->m_pos_x - (i * 2);
+			mapinfo.posPlayer[i][2] = getPlayer()->m_pos_y - (i * 2);
+
+		}
+
+		i++;
+	}
+	
+	
+
 }
 
 

@@ -125,9 +125,9 @@ public:
 	struct startG getMapData();// net takes the map data to be send to peers
 	void setMapData(startG strg);//game takes the map data to be loaded 
 
-	struct startG getMapInfo();// access the stored map data recieved from host 
+	struct startG& getMapInfo();// access the stored map data recieved from host 
 
-	
+	void createMapInfoData();
 	
 
 	

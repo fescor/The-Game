@@ -603,6 +603,12 @@ void Level::init()
 		break;
 
 	}
+
+	
+
+
+
+
 	score = 0;
 	createGameObjects();
 	mapPlanets();
@@ -611,6 +617,18 @@ void Level::init()
 	m_minimap->init();
 	m_background->init();
 	initObjects();
+	m_state->createMapInfoData();
+
+
+	for (int i = 0; i < m_state->geto_playersmap().size(); i++) {
+		
+		m_state->geto_playersmap().find(m_state->getMapInfo().posPlayer[i][0])->second->m_pos_x = m_state->getMapInfo().posPlayer[i][1];
+		m_state->geto_playersmap().find(m_state->getMapInfo().posPlayer[i][0])->second->m_pos_y = m_state->getMapInfo().posPlayer[i][2];
+
+	}
+
+
+
 
 
 	//graphics::playMusic("assets//Sectio Aurea - Giove.mp3", 1.0f, true, 200000);
@@ -640,21 +658,26 @@ void Level::init(startG mapinfo)
 		break;
 
 	}
-	for (int i = 0; i < sizeof(mapinfo.map_x) / sizeof(mapinfo.map_x[0]); i++) {
+	
+	
+		for (int i = 0; i < sizeof(mapinfo.map_x) / sizeof(mapinfo.map_x[0]); i++) {
 
-		map1x.push_back(mapinfo.map_x[i]);
-		map1y.push_back(mapinfo.map_y[i]);
-		planet_level.push_back(mapinfo.planet_lvl[i]);
+			map1x.push_back(mapinfo.map_x[i]);
+			map1y.push_back(mapinfo.map_y[i]);
+			planet_level.push_back(mapinfo.planet_lvl[i]);
 
 
-	}
-	for (int i = 0; i < sizeof(mapinfo.token_x) / sizeof(mapinfo.token_x[0]); i++) {
+		}
+		for (int i = 0; i < sizeof(mapinfo.token_x) / sizeof(mapinfo.token_x[0]); i++) {
 
-		token_x.push_back(mapinfo.token_x[i]);
-		token_y.push_back(mapinfo.token_y[i]);
-		token_type.push_back(mapinfo.token_type[i]);
+			token_x.push_back(mapinfo.token_x[i]);
+			token_y.push_back(mapinfo.token_y[i]);
+			token_type.push_back(mapinfo.token_type[i]);
 
-	}
+		}
+
+
+
 	
 	for (int i = 0; i < m_state->geto_playersmap().size() + 1; i++) {
 		if (mapinfo.posPlayer[i][0] == *(m_state->getPlayer()->geto_id())) {
@@ -683,6 +706,13 @@ void Level::init(startG mapinfo)
 	m_minimap->init();
 	m_background->init();
 	initObjects();
+
+
+
+
+
+
+
 
 
 

@@ -43,7 +43,7 @@ int Net::host()
 		if (m_state->loadedLevel() && !inGame) {
 			
 			Data d;
-			d.strtg = createSGDtata();
+			d.strtg = m_state->getMapInfo();
 			
 
 			sendDataBroadcast(d , START_GAME);
@@ -677,7 +677,7 @@ startG Net::createSGDtata()
 		
 		i++;
 	}
-
+	m_state->setMapData(strg);
 	return strg;
 }
 
