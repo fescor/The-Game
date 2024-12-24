@@ -620,9 +620,10 @@ void Level::init()
 	m_state->createMapInfoData();
 
 
-	for (int i = 0; i < m_state->geto_playersmap().size(); i++) {
+	for (int i = 1; i < m_state->geto_playersmap().size() + 1; i++) { //start from i=1 cuz on posPlayer[0][0] is my info always (host)
 		
-		m_state->geto_playersmap().find(m_state->getMapInfo().posPlayer[i][0])->second->m_pos_x = m_state->getMapInfo().posPlayer[i][1];
+		m_state->geto_playersmap().find(m_state->getMapInfo().posPlayer[i][0])->second->m_pos_x = m_state->getMapInfo().posPlayer[i][1];// girnaei apo to find iter meta to end kai skaei 
+		// to proto find tha einai gi 0 pou den yparxei sto o_players
 		m_state->geto_playersmap().find(m_state->getMapInfo().posPlayer[i][0])->second->m_pos_y = m_state->getMapInfo().posPlayer[i][2];
 
 	}
