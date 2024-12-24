@@ -176,6 +176,7 @@ void GameState::update(float dt)
 
 		init();
 		
+		
 
 	}
 	
@@ -318,6 +319,11 @@ int GameState::getPlayersLoadedLevel()
 void GameState::playerLoadedLevel()
 {
 	playersLoadedLevel++;
+}
+
+void GameState::resetPlayerLoadedLevel()
+{
+	playersLoadedLevel = 0;
 }
 
 bool GameState::loadedLevel()

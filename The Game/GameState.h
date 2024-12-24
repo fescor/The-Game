@@ -118,7 +118,7 @@ public:
 	const std::map<int, std::unique_ptr<Player>>& geto_playersmap();
 	int getPlayersLoadedLevel();// get the numbers of connected players that have loaded the level in their local machine
 	void playerLoadedLevel(); // increases the number of connected players that have loaded the level in their local machine
-
+	void resetPlayerLoadedLevel();
 	bool loadedLevel();// is the level has loaded on the local machine 
 
 	bool amHost();

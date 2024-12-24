@@ -810,8 +810,10 @@ void Level::draw()
 		m_state->getNet()->sendLoadedLevelMSG(*(m_state->getPlayer()->geto_id()));
 		gameLoaded = true;
 		while (!allPlayersLoadedLevel()) {
-
+		
 		}
+		m_state->resetPlayerLoadedLevel();
+		
 		
 	}
 	
