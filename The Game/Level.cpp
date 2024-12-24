@@ -491,9 +491,8 @@ void Level::update(float dt)
 
 		}
 		if (graphics::getKeyState(graphics::SCANCODE_M)) {
-			m_state->setLevelpointerNull();
-			m_state->setStatus('M');
-			delete this;
+			deleteLevel();
+
 		}
 		//cout << "a";
 		return;
@@ -837,6 +836,16 @@ std::unordered_map<int, Planet*>& Level::getm_planets()
 std::unordered_map<int, Tokens*>& Level::getm_tokens()
 {
 	return m_tokens;
+}
+
+void Level::deleteLevel()
+{
+
+	m_state->setLevelpointerNull();
+	m_state->setStatus('M');
+	delete this;
+
+
 }
 
 void Level::restart() 

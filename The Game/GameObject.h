@@ -19,7 +19,7 @@ public:
 	virtual void draw(bool online) {}
 
 	virtual  ~GameObject() {}
-	bool isActive() { return m_active; }
+	bool isActive() { if (this != nullptr) { return m_active; } }
 	void setActive( bool a) { m_active = a; }
 
 

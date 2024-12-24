@@ -104,6 +104,7 @@ public:
 	bool getGameLoadedStatus();
 	std::unordered_map<int, Planet*>& getm_planets();
 	std::unordered_map<int, Tokens*>& getm_tokens();
+	void deleteLevel();
 	~Level();
 
 };

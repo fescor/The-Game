@@ -199,7 +199,8 @@ void GameState::update(float dt)
 	if (online && net == nullptr) { 
 		initNet();
 	}
-	if (!online && net != nullptr) {
+	if (!online && net != nullptr) {//thsi shit is sus
+
 		
 		net->setOnline(false);
 		nt.join();
@@ -210,6 +211,7 @@ void GameState::update(float dt)
 			delete m_player;
 			m_player = nullptr;
 		}
+		getLevel()->deleteLevel();
 		mainscreen->setSelector(CREATE_LOBBY);
 
 	}
