@@ -845,6 +845,10 @@ void Level::deleteLevel()
 
 	m_state->setLevelpointerNull();
 	m_state->setStatus('M');
+	if (m_state->getNet()) {
+		m_state->getNet()->setinGame(false);
+	}
+	
 	delete this;
 
 
