@@ -12,6 +12,7 @@
 #define BABUSUS "10.124.68.39"
 //TODO :  wierd stuff happening on movment from peer(connecting to host) 
 //TODO : when host wait for the peer to send i loaded msg if the peer dc in that time the host will wait forever FIX!
+//TODO : bug when on join function i try to join a game again (havent restarded the client it is stuck and wont load the game)
 
 
 using namespace std;
@@ -73,8 +74,11 @@ int Net::host()
 			case ENET_EVENT_TYPE_DISCONNECT:
 				
 				cout << "enet_peer disconected" << endl;
-				event.peer->data = nullptr;
-
+				if (event.peer->data != nullptr) {
+					deletePeer(*((int*)event.peer->data));
+					event.peer->data = nullptr;
+				}
+				
 			}
 		}
 	
@@ -126,7 +130,12 @@ int Net::join()
 			case ENET_EVENT_TYPE_DISCONNECT:
 				
 				cout << "enet peer disconnected " << endl;
-				event.peer->data = nullptr;
+				if (event.peer->data != nullptr) {
+					deletePeer(*((int*)event.peer->data));
+					event.peer->data = nullptr;
+				}
+				
+				
 
 
 			}
@@ -624,7 +633,7 @@ void Net::disconnect()///telling everyone i am disconecting
 
 	union Data payload;
 	dc dc;
-	dc.idc = *(int*)m_state->getPlayer()->geto_id();
+	dc.idc = *m_state->getPlayer()->geto_id();
 	payload.idc = dc;
 
 
@@ -644,6 +653,10 @@ void Net::deletePeer(int id)
 	m_state->deletePlayer(id);
 	if (!connectedPeers.empty()) { connectedPeers.erase(id); }
 	cout << "Player with ID : " + std::to_string(id) + " disconected " << endl;
+	if (id == 0) {
+		m_state->setOnline(false, false);
+		cout << "HOST DISCONECTED" << '\n';
+	}
 
 
 

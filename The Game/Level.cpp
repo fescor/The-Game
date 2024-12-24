@@ -14,17 +14,6 @@
 #include <vector>
 using namespace std;
 
-//std::vector<int> map1x = { 10,80,-75,-35,65,87,95,152,100,100,33,-3,-80,-45,-50,-15,5,50,100,30,80,-4,34,50,48,-21,-1,60,140,130,150,15,-80,-35,5 };
-//std::vector<int> map1y = { -45,15,-50,40,82,50,15,-20,-70,-50,-45,-66,-76,-35,20,52,85,76,65,-23,80,6,13,9,20,-1,-15,-70,-52,40,20,30,-20,-50,28 };
-//std::vector<int> map1x = { 10,80,-75,-35,65,87,95,152,100,100,33,-3,-80,-45,-50,-15,5,50,100,30,80,-4,34,50,48,-21,-1,60,140,130,150,15,-80,-35,5 };//35
-//std::vector<int> map1y = { -45,15,-50,40, 82,50,15,-20,-70,-50,-45,-66,-76,-35,20,52,85,76,65,-23,80,6,13,9,20,-1,-15,-70,-52,40,20,30,-20,-50,28 };
-//std::vector<int> planet_level = { 1, 1, 1, 2, 2, 1, 3, 3, 1, 1, 1, 2, 2, 3, 1, 3, 3, 2, 2, 2, 3, 1, 1, 1, 2, 3, 1, 3, 3, 2, 2, 2, 3, 1, 2 };
-//std::vector<int> map1x = { 10};//35
-//std::vector<int> map1y = { -45};
-//std::vector<int> planet_level = { 1};
-
-// when rstarting i init the planets that are alive if the last time i killed 20 planets when i restart i will have only the rest 
-
 void Level::readMap(const std::string& filePath)
 {
 	//dimiourgia
@@ -96,7 +85,7 @@ bool Level::inView(float x, float y)// checking for collisions is very expensive
 
 bool Level::allPlayersLoadedLevel()
 {
-	return m_state->geto_playersmap().size() == m_state->getPlayersLoadedLevel()  ;
+	return m_state->geto_playersmap().size() == m_state->getPlayersLoadedLevel();
 }
 
 
