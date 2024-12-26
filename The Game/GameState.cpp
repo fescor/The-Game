@@ -136,13 +136,14 @@ void GameState::init()
 		break;
 
 	}
-	
+	//auta ola tha mpoun se sunarthsh pou tha kaleite sthn update 
 	//ksekinaei h audiohandler otan ginei to multiplayer tha ksekinaei ekei 
 	audiohandler = new AudioHandler();
 	
 	if (audiohandler->audioInit()) {
 		audiohandler->ShowDefaultDevices();
 		audiohandler->startAudio();
+		//audiohandler->audioCallback(); 
 		audiohandler->stopAudio();
 		
 

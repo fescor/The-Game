@@ -2,6 +2,9 @@
 #include <portaudio.h>
 #include <iostream>
 #include "GameState.h"
+#include <vector>
+#include <mutex>
+
 
 class AudioHandler {
 private:
@@ -11,7 +14,9 @@ private:
 
 	
 public:
-	
+	static std::vector <float> globalAudioBuffer; //buffer gia dedomena hxou
+	static std::mutex buffermutex; //mutex for safety 
+	std::vector<float> getAndClearAudioBuffer();
 	AudioHandler();   // Constructor
 	~AudioHandler(); //katastrofeas
 	bool audioInit(); // portaudio initialization

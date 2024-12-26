@@ -2,10 +2,13 @@
 #include <fstream>
 #include <cstdint>   // gia int16_t
 #include <iostream>
+#include <vector>
+#include <mutex>
 
 using namespace std;
 
-
+std::vector<float> AudioHandler::globalAudioBuffer;
+std::mutex AudioHandler::buffermutex;
 
 // Constructor implementation
 AudioHandler::AudioHandler() {
@@ -41,6 +44,7 @@ bool AudioHandler::audioInit() {
 
 }
 
+//TODO: O KATHE PAIXTHS NA MPOREI NA EPILEKSEI THN SISKEUH POU THELEI GIA EISODO KAI EKSODO HXOU ANTI NA PICKARW TA DEFAULT 
 void AudioHandler::ShowDefaultDevices() const {
 	if (!initialized) {
 		cerr << "Portaudio not initialized." << endl;
@@ -144,114 +148,37 @@ void AudioHandler::stopAudio() {
 
 	}
 }
-
+//todo apothikeuse ta chinsk se mia global metavliti me skopo na ta stelneis apo ekei 
 //call back function for processing audio 
 int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer,unsigned long framesPerBuffer,const PaStreamCallbackTimeInfo* timeInfo,PaStreamCallbackFlags statusFlags,void* userData) {
+	
+	
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
+
 	if (inputBuffer) {
-		//if input buffer is available copy it directly 
+		std::vector<float> chunk(in, in + framesPerBuffer); //coply chunk in local vector
+		{
+			std::lock_guard<std::mutex> lovk(buffermutex);// mutex lock
+			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
+		}
+		
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
-			out[i] = in[i];// real time playback for mic 
+			out[i] = in[i]; // Real-time playback
 		}
+	}else {
+			for (unsigned long i = 0; i < framesPerBuffer; i++) {
+				out[i] = 0.0f; // Silence
+			}
 	}
-	else {
-		//if no input fill output with silence 
-		for (unsigned long i = 0; i < framesPerBuffer; i++) {
-			out[i] = 0.0f;
-		}
-	}
-
-	return paContinue; // continue the audiostream
+	
+	return paContinue;
+	
 }
-/*
-//prospatheia gia record apo to default input kai save se arxeio 
-
-bool AudioHandler::AudioRecorder(int durationSeconds,const std::string& filename) {
-	if (!initialized) {
-		cerr << "Portaudio not initialized." << endl;
-		return true;
-	}
-
-	//stream parameters
-	PaStreamParameters inputpar; 
-	memset(&inputpar, 0, sizeof(inputpar));
-
-	//getdefault dev
-	inputpar.device = Pa_GetDefaultInputDevice();
-	if (inputpar.device == paNoDevice) {
-		cerr << "No default input device found." << endl;
-		return false;
-	}
-	const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(inputpar.device);
-	inputpar.channelCount = 1; // Mono recording
-	inputpar.sampleFormat = paInt16; // 16-bit integer format
-	inputpar.suggestedLatency = deviceInfo->defaultLowInputLatency; 
-	inputpar.hostApiSpecificStreamInfo = nullptr;
-
-	const int sampleRate = 44100; //standar sample rate
-	const unsigned long framesPerBuffer = 512; //buffer size
-
-	//open stream 
-	cout << "trying to openstream" << endl;
-	PaError err = Pa_OpenStream(&stream, &inputpar, nullptr, sampleRate, framesPerBuffer, paClipOff, nullptr, nullptr);
-	if (err != paNoError) {
-		std::cerr << "Failed to open audio stream: " << Pa_GetErrorText(err) << std::endl;
-		Pa_CloseStream(stream); //kleinw an ginei mlkia
-		return false;
-	}
-	else
-	{
-		cout << "stream just open" << endl;
-	}
-
-	//start stream
-	err = Pa_StartStream(stream);
-	cout << "trying to start stream" << endl;
-	if (err != paNoError) {
-		std::cerr << "Failed to start audio stream: " << Pa_GetErrorText(err) << std::endl;
-		Pa_CloseStream(stream);
-		stream = nullptr;
-		return false;
-	}
-	else
-	{
-		cout << "stream just start" << endl;
-	}
-	std::cout << "Recording audio for " << durationSeconds << " seconds..." << std::endl;
-
-	//prepare file for saving audio data
-	std::ofstream outFile(filename, std::ios::binary);
-	if (!outFile.is_open()) {
-		std::cerr << "Failed to open file for writing:" << filename << std::endl;
-		Pa_StopStream(stream);
-		Pa_CloseStream(stream);
-		stream = nullptr;
-		return false;
-	}
-
-	//recording loop 
-	int16_t* buffer = new int16_t[framesPerBuffer];
-	int totalFrames = static_cast<int>(durationSeconds * sampleRate);
-
-	for (int i = 0; i < totalFrames; i += framesPerBuffer) {
-		err = Pa_ReadStream(stream, buffer, framesPerBuffer);
-		if (err != paNoError) {
-			std::cerr << "Error reading audio stream: " << Pa_GetErrorText(err) << std::endl;
-			break;
-		}
-		//Write the audio data buffer to the output file
-		outFile.write(reinterpret_cast<char*>(buffer), framesPerBuffer * sizeof(int16_t));
-	}
-
-	//cleanup
-	delete[] buffer;
-	outFile.close();
-
-	err = Pa_StopStream(stream);
-	if (err != paNoError) {
-		std::cerr << "Error stopping stream : " << Pa_GetErrorText(err) << std::endl;
-		return true;
-	}
+std::vector<float> AudioHandler::getAndClearAudioBuffer() {
+	std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
+	std::vector<float> data = std::move(globalAudioBuffer);	//move buffer to data (local)
+	globalAudioBuffer.clear();// katharismos buffer
+	return data; 
 }
-*/
+
