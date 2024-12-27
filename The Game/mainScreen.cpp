@@ -275,14 +275,13 @@ void MainScreen::select()
 
 				m_state->setSpaceship(spaceshipSelector);
 				selector = PLAY;
-
 				break;
 			case SELECT_CONTROLS:
 				selector = PLAY;
 				break;
 			case ONLINE:
+
 				selector = CREATE_LOBBY;
-				
 				break;
 			case CREATE_LOBBY: // host a game
 				selector = DC;
@@ -342,7 +341,10 @@ void MainScreen::update(float dt)
 
 		hover();	
 		std::this_thread::sleep_for(std::chrono::duration<float, milli>(sleep_time));
-		
+
+		graphics::getMouseState(mouse);
+		mouse_x = mouse.cur_pos_x;
+		mouse_y = mouse.cur_pos_y;
 }
 
 void MainScreen::init()
@@ -364,6 +366,10 @@ void MainScreen::init()
 
 void MainScreen::draw()
 {
+	SETCOLOR(m_lobby_gui.outline_color, 250, 0, 0);
+	SETCOLOR(test.fill_color, 250, 0, 0);
+	m_lobby_gui.fill_opacity = 0.0f;
+	m_lobby_gui.outline_width = 2.0f;
 
 	m_background->draw();
 	graphics::setFont(m_state->getFullAssetPath("font.ttf"));
@@ -555,8 +561,18 @@ void MainScreen::draw()
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.f, 2.0f, "START GAME", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
 			break;
+	case LOBBY_SCREEN:
+		graphics::drawText(mouse.cur_pos_x + 1, mouse.cur_pos_y + 1, 1.0f, std::to_string(mouse.cur_pos_x) + " , " + std::to_string(mouse.cur_pos_y), test);
+
+		graphics::drawRect((m_state->getCanvasWidth() * 0.5)  + m_state->getCanvasWidth()*0.2, m_state->getCanvasHeight() * 0.5, m_state->getCanvasWidth() - m_state->getCanvasWidth()*0.5, m_state->getCanvasHeight() - 5.0f, m_lobby_gui);
+		//graphics::drawLine();
+
+
+
 
 	}
+	
+
 
 	m_main_text.fill_opacity = 0.3f;
 	

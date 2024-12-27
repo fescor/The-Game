@@ -57,6 +57,10 @@ void Player::update(float dt, bool online)
 		if (!q_packets.try_pop(move)) {
 			cout << "failed to pop move" << endl;
 		}
+		cout << "DRAWING MOVE PACKET WITH ID : " + move.fc << endl;
+		cout << "AT FRAME " + to_string(m_state->framecounter) << endl;
+		cout << "AT : " + std::to_string(graphics::getGlobalTime()) << endl;
+
 		
 		//q_packets.pop_front();
 		//m_state->getMutex().unlock();
@@ -126,6 +130,9 @@ void Player::changeBulletCount(int v)
 
 void Player::update(float dt)
 {
+	
+
+
 	bool f1 = false;
 	float delta_time = dt / 2000.0f;
 	int o_angle = IDLE;
@@ -229,10 +236,10 @@ void Player::update(float dt)
 		
 	
 	
-
+	testcounter++;
 	
 	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
-		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y , m_state->framecounter);
+		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y , testcounter);
 		packetcounter_send++;
 	}
 	isAngleIdle = true;

@@ -15,7 +15,7 @@ class Player : public GameObject, public Box , public Health
 {
 
 	bool isAngleIdle = true;
-	
+	int testcounter = 0;
 
 	graphics::Brush m_brush_shield;
 	graphics::Brush m_explosion_brush;

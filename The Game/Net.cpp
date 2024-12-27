@@ -19,11 +19,18 @@ using namespace std;
 
 int Net::host()
 {
-	
+	float timeB = graphics::getGlobalTime();
+	float timeDIF = 0.0f;
 	ENetEvent event;
 	
 
 	while (online) {
+		timeDIF = graphics::getGlobalTime() - timeB ;
+		timeB = graphics::getGlobalTime();
+
+
+		cout << timeDIF << endl;
+
 		if (!p_packets.empty()) {
 
 
@@ -601,7 +608,9 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 		}
 		m_state->insertOPlayersPmove(p.pmove);
-		cout << "RECIEVED MOVE PACKET AT FRAME " + to_string(m_state->framecounter) << endl;
+		cout << "RECIEVED MOVE PACKET WITH ID : " + p.pmove.fc  << endl;
+		cout << "AT FRAME " + to_string(m_state->framecounter) << endl;  
+		cout << "AT : " + std::to_string(graphics::getGlobalTime()) << endl;
 		break;
 	case START_GAME:
 

@@ -16,6 +16,12 @@ class MainScreen : public GameObject {
 	graphics::Brush m_main_text;
 	graphics::Brush m_spaceship;
 	graphics::Brush m_keys;
+	graphics::Brush m_lobby_gui;
+	graphics::Brush test;
+	graphics::MouseState mouse;
+	float mouse_x = 0.f;
+	float mouse_y = 0.f;
+
 	int selector;
 	Background* m_background;
 	int framecounter1 = 0;
@@ -69,6 +75,7 @@ enum HOVER {
 	JOIN_LOBBY,
 	DC,
 	SEND_BROADCAST,
+	LOBBY_SCREEN,
 
 
 
