@@ -23,7 +23,7 @@ using namespace std;
 class Net : public GameObject {
 	
 	bool inGame = false; // this tells if the lobby is in game or not
-
+	
 
 
 	std::mutex net_mutex;
@@ -59,7 +59,8 @@ class Net : public GameObject {
 	void anounceLobbyPeers(ENetPeer* newPeer);
 	union Data setPeerID();
 	
-	void parseData(unsigned char* buffer, size_t size, ENetEvent& event );
+	void parseData(unsigned char* buffer, size_t size, ENetEvent& event , int timediff);
+	void parseData(ENetPacket* packet, int timediff);
 
 	void disconnect();
 

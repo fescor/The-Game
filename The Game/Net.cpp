@@ -29,7 +29,7 @@ int Net::host()
 		timeB = graphics::getGlobalTime();
 
 
-		cout << timeDIF << endl;
+		//cout << timeDIF << endl;
 
 		if (!p_packets.empty()) {
 
@@ -64,6 +64,10 @@ int Net::host()
 		}
 
 
+		
+		
+
+
 		if (enet_host_service(client, &event, 0) > 0) {
 			switch (event.type)
 			{
@@ -74,7 +78,7 @@ int Net::host()
 
 			case ENET_EVENT_TYPE_RECEIVE:
 
-				parseData(event.packet->data, event.packet->dataLength, event);
+				parseData(event.packet->data, event.packet->dataLength, event, timeDIF);
 				enet_packet_destroy(event.packet);
 				break;
 
@@ -87,6 +91,10 @@ int Net::host()
 				}
 				
 			}
+		}
+		for (auto iter : connectedPeers) {
+			parseData(enet_peer_receive(iter.second, 0), timeDIF);
+
 		}
 	
 	}
@@ -129,7 +137,7 @@ int Net::join()
 
 			case ENET_EVENT_TYPE_RECEIVE:
 				
-				parseData(event.packet->data, event.packet->dataLength, event);
+				//parseData(event.packet->data, event.packet->dataLength, event);
 				enet_packet_destroy(event.packet);
 				
 				break;
@@ -557,7 +565,7 @@ union Data Net::setPeerID()
 
 }
 
-void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
+void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int timeDIF)
 {
 
 
@@ -608,9 +616,15 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 
 		}
 		m_state->insertOPlayersPmove(p.pmove);
-		cout << "RECIEVED MOVE PACKET WITH ID : " + p.pmove.fc  << endl;
-		cout << "AT FRAME " + to_string(m_state->framecounter) << endl;  
-		cout << "AT : " + std::to_string(graphics::getGlobalTime()) << endl;
+		{
+			std::string s = "TIME BETWEEN ONLINE FRAMES :" + std::to_string(timeDIF) + "\n" +
+				"RECIEVED MOVE PACKET WITH ID : " + std::to_string(p.pmove.fc) + "\n" +
+				"AT FRAME " + to_string(m_state->framecounter) + "\n" +
+				"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
+			cout << s;
+		}
+
+		
 		break;
 	case START_GAME:
 
@@ -633,6 +647,72 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event)
 	
 
 	
+
+
+
+}
+
+void Net::parseData(ENetPacket* net_packet, int timeDIF)
+{
+
+	if (net_packet == NULL) { return ; }
+
+
+	std::stringstream ss = std::stringstream(std::string((char*)net_packet->data, net_packet->dataLength));
+
+
+	
+	packet  p;
+
+	{
+		cereal::PortableBinaryInputArchive iarchive(ss); // Create an input archive
+
+
+		iarchive(p); // Read the data from the archive
+	}
+
+	switch (p.type)
+	{
+	
+	case PMOVE:
+		if (_host = true) {
+
+
+		}
+		m_state->insertOPlayersPmove(p.pmove);
+		{
+			std::string s = "TIME BETWEEN ONLINE FRAMES :" + std::to_string(timeDIF) + "\n" +
+				"RECIEVED MOVE PACKET WITH ID : " + std::to_string(p.pmove.fc) + "\n" +
+				"AT FRAME " + to_string(m_state->framecounter) + "\n" +
+				"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
+			cout << s;
+		}
+
+
+		break;
+	case START_GAME:
+
+		m_state->setMapData(p.strtg);
+
+		if (!_host) {
+			m_state->setStatus('L');
+
+		}
+
+		break;
+
+	case LOADED_LEVEL:
+
+		m_state->playerLoadedLevel();
+		break;
+
+	}
+
+
+
+
+
+
 
 
 

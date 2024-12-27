@@ -57,9 +57,11 @@ void Player::update(float dt, bool online)
 		if (!q_packets.try_pop(move)) {
 			cout << "failed to pop move" << endl;
 		}
-		cout << "DRAWING MOVE PACKET WITH ID : " + move.fc << endl;
-		cout << "AT FRAME " + to_string(m_state->framecounter) << endl;
-		cout << "AT : " + std::to_string(graphics::getGlobalTime()) << endl;
+		std::string s = 
+			"DRAWING MOVE PACKET WITH ID : " + std::to_string(move.fc) + "\n" +
+			"AT FRAME " + to_string(m_state->framecounter) + "\n" +
+			"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
+		cout << s;
 
 		
 		//q_packets.pop_front();
@@ -159,8 +161,8 @@ void Player::update(float dt)
 
 		
 		
-		//speed += delta_time * velocity;
-		speed += velocity;
+		speed += delta_time * velocity;
+		//speed += velocity;
 		if (speed > 28.0f) {
 			speed = 28.0f;
 		}
@@ -201,9 +203,11 @@ void Player::update(float dt)
 		flag = false;
 	}
 	
-	m_pos_y -= sin(radians(angle)) * (speed * delta_time);												
+	m_pos_y -= sin(radians(angle)) * (speed * delta_time);	
+	//m_pos_y -= sin(radians(angle)) * (speed );												
 																										
 	m_pos_x += cos(radians(angle)) * (speed * delta_time);
+	//m_pos_x += cos(radians(angle)) * speed;
 
 
 
