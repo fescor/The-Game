@@ -92,10 +92,19 @@ int Net::host()
 				
 			}
 		}
-		for (auto iter : connectedPeers) {
-			parseData(enet_peer_receive(iter.second, 0), timeDIF, iter.second);
+		else {
+			if (enet_host_check_events(client, &event) > 0) {
+				parseData(event.packet->data, event.packet->dataLength, event, timeDIF);
+			}
+			/*
+			for (auto iter : connectedPeers) {
+				parseData(enet_peer_receive(iter.second, 0), timeDIF, iter.second);
+
+			}
+			*/
 
 		}
+		
 	
 	}
 	
@@ -141,7 +150,7 @@ int Net::join()
 
 			case ENET_EVENT_TYPE_RECEIVE:
 				
-				//parseData(event.packet->data, event.packet->dataLength, event);
+				parseData(event.packet->data, event.packet->dataLength, event, timeDIF);
 				enet_packet_destroy(event.packet);
 				
 				break;
@@ -160,10 +169,19 @@ int Net::join()
 			}
 			
 		}
-		for (auto iter : connectedPeers) {
-			parseData(enet_peer_receive(iter.second, 0), timeDIF, iter.second);
+		else {
+			if (enet_host_check_events(client, &event) > 0) {
+				parseData(event.packet->data, event.packet->dataLength, event, timeDIF);
+			}
+			/*
+			for (auto iter : connectedPeers) {
+				parseData(enet_peer_receive(iter.second, 0), timeDIF, iter.second);
+
+			}
+			*/
 
 		}
+		
 		if (!m_state->getOnline()) {
 			
 			disconnect();
