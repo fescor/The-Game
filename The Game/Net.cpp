@@ -109,10 +109,14 @@ int Net::join()
 {	
 	ENetEvent event;
 	if (!connectToHost(LAPTOP_IP)) {online = false;}
-	
+	float timeB = graphics::getGlobalTime();
+	float timeDIF = 0.0f;
 	
 	
 	while (online) {
+		timeDIF = graphics::getGlobalTime() - timeB;
+		timeB = graphics::getGlobalTime();
+
 		if (!p_packets.empty()) {
 
 
@@ -154,6 +158,11 @@ int Net::join()
 
 
 			}
+			
+		}
+		for (auto iter : connectedPeers) {
+			parseData(enet_peer_receive(iter.second, 0), timeDIF, iter.second);
+
 		}
 		if (!m_state->getOnline()) {
 			
