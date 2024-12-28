@@ -351,14 +351,9 @@ void Player::draw()
 		shieldFramecounter = 0;
 		shield = false;
 	}
-	if (m_state->amHost()) {
-		SETCOLOR(test.fill_color, 255, 0, 0);
 
-	}
-	else {
-		SETCOLOR(test.fill_color, 255, 255, 0);
-	}
-	
+	SETCOLOR(test.fill_color, 255, 0, 0);
+
 	m_brush_player.outline_opacity = 0.0f;
 	graphics::setOrientation(angle - 90.0f);
 	graphics::drawRect(m_state->getCanvasWidth() * 0.5f, m_state->getCanvasHeight() * 0.5f, 2.0f, 2.0f, m_brush_player);
@@ -406,6 +401,11 @@ void Player::draw(bool online)
 	graphics::setOrientation(angle - 90.0f);
 	graphics::drawRect(m_pos_x + m_state->m_global_offset_x, m_pos_y + m_state->m_global_offset_y, 2.0f, 2.0f, m_brush_player);
 	graphics::resetPose();
+
+		SETCOLOR(test.fill_color, 255, 255, 0);
+	
+
+	graphics::drawText(this->m_pos_x, this->m_pos_y, 1.0f, " X : " + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y), test);
 
 	if (explosion) {// implement it corectly for online players
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
