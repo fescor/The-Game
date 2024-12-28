@@ -95,14 +95,14 @@ void Player::update(float dt, bool online)
 		
 		speed = move.speed;
 
-
+		/*
 		m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
 
 		m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
-		/*
+		*/
 		m_pos_x = move.x;
 		m_pos_y = move.y;
-		*/
+		
 		if ((m_state->framecounter - prev_framecounter) != 1) { cout << to_string(m_state->framecounter - prev_framecounter) << endl; }
 		prev_framecounter = m_state->framecounter;
 
@@ -110,6 +110,7 @@ void Player::update(float dt, bool online)
 
 
 	}
+	cout << "NO PACKETS";
 	
 
 
@@ -350,12 +351,19 @@ void Player::draw()
 		shieldFramecounter = 0;
 		shield = false;
 	}
-	
+	if (m_state->amHost()) {
+		SETCOLOR(test.fill_color, 255, 0, 0);
 
+	}
+	else {
+		SETCOLOR(test.fill_color, 255, 255, 0);
+	}
+	
 	m_brush_player.outline_opacity = 0.0f;
 	graphics::setOrientation(angle - 90.0f);
 	graphics::drawRect(m_state->getCanvasWidth() * 0.5f, m_state->getCanvasHeight() * 0.5f, 2.0f, 2.0f, m_brush_player);
 	graphics::resetPose();
+	graphics::drawText( this->m_pos_x ,this->m_pos_y , 1.0f , " X : "  + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y), test);
 
 	if (explosion){
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
