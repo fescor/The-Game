@@ -13,6 +13,8 @@
 
 class Player : public GameObject, public Box , public Health
 {
+	const float tickrate = 50.0f;
+	float lastPacket_timeSend = .0;
 
 	bool isAngleIdle = true;
 	int testcounter = 0;
@@ -47,6 +49,11 @@ class Player : public GameObject, public Box , public Health
 	unsigned long prev_framecounter = 0;
 	unsigned long packetcounter_send = 0;
 
+
+	bool keystroke_s = false;
+	bool keystroke_w = false;
+	bool keystroke_a = false;
+	bool keystroke_d = false;
 
 
 	//friend Level;

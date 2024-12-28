@@ -643,6 +643,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 
 		}
 		m_state->insertOPlayersPmove(p.pmove);
+		/*
 		{
 			std::string s = "TIME BETWEEN ONLINE FRAMES :" + std::to_string(timeDIF) + "\n" +
 				"RECIEVED MOVE PACKET WITH ID : " + std::to_string(p.pmove.fc) + "\n" +
@@ -650,6 +651,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 				"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
 			cout << s;
 		}
+		*/
 
 		
 		break;

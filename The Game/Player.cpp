@@ -57,12 +57,13 @@ void Player::update(float dt, bool online)
 		if (!q_packets.try_pop(move)) {
 			cout << "failed to pop move" << endl;
 		}
+		/*
 		std::string s = 
 			"DRAWING MOVE PACKET WITH ID : " + std::to_string(move.fc) + "\n" +
 			"AT FRAME " + to_string(m_state->framecounter) + "\n" +
 			"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
 		cout << s;
-
+		*/
 		
 		//q_packets.pop_front();
 		//m_state->getMutex().unlock();
@@ -145,7 +146,12 @@ void Player::update(float dt)
 		isAngleIdle = false;
 		
 		o_angle = TURN_LEFT;
+		keystroke_a = true;
 		
+	}
+	else {
+		keystroke_a = false;
+
 	}
 	
 	if (graphics::getKeyState(graphics::SCANCODE_D)) {
@@ -241,6 +247,11 @@ void Player::update(float dt)
 	
 	
 	testcounter++;
+
+	//if(graphics::getGlobalTime() - lastPacket_timeSend)
+
+	cout << std::to_string(dt) + "\n";
+
 	
 	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
 		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y , testcounter);
@@ -458,3 +469,4 @@ Player::~Player()
 	}
 	
 }
+
