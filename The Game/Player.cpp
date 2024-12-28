@@ -49,7 +49,7 @@ void Player::update(float dt, bool online)
 {
 
 	float delta_time = dt / 2000.0f;
-
+	float fixed_timeStep = tickrate / 7000.0f;
 	if (!q_packets.empty()) {
 
 		//m_state->getMutex().lock();
@@ -82,12 +82,12 @@ void Player::update(float dt, bool online)
 			break;
 		case TURN_LEFT:
 			
-			angle += pow(velocity, 2) / 2 * delta_time;
+			angle += pow(velocity, 2) / 2 * fixed_timeStep;
 			
 			break;
 		case TURN_RIGHT:
 			
-			angle -= pow(velocity, 2) / 2 * delta_time;
+			angle -= pow(velocity, 2) / 2 * fixed_timeStep;
 			
 			break;
 
@@ -96,9 +96,9 @@ void Player::update(float dt, bool online)
 		speed = move.speed;
 
 
-		m_pos_y -= sin(radians(angle)) * (speed * delta_time);
+		m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
 
-		m_pos_x += cos(radians(angle)) * (speed * delta_time);
+		m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
 		/*
 		m_pos_x = move.x;
 		m_pos_y = move.y;
@@ -138,11 +138,12 @@ void Player::update(float dt)
 
 	bool f1 = false;
 	float delta_time = dt / 2000.0f;
+	float fixed_timeStep = tickrate / 7000.0f;
 	int o_angle = IDLE;
 	if (graphics::getKeyState(graphics::SCANCODE_A)) {
 		
 		PreviousFrameAngle = angle;
-		angle += pow(velocity, 2)/2 * delta_time;
+		angle += pow(velocity, 2)/2 * fixed_timeStep;
 		isAngleIdle = false;
 		
 		o_angle = TURN_LEFT;
@@ -157,7 +158,7 @@ void Player::update(float dt)
 	if (graphics::getKeyState(graphics::SCANCODE_D)) {
 		
 		PreviousFrameAngle = angle;
-		angle -= pow(velocity, 2)/2 * delta_time;
+		angle -= pow(velocity, 2)/2 * fixed_timeStep;
 		isAngleIdle = false;
 		o_angle = TURN_RIGHT;
 	}
@@ -167,7 +168,7 @@ void Player::update(float dt)
 
 		
 		
-		speed += delta_time * velocity;
+		speed += fixed_timeStep * velocity;
 		//speed += velocity;
 		if (speed > 28.0f) {
 			speed = 28.0f;
@@ -176,7 +177,7 @@ void Player::update(float dt)
 		
 	}
 	else {		
-				speed -= delta_time*velocity;
+				speed -= fixed_timeStep *velocity;
 				if (speed < 0.0f) {
 					speed = 0.0f;
 				}
@@ -189,7 +190,7 @@ void Player::update(float dt)
 
 	
 	if (graphics::getKeyState(graphics::SCANCODE_S)) {
-		speed -= 2*delta_time * velocity;
+		speed -= 2* fixed_timeStep * velocity;
 		if (speed < 0.0f) {
 			speed = 0.0f;
 		}
@@ -209,10 +210,10 @@ void Player::update(float dt)
 		flag = false;
 	}
 	
-	m_pos_y -= sin(radians(angle)) * (speed * delta_time);	
+	m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
 	//m_pos_y -= sin(radians(angle)) * (speed );												
 																										
-	m_pos_x += cos(radians(angle)) * (speed * delta_time);
+	m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
 	//m_pos_x += cos(radians(angle)) * speed;
 
 
@@ -247,9 +248,16 @@ void Player::update(float dt)
 	
 	
 	testcounter++;
+	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
+		if (graphics::getGlobalTime() - lastPacket_timeSend >= tickrate) {
 
-	//if(graphics::getGlobalTime() - lastPacket_timeSend)
 
+			m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y, testcounter);
+			lastPacket_timeSend = graphics::getGlobalTime();
+			
+		}
+	}
+	/*
 	cout << std::to_string(dt) + "\n";
 
 	
@@ -257,6 +265,7 @@ void Player::update(float dt)
 		m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y , testcounter);
 		packetcounter_send++;
 	}
+	*/
 	isAngleIdle = true;
 
 		
