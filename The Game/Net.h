@@ -60,7 +60,7 @@ class Net : public GameObject {
 	union Data setPeerID();
 	
 	void parseData(unsigned char* buffer, size_t size, ENetEvent& event , int timediff);
-	void parseData(ENetPacket* packet, int timediff);
+	void parseData(ENetPacket* packet, int timediff, ENetPeer* peer);
 
 	void disconnect();
 
@@ -81,7 +81,7 @@ class Net : public GameObject {
 	///JOIN FUNCTIONS
 
 	void setmyID(int id);
-	void validatePeer(enet_uint32 ip, int id, ENetEvent & event);
+	void validatePeer(enet_uint32 ip, int id, ENetPeer* peer);
 
 
 	

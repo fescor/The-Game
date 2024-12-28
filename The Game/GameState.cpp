@@ -180,6 +180,10 @@ void GameState::update(float dt)
 
 	}
 	
+			
+
+	
+		
 	
 	switch (status) {
 	case 'M':

@@ -93,7 +93,7 @@ int Net::host()
 			}
 		}
 		for (auto iter : connectedPeers) {
-			parseData(enet_peer_receive(iter.second, 0), timeDIF);
+			parseData(enet_peer_receive(iter.second, 0), timeDIF, iter.second);
 
 		}
 	
@@ -601,7 +601,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		break;
 	case LOOBYPEER:// here i want to store the info of the peer in newPeers and when the conection comes validate it(not here validation) 
 
-		validatePeer(p.newpeer.ip, p.newpeer.id, event);
+		validatePeer(p.newpeer.ip, p.newpeer.id, event.peer);
 		break;
 	case DISCONNECT:
 
@@ -652,7 +652,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 
 }
 
-void Net::parseData(ENetPacket* net_packet, int timeDIF)
+void Net::parseData(ENetPacket* net_packet, int timeDIF, ENetPeer* peer)
 {
 
 	if (net_packet == NULL) { return ; }
@@ -673,7 +673,32 @@ void Net::parseData(ENetPacket* net_packet, int timeDIF)
 
 	switch (p.type)
 	{
-	
+	case NEWPEER:
+
+		if (p.newpeer.id == *(m_state->getPlayer()->geto_id())) { break; }
+		cout << "msg type : " << p.type << endl << " peer id : " << p.newpeer.id << endl << " peer ip : " << hex_to_strip(p.newpeer.ip) << endl;
+		connectToPeer(hex_to_strip(p.newpeer.ip), p.newpeer.id);
+
+
+		break;
+	case SETID:
+
+		setmyID(p.setid.id);
+
+
+
+		break;
+	case LOOBYPEER:// here i want to store the info of the peer in newPeers and when the conection comes validate it(not here validation) 
+
+		validatePeer(p.newpeer.ip, p.newpeer.id, peer);
+		break;
+	case DISCONNECT:
+
+		enet_peer_disconnect(peer, 0);
+		deletePeer(p.idc.idc);
+		peer->data = nullptr;
+
+		break;
 	case PMOVE:
 		if (_host = true) {
 
@@ -707,6 +732,8 @@ void Net::parseData(ENetPacket* net_packet, int timeDIF)
 		break;
 
 	}
+
+
 
 
 
@@ -814,7 +841,7 @@ void Net::setmyID(int id)
 
 }
 
-void Net::validatePeer(enet_uint32 ip, int id, ENetEvent & event) // this should be called when host announces a new peer so i validate it 
+void Net::validatePeer(enet_uint32 ip, int id, ENetPeer* peer) // this should be called when host announces a new peer so i validate it 
 {
 	
 	if (newPeers.find(ip) != newPeers.end()) {
@@ -824,7 +851,7 @@ void Net::validatePeer(enet_uint32 ip, int id, ENetEvent & event) // this should
 		m_state->createPlayer(id);
 
 		connectedPeers[id]->data = m_state->connectpeer2player(id);
-		cout << "A new Player connected with ID :  " + std::to_string(id) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+		cout << "A new Player connected with ID :  " + std::to_string(id) + " IP : " + (hex_to_strip(peer->address.host)) << endl;
 		return;
 
 
