@@ -370,7 +370,7 @@ void Player::draw()
 	graphics::setOrientation(angle - 90.0f);
 	graphics::drawRect(m_state->getCanvasWidth() * 0.5f, m_state->getCanvasHeight() * 0.5f, 2.0f, 2.0f, m_brush_player);
 	graphics::resetPose();
-	graphics::drawText( this->m_pos_x ,this->m_pos_y , 1.0f , " X : "  + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y), test);
+	graphics::drawText( this->m_pos_x + m_state->m_global_offset_x,this->m_pos_y + m_state->m_global_offset_y, 1.0f , " X : "  + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y) + " , SP : " + std::to_string(speed), test);
 
 	if (explosion){
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
@@ -417,7 +417,7 @@ void Player::draw(bool online)
 		SETCOLOR(test.fill_color, 255, 255, 0);
 	
 
-	graphics::drawText(this->m_pos_x, this->m_pos_y, 1.0f, " X : " + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y), test);
+		graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y, 1.0f, " X : " + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y) + " , SP : " + std::to_string(speed), test);
 
 	if (explosion) {// implement it corectly for online players
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
