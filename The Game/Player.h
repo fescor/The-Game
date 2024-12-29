@@ -14,6 +14,7 @@
 class Player : public GameObject, public Box , public Health
 {
 	const float tickrate = 50.0f;
+	float timeStepCounter = .0f;
 	float lastPacket_timeSend = .0;
 
 	bool isAngleIdle = true;

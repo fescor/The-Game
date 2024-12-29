@@ -134,12 +134,24 @@ void Player::changeBulletCount(int v)
 
 void Player::update(float dt)
 {
-	
+	timeStepCounter += dt;
+	if (timeStepCounter < tickrate) {
+		
+		
+		return;
 
+
+	}
+	timeStepCounter -= tickrate;
 
 	bool f1 = false;
 	float delta_time = dt / 2000.0f;
-	float fixed_timeStep = tickrate / 7000.0f;
+	float fixed_timeStep = tickrate / 2000.0f;
+
+
+
+
+
 	int o_angle = IDLE;
 	if (graphics::getKeyState(graphics::SCANCODE_A)) {
 		
