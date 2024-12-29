@@ -75,23 +75,7 @@ void Player::update(float dt, bool online)
 
 
 		
-
-		switch (move.angle) {
-		case IDLE:
-
-			break;
-		case TURN_LEFT:
-			
-			angle += pow(velocity, 2) / 2 * fixed_timeStep;
-			
-			break;
-		case TURN_RIGHT:
-			
-			angle -= pow(velocity, 2) / 2 * fixed_timeStep;
-			
-			break;
-
-		}
+		angle = move.angle;
 		
 		speed = move.speed;
 
@@ -265,7 +249,7 @@ void Player::update(float dt)
 		if (graphics::getGlobalTime() - lastPacket_timeSend >= tickrate) {
 
 
-			m_state->getNet()->addpMOVEToQueue(o_id, o_angle, speed, m_pos_x, m_pos_y, testcounter);
+			m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y, testcounter);
 			lastPacket_timeSend = graphics::getGlobalTime();
 			
 		}

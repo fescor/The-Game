@@ -99,7 +99,7 @@ class Net : public GameObject {
 		
 		void setOnline(bool a);
 		bool getOnline();
-		void addpMOVEToQueue(int o_id , int angle , float speed , float x , float y , unsigned long framecounter);
+		void addpMOVEToQueue(int o_id , float angle , float speed , float x , float y , unsigned long framecounter);
 		bool isHost();
 		void sendLoadedLevelMSG(int o_id);
 		std::mutex& getMutex();
