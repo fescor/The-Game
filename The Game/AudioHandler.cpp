@@ -152,6 +152,7 @@ void AudioHandler::stopAudio() {
 
 		stream = nullptr;
 		std::cout << "Audio stream just stopped and closed!" << std::endl;
+		AudioHandler::getAndClearAudioBuffer();
 
 	}
 }
@@ -162,13 +163,10 @@ void AudioHandler::stopAudio() {
 //call back function for processing audio 
 int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
 
-	static int callCount = 0;
-	if (callCount++ < 15) {
-		std::cout << "audioCallback called!" << std::endl;
-	}
-	if (callCount == 15) {
-		std::cout << ":(" << std::endl;
-	}
+	
+	
+		//std::cout << "audioCallback called!" << std::endl;
+
 
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data

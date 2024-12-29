@@ -195,24 +195,19 @@ void GameState::update(float dt)
 	//
 
 	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
-	std::cout << "Previous State: " << PreviousState << ", Current State: " << CurrentState << std::endl;
 	if ((CurrentState) && (!PreviousState)) {
 		if(!isStreaming){
 			isStreaming = true; //edw ksekinaei h diadikasia tou stream
 			GameState::PushToTalk(isStreaming);
+			std::cout << "streaming :"<<isStreaming << std::endl;
 		}
 	}
 	if ((!CurrentState) && (PreviousState)) {
 		if(isStreaming){
 			
-
+			isStreaming = false;
 			GameState::PushToTalk(false);
-		}
-	}
-	if ((!CurrentState) && (!PreviousState)) {
-		if (isStreaming) {
-			isStreaming == false;//afhse to koumpi kleinoume stream
-			GameState::PushToTalk(isStreaming);
+			std::cout << "streaming :" << isStreaming << std::endl;
 		}
 	}
 	
