@@ -25,6 +25,14 @@ private:
 	//AUDIO//
 	//dimiourgia pointer gia antikeimeno audiomanager
 	class AudioHandler* audiohandler = nullptr;
+	//push to talk
+	bool PushToTalk(bool);
+	bool isStreaming = false;
+	bool PreviousState = false;
+	bool CurrentState;
+	//AudioHandler* audiohandler = nullptr; // create instance
+	std::thread pst;
+
 
 	
 	////// NET VARS //////
@@ -34,7 +42,7 @@ private:
 	bool online = false;
 	bool host = false;
 	
-
+	
 
 
 	graphics::Brush m_brush_background;
@@ -76,8 +84,8 @@ public:
 	/////////////////////////////////////////////////////
 
 
+
 	void setStatus(char s);
-	
 	char getStatus();
 	GameState();
 	float m_global_offset_x = 0.0f;  //borw na kanw friend class ton pexti kai na exw private ta offset o pextis ta pernei me get/set

@@ -31,6 +31,9 @@ AudioHandler::~AudioHandler() {
 
 //initialize audioport logika tha kaleite otan ksekinaei to game
 bool AudioHandler::audioInit() {
+	if (initialized) {
+		return true;
+	}
 	PaError err;
 	err = Pa_Initialize();
 
@@ -76,6 +79,10 @@ void AudioHandler::ShowDefaultDevices() const {
 
 
 void AudioHandler::startAudio(){
+	if (stream && Pa_IsStreamActive(stream)) {
+		std::cerr << "Audio stream is already active!" << std::endl;
+		return; // ean exei anoiksei mhn ksana anoigeis
+	}
 	if (!initialized) {
 		cerr << "Portaudio not initialized." << endl;
 		return ;
@@ -130,14 +137,14 @@ void AudioHandler::startAudio(){
 void AudioHandler::stopAudio() {
 	if (stream) {
 		//stop audio stream
-		PaError err =  Pa_StopStream(stream);
+		PaError err = Pa_StopStream(stream);
 		if (err != paNoError) {
 			std::cerr << "Fail to stop audio stream." << Pa_GetErrorText(err) << std::endl;
 			return;
 		}
 
 		//close audio stream
-		err = Pa_CloseStream(stream); 
+		err = Pa_CloseStream(stream);
 		if (err != paNoError) {
 			std::cerr << "Fail to close audio stream." << Pa_GetErrorText(err) << std::endl;
 			return;
@@ -148,11 +155,21 @@ void AudioHandler::stopAudio() {
 
 	}
 }
+
+
+
 //todo apothikeuse ta chinsk se mia global metavliti me skopo na ta stelneis apo ekei 
 //call back function for processing audio 
-int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer,unsigned long framesPerBuffer,const PaStreamCallbackTimeInfo* timeInfo,PaStreamCallbackFlags statusFlags,void* userData) {
-	
-	
+int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
+
+	static int callCount = 0;
+	if (callCount++ < 15) {
+		std::cout << "audioCallback called!" << std::endl;
+	}
+	if (callCount == 15) {
+		std::cout << ":(" << std::endl;
+	}
+
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
 
@@ -162,23 +179,28 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer,unsi
 			std::lock_guard<std::mutex> lovk(buffermutex);// mutex lock
 			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
 		}
-		
+
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
 			out[i] = in[i]; // Real-time playback
 		}
-	}else {
-			for (unsigned long i = 0; i < framesPerBuffer; i++) {
-				out[i] = 0.0f; // Silence
-			}
 	}
+	else {
+		for (unsigned long i = 0; i < framesPerBuffer; i++) {
+			out[i] = 0.0f; // Silence
+		}
+	}
+
+
 	
+
 	return paContinue;
-	
+
 }
 std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
 	std::vector<float> data = std::move(globalAudioBuffer);	//move buffer to data (local)
 	globalAudioBuffer.clear();// katharismos buffer
-	return data; 
+	return data;
 }
+
 

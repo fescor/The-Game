@@ -26,6 +26,35 @@ void GameState::deletePlayer(const int id) // this should be called by net only
 
 }
 
+bool GameState::PushToTalk(bool isStreaming) {
+	if (isStreaming) {
+
+	if (!audiohandler) {
+			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
+			pst = std::thread(&AudioHandler::startAudio, audiohandler);
+			pst.detach();//	 thread trexei aneksarthta
+			return true;
+
+		}
+		//if (audiohandler->audioInit()) {}
+	}
+	else
+	{	
+		//otan afhnoume to koumpi perimenei to thread na teleiwsei gia na ginei to join
+		if (pst.joinable()) {
+			pst.join();
+		}
+		
+		pst = std::thread(&AudioHandler::stopAudio, audiohandler);
+		pst.join(); //molis to thread kleisei to stream
+		delete audiohandler;
+		audiohandler = nullptr;
+		return false; 
+	}
+	
+}
+
+
 int* GameState::connectpeer2player()
 {
 	return o_players.back()->geto_id();
@@ -136,27 +165,6 @@ void GameState::init()
 		break;
 
 	}
-	//auta ola tha mpoun se sunarthsh pou tha kaleite sthn update 
-	//ksekinaei h audiohandler otan ginei to multiplayer tha ksekinaei ekei 
-	audiohandler = new AudioHandler();
-	
-	if (audiohandler->audioInit()) {
-		audiohandler->ShowDefaultDevices();
-		audiohandler->startAudio();
-		//audiohandler->audioCallback(); 
-		audiohandler->stopAudio();
-		
-
-	}
-	
-
-
-	
-
-	
-
-	//graphics::preloadBitmaps(getAssetDir());
-
 }
 
 void GameState::draw()
@@ -183,8 +191,35 @@ void GameState::update(float dt)
 	if (dt > 500) {
 		return;
 	}
+
+	//
+
+	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
+	std::cout << "Previous State: " << PreviousState << ", Current State: " << CurrentState << std::endl;
+	if ((CurrentState) && (!PreviousState)) {
+		if(!isStreaming){
+			isStreaming = true; //edw ksekinaei h diadikasia tou stream
+			GameState::PushToTalk(isStreaming);
+		}
+	}
+	if ((!CurrentState) && (PreviousState)) {
+		if(isStreaming){
+			
+
+			GameState::PushToTalk(false);
+		}
+	}
+	if ((!CurrentState) && (!PreviousState)) {
+		if (isStreaming) {
+			isStreaming == false;//afhse to koumpi kleinoume stream
+			GameState::PushToTalk(isStreaming);
+		}
+	}
 	
-	
+	PreviousState = CurrentState; //update state
+
+
+
 	switch (status) {
 	case 'M':
 		
@@ -223,6 +258,7 @@ void GameState::update(float dt)
 	framecounter++;
 	
 	
+
 	
 }
 
