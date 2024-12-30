@@ -672,10 +672,14 @@ void Level::init(startG mapinfo)
 		if (mapinfo.posPlayer[i][0] == *(m_state->getPlayer()->geto_id())) {
 			m_state->getPlayer()->m_pos_x = mapinfo.posPlayer[i][1];
 			m_state->getPlayer()->m_pos_y = mapinfo.posPlayer[i][2];
+			m_state->getPlayer()->setPrevPos(mapinfo.posPlayer[i][1] , mapinfo.posPlayer[i][2] , 0 , 90.0f , m_state->framecounter);
+			m_state->getPlayer()->setNewPos(mapinfo.posPlayer[i][1], mapinfo.posPlayer[i][2], 0 ,90.0f ,   m_state->framecounter);
 		}
 		else {
 			m_state->geto_playersmap().find(mapinfo.posPlayer[i][0])->second->m_pos_x = mapinfo.posPlayer[i][1];
 			m_state->geto_playersmap().find(mapinfo.posPlayer[i][0])->second->m_pos_y = mapinfo.posPlayer[i][2];
+			m_state->geto_playersmap().find(mapinfo.posPlayer[i][0])->second->setPrevPos(mapinfo.posPlayer[i][1], mapinfo.posPlayer[i][2], 0 , 90.0f , m_state->framecounter);
+			m_state->geto_playersmap().find(mapinfo.posPlayer[i][0])->second->setNewPos(mapinfo.posPlayer[i][1], mapinfo.posPlayer[i][2], 0, 90.0f, m_state->framecounter);
 
 		}
 		

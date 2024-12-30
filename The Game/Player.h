@@ -9,9 +9,32 @@
 #include "Structs.h"
 #include <ppl.h>
 #include <concurrent_queue.h>
+struct keystrokes {
+
+	int key_A = 0;
+	int key_W = 0;
+	int key_S = 0;
+	int key_D = 0;
+	int space = 0;
 
 
-class Player : public GameObject, public Box , public Health
+
+
+};
+struct potition
+{
+	float x = NULL;
+	float y = NULL;
+	int frame = NULL;
+	float angle = NULL;
+	float speed = NULL;
+
+
+
+};
+
+
+class Player : public GameObject, public Box, public Health
 {
 	const float tickrate = 50.0f;
 	float timeStepCounter = .0f;
@@ -23,20 +46,26 @@ class Player : public GameObject, public Box , public Health
 	graphics::Brush m_brush_shield;
 	graphics::Brush m_explosion_brush;
 	graphics::Brush m_brush_player;
-	int  m_bullets ;
+	int  m_bullets;
 	graphics::Brush m_bullet_brush;
 	Explosion* e;
 	bool flag;
 	void fire();
 	void loadExplosionSprites();
-	const float velocity = 2.0f*12.0f;
+	const float velocity = 2.0f * 12.0f;
 	float angle;
 	float PreviousFrameAngle;
-	float speed ;
-	int sprite_counter ;
-	
-	int shieldFramecounter ;
-	
+	float speed;
+	int sprite_counter;
+
+	int shieldFramecounter;
+
+
+	keystrokes input;
+	potition prev_pos;
+	potition new_pos;
+
+
 
 	std::vector<std::string> sprites_explosion;
 
@@ -56,17 +85,21 @@ class Player : public GameObject, public Box , public Health
 	bool keystroke_a = false;
 	bool keystroke_d = false;
 
+	void getKeyStrokes();
+	void resetKeyStrokes();
+	int simulateNewPos();
+	void outOfBounds();
 
 	//friend Level;
 
 protected:
-	
+
 public:
-	
+
 	bool shield;
 	bool explosion;
 	void Activateshield();
-	Player(std::string name) : GameObject(name){}
+	Player(std::string name) : GameObject(name) {}
 	bool flag2;
 	float getAngle();
 	float getX();
@@ -86,7 +119,14 @@ public:
 	int* geto_id();
 	///this is called by net to add a packet to the o_player's packet qeue
 	void insertPlayerPacket(pMOVE packet);
-	
+
+	void setPrevPos(float x, float y, float speed , float angle  , int fc);
+	potition getprevPos();
+
+	void setNewPos(float x, float y,float speed , float angle ,  int fc);
+	potition getNewPos();
+
+
 
 	Player(int online_id);
 	~Player();

@@ -10,6 +10,8 @@
 #include "util.h"
 #include <cmath>
 
+// TODO : interpolate from prev potition to new potition with the fixed tickrate so between tickrates you neet to interpolate in the update,  smooth the renderin te quifsa
+
 
 using namespace std;
 #define TURN_LEFT 1
@@ -52,7 +54,7 @@ void Player::update(float dt, bool online)
 	float fixed_timeStep = tickrate / 7000.0f;
 	if (!q_packets.empty()) {
 
-		//m_state->getMutex().lock();
+		
 		pMOVE move;
 		if (!q_packets.try_pop(move)) {
 			cout << "failed to pop move" << endl;
@@ -65,28 +67,29 @@ void Player::update(float dt, bool online)
 		cout << s;
 		*/
 		
-		//q_packets.pop_front();
-		//m_state->getMutex().unlock();
+
 
 		if (graphics::getKeyState(graphics::SCANCODE_B))
 		{
 			cout << "breakpoint" << endl;
 		}
 
+		prev_pos = new_pos;
+	
 
-		
-		angle = move.angle;
-		
-		speed = move.speed;
+		angle = prev_pos.angle;
+		speed = prev_pos.speed;
+		m_pos_x = prev_pos.x;
+		m_pos_y = prev_pos.y;
 
-		/*
-		m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
 
-		m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
-		*/
-		m_pos_x = move.x;
-		m_pos_y = move.y;
-		
+		new_pos.x = move.x;
+		new_pos.y = move.y;
+		new_pos.angle = move.angle;
+		new_pos.speed = move.speed;
+		new_pos.frame = m_state->framecounter;
+
+
 		if ((m_state->framecounter - prev_framecounter) != 1) { cout << to_string(m_state->framecounter - prev_framecounter) << endl; }
 		prev_framecounter = m_state->framecounter;
 
@@ -96,6 +99,192 @@ void Player::update(float dt, bool online)
 	}
 	cout << "NO PACKETS";
 	
+
+
+}
+
+void Player::getKeyStrokes()
+{
+
+	if (graphics::getKeyState(graphics::SCANCODE_A)) {
+		input.key_A = 1;
+
+
+	}
+	else {
+		input.key_A = 0;
+
+	}
+
+	if (graphics::getKeyState(graphics::SCANCODE_D)) {
+		input.key_D = 1;
+		
+	}
+	else {
+		input.key_D = 0;
+	}
+
+	if (graphics::getKeyState(graphics::SCANCODE_W)) {
+
+		input.key_W = 1;
+
+
+
+
+	}
+	else {
+		input.key_W = 0;
+	}
+
+
+
+
+
+
+	if (graphics::getKeyState(graphics::SCANCODE_S)) {
+
+		input.key_S = 1;
+
+	
+	}
+	else {
+		input.key_S = 0;
+	}
+
+	if (graphics::getKeyState(graphics::SCANCODE_SPACE))
+	{
+		input.space = 1;
+
+		//fire(dt);
+	}
+	else {
+		input.space = 0;
+		
+	}
+
+
+
+
+
+}
+
+void Player::resetKeyStrokes()
+{
+	input.key_A = 0;
+	input.key_D = 0;
+	input.key_S = 0;
+	input.key_W = 0;
+	input.space = 0;
+
+}
+
+int Player::simulateNewPos()
+{
+	bool f1 = false;
+	//float delta_time = dt / 2000.0f;
+	float fixed_timeStep = tickrate / 2000.0f;
+	int o_angle = IDLE;
+
+	if (input.key_A) {
+
+		PreviousFrameAngle = angle;
+		//angle += pow(velocity, 2) / 2 * fixed_timeStep;
+		new_pos.angle = prev_pos.angle +  pow(velocity, 2) / 2 * fixed_timeStep;
+		
+		isAngleIdle = false;
+
+		o_angle = TURN_LEFT;
+		keystroke_a = true;
+
+	}
+
+	if (input.key_D) {
+
+		PreviousFrameAngle = angle;
+		//angle -= pow(velocity, 2) / 2 * fixed_timeStep;
+		new_pos.angle = prev_pos.angle - pow(velocity, 2) / 2 * fixed_timeStep;
+		isAngleIdle = false;
+		o_angle = TURN_RIGHT;
+
+	}
+
+
+
+	if (input.key_W) {
+		
+		//speed += fixed_timeStep * velocity;
+		new_pos.speed = prev_pos.speed + fixed_timeStep * velocity;
+		//speed += velocity;
+		if (new_pos.speed > 28.0f) {
+			new_pos.speed = 28.0f;
+		}
+
+
+	}
+	else {
+		//speed -= fixed_timeStep * velocity;
+		new_pos.speed = prev_pos.speed - fixed_timeStep * velocity;
+		if (new_pos.speed < 0.0f) {
+			new_pos.speed = 0.0f;
+		}
+
+	}
+
+	if (input.key_S) {
+		//speed -= 2 * fixed_timeStep * velocity;
+		new_pos.speed = prev_pos.speed - 3* (fixed_timeStep * velocity);
+		if (new_pos.speed < 0.0f) {
+			new_pos.speed = 0.0f;
+		}
+	}
+	
+
+	if (input.space) {
+
+		if (!flag) {
+			graphics::playSound(m_state->getFullAssetPath("shoot2.mp3"), 1.0f, false);
+			fire();
+		}
+		flag = true;
+
+		//fire(dt);
+	}
+	else {
+		flag = false;
+
+	}
+
+	new_pos.x = prev_pos.x + cos(radians(angle)) * (speed * fixed_timeStep);
+	new_pos.y = prev_pos.y - sin(radians(angle)) * (speed * fixed_timeStep);
+	
+	new_pos.frame = m_state->framecounter;
+	return o_angle;
+}
+
+void Player::outOfBounds()
+{
+
+
+	if (m_pos_x > m_state->getLevel()->getBackground()->getWidth() * 1.75 - m_state->getCanvasWidth() * 2) { // deksia an thes na pigenei mexri gonia o pextis /2 anti *2
+
+		m_pos_x = m_state->getLevel()->getBackground()->getWidth() * 1.75 - m_state->getCanvasWidth() * 2;   //blocking player from going outside the map 
+		//those multipliers are given from a greater force of the universe
+	}
+	if (m_pos_x < -m_state->getLevel()->getBackground()->getWidth() * 1.5 + m_state->getCanvasWidth() * 2) {
+
+		m_pos_x = -m_state->getLevel()->getBackground()->getWidth() * 1.5 + m_state->getCanvasWidth() * 2;
+
+	}
+	if (m_pos_y > m_state->getLevel()->getBackground()->getHeight() * 1.75 - m_state->getCanvasHeight() * 2) {//kato 
+
+		m_pos_y = m_state->getLevel()->getBackground()->getHeight() * 1.75 - m_state->getCanvasHeight() * 2;
+	}
+	if (m_pos_y < -m_state->getLevel()->getBackground()->getHeight() * 1.5 + m_state->getCanvasHeight() * 2) {
+
+		m_pos_y = -m_state->getLevel()->getBackground()->getHeight() * 1.5 + m_state->getCanvasHeight() * 2;
+	}
+
+
 
 
 }
@@ -128,111 +317,35 @@ void Player::update(float dt)
 	}
 	timeStepCounter -= tickrate;
 
+	///HERE IT ENTERS EVERY 40ms ////
+
 	bool f1 = false;
 	float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 2000.0f;
-
-
-
-
-
 	int o_angle = IDLE;
-	if (graphics::getKeyState(graphics::SCANCODE_A)) {
-		
-		PreviousFrameAngle = angle;
-		angle += pow(velocity, 2)/2 * fixed_timeStep;
-		isAngleIdle = false;
-		
-		o_angle = TURN_LEFT;
-		keystroke_a = true;
-		
-	}
-	else {
-		keystroke_a = false;
-
-	}
-	
-	if (graphics::getKeyState(graphics::SCANCODE_D)) {
-		
-		PreviousFrameAngle = angle;
-		angle -= pow(velocity, 2)/2 * fixed_timeStep;
-		isAngleIdle = false;
-		o_angle = TURN_RIGHT;
-	}
-	
-	if (graphics::getKeyState(graphics::SCANCODE_W)) {
-		
-
-		
-		
-		speed += fixed_timeStep * velocity;
-		//speed += velocity;
-		if (speed > 28.0f) {
-			speed = 28.0f;
-		}
-		
-		
-	}
-	else {		
-				speed -= fixed_timeStep *velocity;
-				if (speed < 0.0f) {
-					speed = 0.0f;
-				}
-				
-	}
-		
 
 
-		
+	prev_pos = new_pos;
+
+	m_pos_y = prev_pos.y;
+	m_pos_x = prev_pos.x;
+	speed = prev_pos.speed;
+	angle = prev_pos.angle;
+
+
+
+	getKeyStrokes();
+	o_angle = simulateNewPos();
+	resetKeyStrokes();
 
 	
-	if (graphics::getKeyState(graphics::SCANCODE_S)) {
-		speed -= 2* fixed_timeStep * velocity;
-		if (speed < 0.0f) {
-			speed = 0.0f;
-		}
-	}
-
-	if (graphics::getKeyState(graphics::SCANCODE_SPACE))
-	{
-		if (!flag) {
-			graphics::playSound(m_state->getFullAssetPath("shoot2.mp3"), 1.0f, false);
-			fire();
-		}
-		flag = true;
-		
-		//fire(dt);
-	}
-	else {
-		flag = false;
-	}
 	
-	m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
-	//m_pos_y -= sin(radians(angle)) * (speed );												
-																										
-	m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
-	//m_pos_x += cos(radians(angle)) * speed;
 
 
 
-	if (m_pos_x  > m_state->getLevel()->getBackground()->getWidth()*1.75 - m_state->getCanvasWidth() *2) { // deksia an thes na pigenei mexri gonia o pextis /2 anti *2
+	outOfBounds();
 
-		m_pos_x = m_state->getLevel()->getBackground()->getWidth()* 1.75 - m_state->getCanvasWidth()*2;   //blocking player from going outside the map 
-																										//those multipliers are given from a greater force of the universe
-	}
-	if (m_pos_x < -m_state->getLevel()->getBackground()->getWidth() * 1.5 + m_state->getCanvasWidth()*2) {
 
-		m_pos_x = -m_state->getLevel()->getBackground()->getWidth() * 1.5 + m_state->getCanvasWidth() *2;
-		
-	}
-	if (m_pos_y > m_state->getLevel()->getBackground()->getHeight() * 1.75 - m_state->getCanvasHeight() *2) {//kato 
-
-		m_pos_y = m_state->getLevel()->getBackground()->getHeight() * 1.75 - m_state->getCanvasHeight() *2;
-	}
-	if (m_pos_y <  -m_state->getLevel()->getBackground()->getHeight()*1.5 + m_state->getCanvasHeight() *2) {
-
-		m_pos_y = -m_state->getLevel()->getBackground()->getHeight() *1.5 + m_state->getCanvasHeight() *2;
-	}
 	
 	
 	m_state->m_global_offset_x = m_state->getCanvasWidth() / 2.0f - m_pos_x;
@@ -305,6 +418,18 @@ void Player::init(bool online)
 	m_pos_x = 5.0;
 	m_pos_y = 5.0;
 	
+	prev_pos.x = m_pos_x;
+	prev_pos.y = m_pos_y;
+	prev_pos.angle = 90.0f;
+	prev_pos.speed = 0.0f;
+	prev_pos.frame = m_state->framecounter;
+
+	new_pos.x = m_pos_x;
+	new_pos.y = m_pos_y;
+	new_pos.angle = 90.0f;
+	new_pos.speed = 0.0f;
+	new_pos.frame = m_state->framecounter;
+
 	
 
 	//m_width /= 1.5f;
@@ -455,6 +580,39 @@ void Player::insertPlayerPacket(pMOVE packet)// this is called by net thread.
 	q_packets.push(packet);
 	//m_state->getMutex().unlock();
 
+}
+
+void Player::setPrevPos(float x , float y ,float speed , float angle ,  int fc)
+{
+	prev_pos.x = x;
+	prev_pos.y = y;
+	prev_pos.angle = angle;
+	prev_pos.speed  = speed;
+	prev_pos.frame = fc;
+
+
+
+
+}
+
+potition Player::getprevPos()
+{
+	return prev_pos;
+}
+
+void Player::setNewPos(float x, float y,float speed , float angle , int fc)
+{
+	new_pos.x = x;
+	new_pos.y = y;
+	new_pos.angle = angle;
+	new_pos.speed = speed;
+	new_pos.frame = fc;
+
+}
+
+potition Player::getNewPos()
+{
+	return new_pos;
 }
 
 
