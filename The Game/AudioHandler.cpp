@@ -4,6 +4,8 @@
 #include <iostream>
 #include <vector>
 #include <mutex>
+#include <cmath>
+#define _USE_MATH_DEFINES
 
 using namespace std;
 
@@ -47,6 +49,46 @@ bool AudioHandler::audioInit() {
 
 }
 
+
+void AudioHandler::ShowAudioDevices() {
+	PaError err = Pa_Initialize();
+	if (err != paNoError) {
+		std::cerr << "PortAudio initialization failed: " << Pa_GetErrorText(err) << std::endl;
+		return;
+	}
+
+	int numDevices = Pa_GetDeviceCount();
+	if (numDevices < 0) {
+		std::cerr << "ERROR: Pa_GetDeviceCount returned " << numDevices << std::endl;
+		return;
+	}
+
+	std::cout << "Available audio devices:\n";
+
+	for (int i = 0; i < numDevices; i++) {
+		const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(i);
+		if (!deviceInfo) continue;
+
+		std::cout << "Device " << i << ": " << deviceInfo->name << "\n";
+		std::cout << "  Max input channels: " << deviceInfo->maxInputChannels << "\n";
+		std::cout << "  Max output channels: " << deviceInfo->maxOutputChannels << "\n";
+		std::cout << "  Default sample rate: " << deviceInfo->defaultSampleRate << "\n";
+		std::cout << "  Host API: " << Pa_GetHostApiInfo(deviceInfo->hostApi)->name << "\n";
+
+		if (i == Pa_GetDefaultInputDevice()) {
+			std::cout << "  [Default Input Device]\n";
+		}
+		if (i == Pa_GetDefaultOutputDevice()) {
+			std::cout << "  [Default Output Device]\n";
+		}
+
+		std::cout << "---------------------------------\n";
+	}
+
+	Pa_Terminate();
+}
+
+
 //TODO: O KATHE PAIXTHS NA MPOREI NA EPILEKSEI THN SISKEUH POU THELEI GIA EISODO KAI EKSODO HXOU ANTI NA PICKARW TA DEFAULT 
 void AudioHandler::ShowDefaultDevices() const {
 	if (!initialized) {
@@ -79,6 +121,7 @@ void AudioHandler::ShowDefaultDevices() const {
 
 
 void AudioHandler::startAudio(){
+	AudioHandler::ShowAudioDevices();;
 	if (stream && Pa_IsStreamActive(stream)) {
 		std::cerr << "Audio stream is already active!" << std::endl;
 		return; // ean exei anoiksei mhn ksana anoigeis
@@ -93,13 +136,16 @@ void AudioHandler::startAudio(){
 	PaStreamParameters inputparametr, outputparametr; 
 
 	inputparametr.device = Pa_GetDefaultInputDevice(); //get default mic as input device
+	
+
 	if (inputparametr.device == paNoDevice) {
 		std::cerr << "Cant find default input device." << std::endl;
 		return;
 	}
-
-	inputparametr.channelCount = 2; //stereo audio
-	inputparametr.sampleFormat = paFloat32; // 32-bit floating-point samples
+	//PaDeviceIndex deviceIndex = 1; 
+	//inputparametr.device = deviceIndex;
+	inputparametr.channelCount = 1; //stereo audio
+	inputparametr.sampleFormat = paFloat32; // 32-bit floating-point samples  
 	inputparametr.suggestedLatency = Pa_GetDeviceInfo(inputparametr.device)->defaultLowInputLatency;
 	inputparametr.hostApiSpecificStreamInfo = nullptr;
 
@@ -109,13 +155,13 @@ void AudioHandler::startAudio(){
 		std::cerr << "Cant find default output device." << std::endl;
 		return;
 	}
-	outputparametr.channelCount = 2;
+	outputparametr.channelCount = 1;
 	outputparametr.sampleFormat = paFloat32;
 	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
 	outputparametr.hostApiSpecificStreamInfo = nullptr; 
 
 	//open audio stream 
-	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 44100, 256, paClipOff, audioCallback, nullptr);
+	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback, nullptr);//test gia 128 framesperbuffer arxiko 256 test gia 48000hz
 	if (err != paNoError) {
 		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
 		return; 
@@ -129,7 +175,9 @@ void AudioHandler::startAudio(){
 	else {
 		std::cout << "Audio stream just started!" << std::endl;
 	}
-
+	
+	std::cout << "Input Device: " << inputparametr.device << std::endl;
+	//std::cout << "Output Device: " << outputparametr.device << std::endl;
 }
 
 //stop stream and playblack 
@@ -163,33 +211,34 @@ void AudioHandler::stopAudio() {
 //call back function for processing audio 
 int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
 
-	
-	
-		//std::cout << "audioCallback called!" << std::endl;
-
-
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
 
 	if (inputBuffer) {
+
+		//std::cout << "Audio input buffer received, frames: " << framesPerBuffer << std::endl;
+		for (unsigned long i = 0; i < 10; i++) {
+			std::cout << "Input sample " << i << ": " << in[i] << std::endl;
+		}
 		std::vector<float> chunk(in, in + framesPerBuffer); //coply chunk in local vector
+
 		{
 			std::lock_guard<std::mutex> lovk(buffermutex);// mutex lock
 			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
 		}
 
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
-			out[i] = in[i]; // Real-time playback
+			out[i] = in[i] ; // Real-time playback (10.0f = volume)
 		}
-	}
-	else {
+	}else {
+		std::cout << "No input detected, outputting silence." << std::endl;
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
 			out[i] = 0.0f; // Silence
 		}
 	}
-
-
 	
+
+
 
 	return paContinue;
 

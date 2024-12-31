@@ -26,6 +26,7 @@ void GameState::deletePlayer(const int id) // this should be called by net only
 
 }
 
+
 bool GameState::PushToTalk(bool isStreaming) {
 	if (isStreaming) {
 
@@ -33,10 +34,10 @@ bool GameState::PushToTalk(bool isStreaming) {
 			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
 			pst = std::thread(&AudioHandler::startAudio, audiohandler);
 			pst.detach();//	 thread trexei aneksarthta
+		
 			return true;
 
 		}
-		//if (audiohandler->audioInit()) {}
 	}
 	else
 	{	
@@ -196,6 +197,7 @@ void GameState::update(float dt)
 
 	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
 	if ((CurrentState) && (!PreviousState)) {
+		
 		if(!isStreaming){
 			isStreaming = true; //edw ksekinaei h diadikasia tou stream
 			GameState::PushToTalk(isStreaming);
