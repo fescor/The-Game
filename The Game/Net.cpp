@@ -40,6 +40,15 @@ int Net::host()
 			p_packets.try_pop(p);
 			//p_packets.pop();
 			//m_state->getMutex().unlock();
+
+			Data voicechat;
+			voicechat.vc;
+			voicechat.vc.chunk = 0.0f;
+			
+			
+
+			sendDataBroadcast(voicechat, VOICE_CHUNK);
+
 			
 
 			sendDataBroadcast(p, PMOVE);
@@ -352,6 +361,11 @@ void Net::sendDataBroadcast(union Data payload, PACKETTYPE type)
 	case LOADED_LEVEL:
 		p.type = type;
 		p.loaded_level = payload.loaded_level;
+		break;
+	case VOICE_CHUNK:
+		p.type = VOICE_CHUNK;
+		p.vc = payload.vc;
+
 		break;
 
 	}

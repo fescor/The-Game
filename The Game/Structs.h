@@ -16,12 +16,30 @@ struct pMOVE
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(id, angle , speed , x , y , fc ); // serialize things by passing them to the archive
+		archive(id, angle , speed , x , y , fc); // serialize things by passing them to the archive
 	}
 
 
 
 };
+struct voice
+{
+	float chunk;
+	int id;
+	int counter;
+
+
+
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(chunk , id , counter); // serialize things by passing them to the archive
+	}
+
+};
+
+
 struct playerInfo
 {
 	int spaceshipID = 0;
@@ -76,6 +94,9 @@ struct startG {
 
 
 };
+
+
+
 
 
 struct PEER
@@ -133,6 +154,8 @@ enum PACKETTYPE {
 	LOADED_LEVEL,
 	MAP_INFO,
 	PLAYER_INFO,
+	VOICE_CHUNK,
+
 
 
 
@@ -153,6 +176,8 @@ struct packet
 		startG strtg;
 		Loaded loaded_level;
 		playerInfo pi;
+		voice  vc;
+		
 		
 
 
@@ -199,7 +224,8 @@ struct packet
 	packet() {};
 };
 
-union Data {
+union Data 
+{
 
 
 	PEER newp{};
@@ -215,5 +241,8 @@ union Data {
 	Loaded loaded_level;
 
 	playerInfo pi;
+
+	voice vc;
+
 
 };

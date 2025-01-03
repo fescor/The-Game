@@ -282,7 +282,7 @@ void Player::lerp(potition goal_pos, potition current_pos, float dt)
 	float speedDiff = goal_pos.speed - current_pos.speed;
 	float fixed_timeStep = tickrate / 2000.0f;
 	if (speedDiff > dt) {
-		speed += dt;
+		speed += dt*20;
 		m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
 		m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
 	}
