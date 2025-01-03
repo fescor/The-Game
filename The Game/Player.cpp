@@ -54,8 +54,13 @@ void Player::update(float dt, bool online)
 	float fixed_timeStep = tickrate / 7000.0f;
 	std::string s = "PACKET COUNT : " + std::to_string(q_packets.unsafe_size()) + "\n";
 	cout << s;
+	current_pos.angle = angle;
+	current_pos.speed = speed;
+	current_pos.x = m_pos_x;
+	current_pos.y = m_pos_y;
+	
 
-	lerp(new_pos, prev_pos, dt);
+	lerp(new_pos, current_pos, dt);// edw thelei current pos oxi prev pos 
 
 
 	if (!q_packets.empty()) {
@@ -87,6 +92,11 @@ void Player::update(float dt, bool online)
 		speed = prev_pos.speed;
 		m_pos_x = prev_pos.x;
 		m_pos_y = prev_pos.y;
+
+
+		
+
+
 
 
 		new_pos.x = move.x;

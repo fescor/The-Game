@@ -64,6 +64,7 @@ class Player : public GameObject, public Box, public Health
 	keystrokes input;
 	potition prev_pos;
 	potition new_pos;
+	potition current_pos;
 
 
 
