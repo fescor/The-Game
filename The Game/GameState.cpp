@@ -4,6 +4,7 @@
 #include "MainScreen.h"
 #include "Net.h"
 #include <portaudio.h>
+#include "AudioHandler.h"
 
 
 
@@ -21,7 +22,8 @@ void GameState::deletePlayer(const int id) // this should be called by net only
 }
 
 int* GameState::connectpeer2player(int id)
-	}
+{
+	return o_players.find(id)->second->geto_id();
 
 }
 
@@ -54,11 +56,12 @@ bool GameState::PushToTalk(bool isStreaming) {
 	
 }
 
-
+/*
 int* GameState::connectpeer2player()
 {
 	return o_players.find(id)->second->geto_id();
 }
+*/
 
 void GameState::initNet()
 {
