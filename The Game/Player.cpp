@@ -281,10 +281,33 @@ void Player::lerp(potition goal_pos, potition current_pos, float dt)
 {
 	float speedDiff = goal_pos.speed - current_pos.speed;
 	float fixed_timeStep = tickrate / 2000.0f;
-	if (speedDiff > dt) {
-		speed += dt*20;
-		m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
-		m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
+
+
+	if (speedDiff > 0) {
+		speed += dt/2000;
+		if (cos(radians(angle)) * (speed * fixed_timeStep) < 0) {
+			if (goal_pos.x < m_pos_x + cos(radians(angle)) * (speed * fixed_timeStep)) {
+				m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
+
+			}
+		}
+		else {
+			if (goal_pos.x > m_pos_x + cos(radians(angle)) * (speed * fixed_timeStep)) {
+				m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
+			}
+		}
+		if (sin(radians(angle)) * (speed * fixed_timeStep) > 0) {
+			if (goal_pos.y < m_pos_y - sin(radians(angle)) * (speed * fixed_timeStep)) {
+				m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
+			}
+		}
+		else {
+			if (goal_pos.y > m_pos_y - sin(radians(angle)) * (speed * fixed_timeStep)) {
+				m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
+			}
+		}
+		
+		
 	}
 	else if(speedDiff < -dt) {
 		speed -= dt;
