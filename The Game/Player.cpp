@@ -52,6 +52,12 @@ void Player::update(float dt, bool online)
 
 	float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 7000.0f;
+	std::string s = "PACKET COUNT : " + std::to_string(q_packets.unsafe_size()) + "\n";
+	cout << s;
+
+	lerp(new_pos, prev_pos, dt);
+
+
 	if (!q_packets.empty()) {
 
 		
@@ -259,6 +265,33 @@ int Player::simulateNewPos()
 	
 	new_pos.frame = m_state->framecounter;
 	return o_angle;
+}
+
+void Player::lerp(potition goal_pos, potition current_pos, float dt)
+{
+	float speedDiff = goal_pos.speed - current_pos.speed;
+	float fixed_timeStep = tickrate / 2000.0f;
+	if (speedDiff > dt) {
+		speed += dt;
+		m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
+		m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
+	}
+	else if(speedDiff < -dt) {
+		speed -= dt;
+		m_pos_x += cos(radians(angle)) * (speed * fixed_timeStep);
+		m_pos_y -= sin(radians(angle)) * (speed * fixed_timeStep);
+	}
+	else {
+		return;
+	}
+
+
+
+
+
+
+
+
 }
 
 void Player::outOfBounds()

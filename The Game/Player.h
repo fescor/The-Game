@@ -88,6 +88,8 @@ class Player : public GameObject, public Box, public Health
 	void getKeyStrokes();
 	void resetKeyStrokes();
 	int simulateNewPos();
+	void lerp(potition prev_pos , potition new_pos , float dt);
+
 	void outOfBounds();
 
 	//friend Level;
