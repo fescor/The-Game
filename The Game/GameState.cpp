@@ -3,6 +3,7 @@
 #include "Player.h"
 #include "MainScreen.h"
 #include "Net.h"
+#include <portaudio.h>
 
 
 
@@ -20,6 +21,41 @@ void GameState::deletePlayer(const int id) // this should be called by net only
 }
 
 int* GameState::connectpeer2player(int id)
+	}
+
+}
+
+
+bool GameState::PushToTalk(bool isStreaming) {
+	if (isStreaming) {
+
+	if (!audiohandler) {
+			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
+			pst = std::thread(&AudioHandler::startAudio, audiohandler);
+			pst.detach();//	 thread trexei aneksarthta
+		
+			return true;
+
+		}
+	}
+	else
+	{	
+		//otan afhnoume to koumpi perimenei to thread na teleiwsei gia na ginei to join
+		if (pst.joinable()) {
+			pst.join();
+		}
+		
+		pst = std::thread(&AudioHandler::stopAudio, audiohandler);
+		pst.join(); //molis to thread kleisei to stream
+		delete audiohandler;
+		audiohandler = nullptr;
+		return false; 
+	}
+	
+}
+
+
+int* GameState::connectpeer2player()
 {
 	return o_players.find(id)->second->geto_id();
 }
@@ -132,19 +168,6 @@ void GameState::init()
 		break;
 
 	}
-	
-		
-	
-	
-	
-
-
-	
-
-	
-
-	//graphics::preloadBitmaps(getAssetDir());
-
 }
 
 void GameState::draw()
@@ -232,6 +255,7 @@ void GameState::update(float dt)
 	framecounter++;
 	
 	
+
 	
 }
 

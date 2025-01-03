@@ -149,6 +149,7 @@
     <ClCompile Include="..\lib\enet-1.3.18\host.c" />
     <ClCompile Include="..\lib\enet-1.3.18\peer.c" />
     <ClCompile Include="Asteroid.cpp" />
+    <ClCompile Include="AudioHandler.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Bullets.cpp" />
     <ClCompile Include="Explosion.cpp" />
@@ -167,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="Animations.h" />
     <ClInclude Include="Asteroid.h" />
+    <ClInclude Include="AudioHandler.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="box.h" />
     <ClInclude Include="Bullets.h" />

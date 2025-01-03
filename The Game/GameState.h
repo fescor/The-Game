@@ -30,6 +30,18 @@ private:
 	class Level* m_current_level = nullptr;
 	class MainScreen* mainscreen = nullptr;
 
+	//AUDIO//
+	//dimiourgia pointer gia antikeimeno audiomanager
+	class AudioHandler* audiohandler = nullptr;
+	//push to talk
+	bool PushToTalk(bool);
+	bool isStreaming = false;
+	bool PreviousState = false;
+	bool CurrentState;
+	//AudioHandler* audiohandler = nullptr; // create instance
+	std::thread pst;
+
+
 	
 	////// NET VARS //////
 
@@ -88,7 +100,7 @@ public:
 	/////////////////////////////////////////////////////
 
 
-	
+
 	void setStatus(char s);
 	char getStatus();
 
