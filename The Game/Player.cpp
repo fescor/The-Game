@@ -280,6 +280,8 @@ int Player::simulateNewPos()
 void Player::lerp(potition goal_pos, potition current_pos, float dt)
 {
 	float speedDiff = goal_pos.speed - current_pos.speed;
+	float angleDiff = goal_pos.angle - current_pos.angle;
+
 	float fixed_timeStep = tickrate / 2000.0f;
 
 
@@ -317,6 +319,29 @@ void Player::lerp(potition goal_pos, potition current_pos, float dt)
 	else {
 		return;
 	}
+
+	
+	if (current_pos.angle < goal_pos.angle) {
+
+		if (current_pos.angle + pow(velocity, 2) / 2 * fixed_timeStep < goal_pos.angle) {
+			angle +=  pow(velocity, 2) / 2 * dt/2000;
+		}
+			
+
+	}
+	else {
+		if (current_pos.angle + pow(velocity, 2) / 2 * fixed_timeStep > goal_pos.angle) {
+				angle -= pow(velocity, 2) / 2 * dt / 2000;
+		}
+			
+	}
+
+
+	
+
+
+
+
 
 
 
@@ -546,7 +571,7 @@ void Player::draw()
 	graphics::drawRect(m_state->getCanvasWidth() * 0.5f, m_state->getCanvasHeight() * 0.5f, 2.0f, 2.0f, m_brush_player);
 	graphics::resetPose();
 	graphics::drawText( this->m_pos_x + m_state->m_global_offset_x,this->m_pos_y + m_state->m_global_offset_y, 1.0f , " X : "  + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y) + " , SP : " + std::to_string(speed), test);
-
+	graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y + 3, 1.0f, "angle : " + std::to_string(this->angle) , test);
 	if (explosion){
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
 
