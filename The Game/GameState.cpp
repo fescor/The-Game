@@ -198,6 +198,19 @@ void GameState::update(float dt)
 		return;
 	}
 
+
+
+	if (status == 'L' && m_current_level == nullptr) {
+
+		init();
+
+	}
+
+
+
+
+
+
 	//
 
 	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
