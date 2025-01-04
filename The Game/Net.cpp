@@ -10,9 +10,7 @@
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.39"
-//TODO :  wierd stuff happening on movment from peer(connecting to host) 
-
-//TODO : bug when on join function i try to join a game again (havent restarded the client it is stuck and wont load the game)
+//TODO : error when host dc hapening on peer (bug happens after peer-net sends type msg 3 )
 
 
 using namespace std;

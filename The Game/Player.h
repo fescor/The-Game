@@ -29,7 +29,9 @@ struct potition
 	float angle = NULL;
 	float speed = NULL;
 
-
+	bool operator == (potition& b) {
+		return (x == b.x && y == b.y && angle == b.angle);
+	}
 
 };
 
@@ -41,6 +43,7 @@ class Player : public GameObject, public Box, public Health
 	float lastPacket_timeSend = .0;
 	float maxTimeLerp = 50.0f; // this should be the 40ms of the tickrate + rtt/2 (round trip time of packet /2 cuz i want the time elapse in send bot send and  back)
 	float elapsedTimeLerp = 0.0f;
+	float t = 0.0f;
 
 
 
@@ -96,6 +99,10 @@ class Player : public GameObject, public Box, public Health
 	potition lerp(potition start_pos , potition goal_pos , float t);
 
 	void outOfBounds();
+
+
+
+
 
 	//friend Level;
 

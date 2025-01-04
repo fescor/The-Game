@@ -10,6 +10,7 @@
 #include "util.h"
 #include <cmath>
 
+
 // TODO : interpolate from prev potition to new potition with the fixed tickrate so between tickrates you neet to interpolate in the update,  smooth the renderin te quifsa
 
 
@@ -51,16 +52,17 @@ void Player::update(float dt, bool online)
 {
 
 	float delta_time = dt / 2000.0f;
-	float fixed_timeStep = tickrate / 7000.0f;
+	float fixed_timeStep = tickrate / 2000.0f;
 
 	std::string s = "PACKET COUNT : " + std::to_string(q_packets.unsafe_size()) + "\n";
+	/*
 	cout << s;
 	current_pos.angle = angle;
 	current_pos.speed = speed;
 	current_pos.x = m_pos_x;
 	current_pos.y = m_pos_y;
 
-	elapsedTimeLerp += dt/2;
+	elapsedTimeLerp += dt;
 	float t = elapsedTimeLerp / maxTimeLerp;
 	if (elapsedTimeLerp >= maxTimeLerp) {
 		
@@ -76,17 +78,21 @@ void Player::update(float dt, bool online)
 		angle = current_pos.angle;
 
 	}
+	*/
+	
+
+	potition current_pos;
+	current_pos.x = m_pos_x;
+	current_pos.y = m_pos_y;
+	current_pos.angle = angle;
+
+
+
 	
 
 
 
-
-	
-
-	//lerp(new_pos, current_pos, dt);// edw thelei current pos oxi prev pos 
-
-
-	if (!q_packets.empty()) {
+	if (!q_packets.empty() && current_pos == new_pos) {
 
 		
 		pMOVE move;
@@ -136,7 +142,24 @@ void Player::update(float dt, bool online)
 
 
 	}
-	cout << "NO PACKETS";
+	else if(!(current_pos == new_pos)) {
+		
+		if (t > 1.0f) { t == 1.0f; }
+		m_pos_x = std::lerp(prev_pos.x ,new_pos.x , 0.5f);
+		m_pos_x = std::lerp(prev_pos.y, new_pos.y , 0.5f);
+		angle = std::lerp(prev_pos.angle, new_pos.angle, 0.5f);
+		if (t == 1) { 
+			t = 0.0f; 
+		}else { 
+			t += 0.5f; 
+		}
+		
+
+	}
+
+
+
+	//cout << "NO PACKETS";
 	
 
 
@@ -314,11 +337,15 @@ potition Player::lerp(potition start_pos, potition goal_pos, float t)// fix lerp
 		cout << "breakpoint";
 	}
 
-
+	/*
 	cur.speed = start_pos.speed + (goal_pos.speed - start_pos.speed) * t;
-	if (cur.speed > goal_pos.speed) {
+	if (goal_pos.speed > start_pos.speed && cur.speed > goal_pos.speed) {
 		cur.speed = goal_pos.speed;
 	}
+	else if (goal_pos.speed < start_pos.speed && cur.speed < goal_pos.speed) {
+		cur.speed = goal_pos.speed;
+	}
+
 	if (start_pos.angle > goal_pos.angle) {
 		cur.angle = start_pos.angle - (abs(goal_pos.angle) - abs(start_pos.angle)) * t;
 
@@ -331,6 +358,13 @@ potition Player::lerp(potition start_pos, potition goal_pos, float t)// fix lerp
 	cur.y = m_pos_y - sin(radians(cur.angle)) * (cur.speed * fixed_timeStep);
 
 	return cur;
+	*/
+	
+	cur.x = start_pos.x + (goal_pos.x - start_pos.x) * t;
+	cur.y = start_pos.y + (goal_pos.y - start_pos.y) * t;
+	cur.angle = start_pos.angle + (goal_pos.angle - start_pos.angle) * t;
+	return cur;
+
 
 	/*
 
