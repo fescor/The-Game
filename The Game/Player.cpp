@@ -50,65 +50,12 @@ void Player::loadExplosionSprites()
 
 void Player::update(float dt, bool online)
 {
-	timeStepCounter += dt;
-	if (timeStepCounter < tickrate) {
 
-
-		return;
-
-
-	}
-	timeStepCounter -= tickrate;
-
-	///HERE IT ENTERS EVERY 40ms ////
-
-	bool f1 = false;
-	float delta_time = dt / 2000.0f;
-	float fixed_timeStep = tickrate / 2000.0f;
-	int o_angle = IDLE;
-	pMOVE p;
-
-	prev_pos = new_pos;
-
-	m_pos_y = prev_pos.y;
-	m_pos_x = prev_pos.x;
-	speed = prev_pos.speed;
-	angle = prev_pos.angle;
-
-
-	if (!q_packets.empty()) {
-		q_packets.try_pop(p);
-		new_pos.speed = p.speed;
-		
-		if (p.angle > prev_pos.angle) {
-			new_pos.angle = prev_pos.angle + pow(velocity, 2) / 2 * fixed_timeStep;// A
-		}
-		else if (p.angle < prev_pos.angle) {
-			new_pos.angle = prev_pos.angle - pow(velocity, 2) / 2 * fixed_timeStep;
-		}
-		
-		
-		
-
-		new_pos.x = prev_pos.x + cos(radians(angle)) * (speed * fixed_timeStep);
-		new_pos.y = prev_pos.y - sin(radians(angle)) * (speed * fixed_timeStep);
-
-
-	}
-
-
-
-
-
-
-	
-
-	/*
 	float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 2000.0f;
 
 	std::string s = "PACKET COUNT : " + std::to_string(q_packets.unsafe_size()) + "\n";
-	//////////////////comment out////////////////////////////
+	/*
 	cout << s;
 	current_pos.angle = angle;
 	current_pos.speed = speed;
@@ -131,8 +78,7 @@ void Player::update(float dt, bool online)
 		angle = current_pos.angle;
 
 	}
-	
-	//////////////////comment out////////////////////////////
+	*/
 	
 
 	potition current_pos;
@@ -153,15 +99,13 @@ void Player::update(float dt, bool online)
 		if (!q_packets.try_pop(move)) {
 			cout << "failed to pop move" << endl;
 		}
-		//////////////////comment out////////////////////////////
-		
+		/*
 		std::string s =
 			"DRAWING MOVE PACKET WITH ID : " + std::to_string(move.fc) + "\n" +
 			"AT FRAME " + to_string(m_state->framecounter) + "\n" +
 			"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
 		cout << s;
-		
-		//////////////////comment out////////////////////////////
+		*/
 
 
 
@@ -172,12 +116,12 @@ void Player::update(float dt, bool online)
 
 		prev_pos = new_pos;
 
-		//////////////////comment out////////////////////////////
+		/*
 		angle = prev_pos.angle;
 		speed = prev_pos.speed;
 		m_pos_x = prev_pos.x;
 		m_pos_y = prev_pos.y;
-		//////////////////comment out////////////////////////////
+		*/
 
 
 
@@ -213,7 +157,7 @@ void Player::update(float dt, bool online)
 		
 
 	}
-	*/
+
 
 
 	//cout << "NO PACKETS";
