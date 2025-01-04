@@ -117,7 +117,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost(LAPTOP_IP)) {online = false;}
+	if (!connectToHost("192.168.68.105")) { online = false; }
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
@@ -234,7 +234,7 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 	
 
 
-	cout << "A new Player connected with ID :  " + std::to_string(maxpeerID) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+	//cout << "A new Player connected with ID :  " + std::to_string(maxpeerID) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
 
 
 	
@@ -427,6 +427,7 @@ std::string Net::hex_to_strip(unsigned int input)        //////// O XRISTOS KAI 
 		std::swap(output[i], output[size - i - 2]);
 		std::swap(output[i + 1], output[size - i - 1]);
 	}
+	//edw ginete malakia problema
 	unsigned int val = stoi(output, 0, 16);
 	std::string ip = std::to_string((val & 0xFF000000) >> 24) + '.' + std::to_string((val & 0x00FF0000) >> 16) + '.' + std::to_string((val & 0x0000FF00) >> 8) + '.' + std::to_string((val & 0x000000FF));
 	

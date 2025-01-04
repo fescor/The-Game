@@ -69,6 +69,9 @@
     <ClCompile Include="..\lib\enet-1.3.18\callbacks.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AudioHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animations.h">
