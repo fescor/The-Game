@@ -18,7 +18,7 @@ struct pMOVE
 	{
 		archive(id, angle , speed , x , y , fc ); // serialize things by passing them to the archive
 	}
-
+	//gege
 
 
 };
