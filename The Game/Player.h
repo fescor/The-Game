@@ -39,6 +39,10 @@ class Player : public GameObject, public Box, public Health
 	const float tickrate = 50.0f;
 	float timeStepCounter = .0f;
 	float lastPacket_timeSend = .0;
+	float maxTimeLerp = 50.0f; // this should be the 40ms of the tickrate + rtt/2 (round trip time of packet /2 cuz i want the time elapse in send bot send and  back)
+	float elapsedTimeLerp = 0.0f;
+
+
 
 	bool isAngleIdle = true;
 	int testcounter = 0;
@@ -89,7 +93,7 @@ class Player : public GameObject, public Box, public Health
 	void getKeyStrokes();
 	void resetKeyStrokes();
 	int simulateNewPos();
-	void lerp(potition prev_pos , potition new_pos , float dt);
+	potition lerp(potition start_pos , potition goal_pos , float t);
 
 	void outOfBounds();
 

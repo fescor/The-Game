@@ -52,15 +52,38 @@ void Player::update(float dt, bool online)
 
 	float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 7000.0f;
+
 	std::string s = "PACKET COUNT : " + std::to_string(q_packets.unsafe_size()) + "\n";
 	cout << s;
 	current_pos.angle = angle;
 	current_pos.speed = speed;
 	current_pos.x = m_pos_x;
 	current_pos.y = m_pos_y;
+
+	elapsedTimeLerp += dt/2;
+	float t = elapsedTimeLerp / maxTimeLerp;
+	if (elapsedTimeLerp >= maxTimeLerp) {
+		
+		m_pos_x = new_pos.x;
+		m_pos_y = new_pos.y;
+		angle = new_pos.angle;
+		elapsedTimeLerp = 0.0f;
+	}
+	else {
+		current_pos = lerp(prev_pos,new_pos ,  t);
+		m_pos_x = current_pos.x;
+		m_pos_y = current_pos.y;
+		angle = current_pos.angle;
+
+	}
 	
 
-	lerp(new_pos, current_pos, dt);// edw thelei current pos oxi prev pos 
+
+
+
+	
+
+	//lerp(new_pos, current_pos, dt);// edw thelei current pos oxi prev pos 
 
 
 	if (!q_packets.empty()) {
@@ -87,12 +110,12 @@ void Player::update(float dt, bool online)
 
 		prev_pos = new_pos;
 	
-
+		/*
 		angle = prev_pos.angle;
 		speed = prev_pos.speed;
 		m_pos_x = prev_pos.x;
 		m_pos_y = prev_pos.y;
-
+		*/
 
 		
 
@@ -277,12 +300,65 @@ int Player::simulateNewPos()
 	return o_angle;
 }
 
-void Player::lerp(potition goal_pos, potition current_pos, float dt)
+potition Player::lerp(potition start_pos, potition goal_pos, float t)// fix lerp from medium forum u are doing it wrong 
 {
 	float speedDiff = goal_pos.speed - current_pos.speed;
 	float angleDiff = goal_pos.angle - current_pos.angle;
 
 	float fixed_timeStep = tickrate / 2000.0f;
+
+	potition cur;
+
+
+	if (graphics::getKeyState(graphics::SCANCODE_G)) {
+		cout << "breakpoint";
+	}
+
+
+	cur.speed = start_pos.speed + (goal_pos.speed - start_pos.speed) * t;
+	if (cur.speed > goal_pos.speed) {
+		cur.speed = goal_pos.speed;
+	}
+	if (start_pos.angle > goal_pos.angle) {
+		cur.angle = start_pos.angle - (abs(goal_pos.angle) - abs(start_pos.angle)) * t;
+
+
+	}
+	else {
+		cur.angle = start_pos.angle + (abs(goal_pos.angle) - abs(start_pos.angle)) * t;
+	}
+	cur.x = m_pos_x + cos(radians(cur.angle)) * (cur.speed * fixed_timeStep);
+	cur.y = m_pos_y - sin(radians(cur.angle)) * (cur.speed * fixed_timeStep);
+
+	return cur;
+
+	/*
+
+
+
+	if (current_pos.angle < goal_pos.angle) {
+
+		if (angle + pow(velocity, 2) / 2 * fixed_timeStep > goal_pos.angle) {
+			angle = goal_pos.angle;
+
+		}
+		else {
+			angle += pow(velocity, 2) / 2 * dt / 2000;
+		}
+
+
+	}
+	else if (current_pos.angle > goal_pos.angle) {
+		if (angle + pow(velocity, 2) / 2 * fixed_timeStep < goal_pos.angle) {
+			angle = goal_pos.angle;
+
+		}
+		else {
+			angle -= pow(velocity, 2) / 2 * dt / 2000;
+		}
+
+	}
+
 
 
 	if (speedDiff > 0) {
@@ -319,22 +395,8 @@ void Player::lerp(potition goal_pos, potition current_pos, float dt)
 	else {
 		return;
 	}
+	*/
 
-	
-	if (current_pos.angle < goal_pos.angle) {
-
-		if (current_pos.angle + pow(velocity, 2) / 2 * fixed_timeStep < goal_pos.angle) {
-			angle +=  pow(velocity, 2) / 2 * dt/2000;
-		}
-			
-
-	}
-	else {
-		if (current_pos.angle + pow(velocity, 2) / 2 * fixed_timeStep > goal_pos.angle) {
-				angle -= pow(velocity, 2) / 2 * dt / 2000;
-		}
-			
-	}
 
 
 	
