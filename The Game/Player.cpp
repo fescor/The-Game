@@ -92,21 +92,21 @@ void Player::update(float dt, bool online)
 
 
 
-	if (!q_packets.empty() && current_pos == new_pos) {
+	if (!q_packets.empty() && t == 0.0f) {
 
-		
+
 		pMOVE move;
 		if (!q_packets.try_pop(move)) {
 			cout << "failed to pop move" << endl;
 		}
 		/*
-		std::string s = 
+		std::string s =
 			"DRAWING MOVE PACKET WITH ID : " + std::to_string(move.fc) + "\n" +
 			"AT FRAME " + to_string(m_state->framecounter) + "\n" +
 			"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
 		cout << s;
 		*/
-		
+
 
 
 		if (graphics::getKeyState(graphics::SCANCODE_B))
@@ -115,7 +115,7 @@ void Player::update(float dt, bool online)
 		}
 
 		prev_pos = new_pos;
-	
+
 		/*
 		angle = prev_pos.angle;
 		speed = prev_pos.speed;
@@ -123,7 +123,7 @@ void Player::update(float dt, bool online)
 		m_pos_y = prev_pos.y;
 		*/
 
-		
+
 
 
 
@@ -138,16 +138,17 @@ void Player::update(float dt, bool online)
 		if ((m_state->framecounter - prev_framecounter) != 1) { cout << to_string(m_state->framecounter - prev_framecounter) << endl; }
 		prev_framecounter = m_state->framecounter;
 
-		return;
+		t += 0.5f;
 
 
 	}
-	else if(!(current_pos == new_pos)) {
+	else if (t != 0.0f) {
 		
 		if (t > 1.0f) { t == 1.0f; }
-		m_pos_x = std::lerp(prev_pos.x ,new_pos.x , 0.5f);
-		m_pos_x = std::lerp(prev_pos.y, new_pos.y , 0.5f);
-		angle = std::lerp(prev_pos.angle, new_pos.angle, 0.5f);
+		potition c = lerp(prev_pos, new_pos, t);
+		m_pos_x = c.x;
+		m_pos_y = c.y;
+		angle = c.angle;
 		if (t == 1) { 
 			t = 0.0f; 
 		}else { 
@@ -360,9 +361,19 @@ potition Player::lerp(potition start_pos, potition goal_pos, float t)// fix lerp
 	return cur;
 	*/
 	
-	cur.x = start_pos.x + (goal_pos.x - start_pos.x) * t;
-	cur.y = start_pos.y + (goal_pos.y - start_pos.y) * t;
-	cur.angle = start_pos.angle + (goal_pos.angle - start_pos.angle) * t;
+	if (t <1.0f) {
+		cur.x = start_pos.x + (goal_pos.x - start_pos.x) * t;
+		cur.y = start_pos.y + (goal_pos.y - start_pos.y) * t;
+		cur.angle = start_pos.angle + (goal_pos.angle - start_pos.angle) * t;
+
+	}
+	else if(t == 1.f){
+		cur.x = goal_pos.x;
+		cur.y = goal_pos.y;
+		cur.angle = goal_pos.angle;
+
+	}
+
 	return cur;
 
 
