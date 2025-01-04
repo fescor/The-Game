@@ -371,9 +371,10 @@ potition Player::lerp(potition start_pos, potition goal_pos, float t)// fix lerp
 		cur.x = goal_pos.x;
 		cur.y = goal_pos.y;
 		cur.angle = goal_pos.angle;
+		t = 0.0f;
 
 	}
-
+	
 	return cur;
 
 
@@ -508,6 +509,12 @@ void Player::update(float dt)
 	timeStepCounter += dt;
 	if (timeStepCounter < tickrate) {
 		
+		t += 0.5f;
+		potition c = lerp(prev_pos, new_pos, timeStepCounter/tickrate);
+		m_pos_x = c.x;
+		m_pos_y = c.y;
+		angle = c.angle;
+
 		
 		return;
 
