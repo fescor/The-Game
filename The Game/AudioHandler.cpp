@@ -121,7 +121,7 @@ void AudioHandler::ShowDefaultDevices() const {
 
 
 void AudioHandler::startAudio(){
-	AudioHandler::ShowAudioDevices();;
+	
 	if (stream && Pa_IsStreamActive(stream)) {
 		std::cerr << "Audio stream is already active!" << std::endl;
 		return; // ean exei anoiksei mhn ksana anoigeis

@@ -92,6 +92,17 @@ struct PEER
 	PEER() {};
 };
 
+struct  audiodata
+{
+	int playerid; //who send the data
+	//std::vector<float> audioData; 
+	float audioData[1024];
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(audioData, playerid); // serialize things by passing them to the archive
+	}
+};
 struct setID
 {
 	int id = 0;
@@ -133,7 +144,7 @@ enum PACKETTYPE {
 	LOADED_LEVEL,
 	MAP_INFO,
 	PLAYER_INFO,
-
+	VOICE_DATA
 
 
 };
@@ -153,7 +164,7 @@ struct packet
 		startG strtg;
 		Loaded loaded_level;
 		playerInfo pi;
-		
+		audiodata ad;
 
 
 
@@ -187,6 +198,8 @@ struct packet
 			case PLAYER_INFO:
 				archive(pi);
 				break;
+			case VOICE_DATA:
+				archive(ad);
 
 				
 
@@ -215,5 +228,8 @@ union Data {
 	Loaded loaded_level;
 
 	playerInfo pi;
+	
+	audiodata ad;
+	
 
 };

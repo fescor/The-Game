@@ -198,29 +198,38 @@ void GameState::update(float dt)
 		return;
 	}
 
-	if (status == 'L' && m_current_level == nullptr) {
+	//
 
-		init();
-		
-		
+	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
+	if ((CurrentState) && (!PreviousState)) {
 
-	}
-	
+		if (!isStreaming) {
+			isStreaming = true; //edw ksekinaei h diadikasia tou stream
+			GameState::PushToTalk(isStreaming);
 			
+		}
+	}
+	if ((!CurrentState) && (PreviousState)) {
+		if (isStreaming) {
 
-	
-		
-	
+			isStreaming = false;
+			GameState::PushToTalk(false);
+			
+		}
+	}
+
+	PreviousState = CurrentState; //update state
+
+
+
 	switch (status) {
 	case 'M':
-		mainscreen->update(dt);
-		if (getNet()) {
-			getNet()->setinGame(false);
-		}
-		
-		
-		break;
 
+
+
+		mainscreen->update(dt);
+
+		break;
 	case'L':
 		if (!m_current_level) {
 			framecounter++;
@@ -230,12 +239,11 @@ void GameState::update(float dt)
 		break;
 
 	}
-	if (online && net == nullptr) { 
+	if (online && net == nullptr) {
 		initNet();
 	}
-	if (!online && net != nullptr) {//thsi shit is sus
+	if (!online && net != nullptr) {
 
-		
 		net->setOnline(false);
 		nt.join();
 
@@ -246,21 +254,18 @@ void GameState::update(float dt)
 			m_player = nullptr;
 		}
 
-		if (m_current_level) {
-			getLevel()->deleteLevel();
-		}
-		
-		mainscreen->setSelector(CREATE_LOBBY);
-
 	}
-	
-	
-	framecounter++;
-	
-	
 
-	
+
+	framecounter++;
+
+
+
+
 }
+
+
+
 
 GameState::~GameState()
 {
