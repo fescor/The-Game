@@ -55,6 +55,68 @@ void Player::update(float dt, bool online)
 	float fixed_timeStep = tickrate / 2000.0f;
 
 	std::string s = "PACKET COUNT : " + std::to_string(q_packets.unsafe_size()) + "\n";
+	timeStepCounter += dt;
+	if (timeStepCounter < tickrate) {
+
+		t += 0.5f;
+		potition c = lerp(prev_pos, new_pos, timeStepCounter / tickrate);
+		m_pos_x = c.x;
+		m_pos_y = c.y;
+		angle = c.angle;
+
+
+		return;
+
+
+	}
+	timeStepCounter -= tickrate;
+	if (!q_packets.empty()) {
+
+
+		pMOVE move;
+		if (!q_packets.try_pop(move)) {
+			cout << "failed to pop move" << endl;
+		}
+		/*
+		std::string s =
+			"DRAWING MOVE PACKET WITH ID : " + std::to_string(move.fc) + "\n" +
+			"AT FRAME " + to_string(m_state->framecounter) + "\n" +
+			"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
+		cout << s;
+		*/
+
+
+
+		if (graphics::getKeyState(graphics::SCANCODE_B))
+		{
+			cout << "breakpoint" << endl;
+		}
+
+		prev_pos = new_pos;
+
+		/*
+		angle = prev_pos.angle;
+		speed = prev_pos.speed;
+		m_pos_x = prev_pos.x;
+		m_pos_y = prev_pos.y;
+		*/
+
+
+
+
+
+
+		new_pos.x = move.x;
+		new_pos.y = move.y;
+		new_pos.angle = move.angle;
+		new_pos.speed = move.speed;
+		new_pos.frame = m_state->framecounter;
+
+
+	}
+
+
+
 	/*
 	cout << s;
 	current_pos.angle = angle;
