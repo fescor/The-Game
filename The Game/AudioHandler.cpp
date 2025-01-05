@@ -212,7 +212,6 @@ void AudioHandler::stopAudio() {
 
 
 
-//todo apothikeuse ta chinsk se mia global metavliti me skopo na ta stelneis apo ekei 
 //call back function for processing audio 
 int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
 
@@ -241,10 +240,8 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			//ad.playerid = *player->geto_id(); // Player ID from the Player object
 			if (player != nullptr) {
 				ad.playerid = *player->geto_id();
-			}
-			else {
-				std::cerr << "Player object is null!" << std::endl;
-			}
+			
+			
 			// Copy the audio data into the audiodata structure
 			std::copy(audioData.begin(), audioData.begin() + std::min<size_t>(audioData.size(), sizeof(ad.audioData) / sizeof(ad.audioData[0])), ad.audioData);
 
@@ -257,6 +254,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			//netInstance::sendDataBroadcast(payload, VOICE_DATA);
 			hostInstance.sendDataBroadcast(payload, VOICE_DATA); 
 			clientInstance.sendDataBroadcast(payload, VOICE_DATA);
+			}
 		}
 	
 			for (unsigned long i = 0; i < framesPerBuffer; i++) {

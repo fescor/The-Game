@@ -677,6 +677,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		break;
 	case VOICE_DATA:
 		//ti tha kanei otan dexete to voice data
+		std::cout << "elava ta arxeia " << std::endl;
 		break;
 
 	}
