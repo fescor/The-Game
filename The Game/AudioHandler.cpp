@@ -19,6 +19,7 @@ std::mutex AudioHandler::buffermutex;
 // Constructor implementation
 AudioHandler::AudioHandler() {
 	AudioHandler::audioInit();
+	player = new Player("TEST");
 }
 
 //katastrofeas
@@ -27,15 +28,18 @@ AudioHandler::~AudioHandler() {
 	if (stream) {
 		Pa_StopStream(stream);
 		Pa_CloseStream(stream);
+		delete player;
+		player = nullptr;
 	}
 
 	//terminate portaudio if initialized 
 	if (initialized) {
 		Pa_Terminate();
+		delete player;
+		player = nullptr;
 	}
 }
 
-//initialize audioport logika tha kaleite otan ksekinaei to game
 bool AudioHandler::audioInit() {
 	if (initialized) {
 		return true;
@@ -165,7 +169,7 @@ void AudioHandler::startAudio(){
 	outputparametr.hostApiSpecificStreamInfo = nullptr; 
 
 	//open audio stream 
-	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback, nullptr);//test gia 128 framesperbuffer arxiko 256 test gia 48000hz
+	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback, static_cast<void*>(player));//test gia 128 framesperbuffer arxiko 256 test gia 48000hz
 	if (err != paNoError) {
 		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
 		return; 
@@ -217,7 +221,8 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
-	Player* player = static_cast<Player*>(userData); //player object
+	Player* player = static_cast<Player*>(userData); // player object
+	
 	
 	Net hostInstance(true);//create net instance for host
 	Net clientInstance(false); //create net instance for client

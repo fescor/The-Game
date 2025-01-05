@@ -11,6 +11,7 @@ private:
 	bool initialized;
 	PaStream* stream = nullptr;
 	//float pi = std::acos(-1.0f);
+	Player* player;
 	
 
 	
