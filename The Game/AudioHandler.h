@@ -2,11 +2,13 @@
 #include <portaudio.h>
 #include <iostream>
 #include "GameState.h"
+#include "GameObject.h"
+#include "Player.h"
 #include <vector>
 #include <mutex>
 
 
-class AudioHandler {
+class AudioHandler : public GameObject {
 private:
 	bool initialized;
 	PaStream* stream = nullptr;
