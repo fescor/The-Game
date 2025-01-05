@@ -112,7 +112,7 @@ void Player::update(float dt, bool online)
 		new_pos.speed = move.speed;
 		new_pos.frame = m_state->framecounter;
 
-
+		return;
 	}
 
 
