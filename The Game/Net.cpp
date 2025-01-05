@@ -117,7 +117,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost("192.168.68.105")) { online = false; }
+	if (!connectToHost("192.168.1.10")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
@@ -352,6 +352,10 @@ void Net::sendDataBroadcast(union Data payload, PACKETTYPE type)
 	case LOADED_LEVEL:
 		p.type = type;
 		p.loaded_level = payload.loaded_level;
+		break;
+	case VOICE_DATA: 
+		p.type = type;
+		p.ad = payload.ad;
 		break;
 
 	}
@@ -671,8 +675,12 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 
 		m_state->playerLoadedLevel();
 		break;
+	case VOICE_DATA:
+		//ti tha kanei otan dexete to voice data
+		break;
 
 	}
+	
 
 	
 

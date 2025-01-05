@@ -46,7 +46,7 @@ class Net : public GameObject {
 
 	void sendDataToPeer(ENetPeer* peer , union Data payload, PACKETTYPE type);
 
-	void sendDataBroadcast(union Data payload, PACKETTYPE type);
+	
 
 
 
@@ -59,7 +59,7 @@ class Net : public GameObject {
 	void anounceLobbyPeers(ENetPeer* newPeer);
 	union Data setPeerID();
 	
-	void parseData(unsigned char* buffer, size_t size, ENetEvent& event , int timediff);
+	void parseData(unsigned char* buffer, size_t size, ENetEvent& event , int timediff); //apo edw 
 	void parseData(ENetPacket* packet, int timediff, ENetPeer* peer);
 
 	void disconnect();
@@ -106,5 +106,5 @@ class Net : public GameObject {
 		void setinGame(bool ig);
 		bool getinGame();
 		~Net();
-
+		void sendDataBroadcast(union Data payload, PACKETTYPE type); // thn ekana static kai public gia na mhn kanw instance sthn audiohandler
 };
