@@ -379,8 +379,8 @@ int Player::simulateNewPos()
 
 	}
 
-	new_pos.x = prev_pos.x + cos(radians(angle)) * (speed * fixed_timeStep);
-	new_pos.y = prev_pos.y - sin(radians(angle)) * (speed * fixed_timeStep);
+	new_pos.x = prev_pos.x + cos(radians(angle)) * (new_pos.speed * fixed_timeStep);
+	new_pos.y = prev_pos.y - sin(radians(angle)) * (new_pos.speed * fixed_timeStep);
 	
 	new_pos.frame = m_state->framecounter;
 	return o_angle;
@@ -577,6 +577,9 @@ void Player::update(float dt)
 		m_pos_y = c.y;
 		angle = c.angle;
 
+		m_state->m_global_offset_x = m_state->getCanvasWidth() / 2.0f - m_pos_x;
+		m_state->m_global_offset_y = m_state->getCanvasHeight() / 2.0f - m_pos_y;
+
 		
 		return;
 
@@ -593,12 +596,12 @@ void Player::update(float dt)
 
 
 	prev_pos = new_pos;
-
+	/*
 	m_pos_y = prev_pos.y;
 	m_pos_x = prev_pos.x;
 	speed = prev_pos.speed;
 	angle = prev_pos.angle;
-
+	*/
 
 
 	getKeyStrokes();
@@ -614,10 +617,10 @@ void Player::update(float dt)
 
 
 	
-	
+	/*
 	m_state->m_global_offset_x = m_state->getCanvasWidth() / 2.0f - m_pos_x;
 	m_state->m_global_offset_y = m_state->getCanvasHeight() / 2.0f - m_pos_y;
-
+	*/
 
 
 	
