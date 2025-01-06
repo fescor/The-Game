@@ -213,6 +213,14 @@ void GameState::update(float dt)
 
 	//
 
+	if (status == 'L' && m_current_level == nullptr) {
+
+		init();
+
+
+
+	}
+
 	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
 	if ((CurrentState) && (!PreviousState)) {
 
@@ -302,9 +310,6 @@ void GameState::startLevel()
 	if (!m_current_level) {
 		m_current_level = new Level();
 	}
-	
-
-	
 	
 
 	if (!m_player) {
