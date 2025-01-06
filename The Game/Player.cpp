@@ -309,8 +309,8 @@ int Player::simulateNewPos()
 		fire_flag = false;
 
 	}
-	new_pos.x = prev_pos.x + cos(radians(angle)) * (new_pos.speed * fixed_timeStep);
-	new_pos.y = prev_pos.y - sin(radians(angle)) * (new_pos.speed * fixed_timeStep);
+	new_pos.x = prev_pos.x + cos(radians(new_pos.angle)) * (new_pos.speed * fixed_timeStep);
+	new_pos.y = prev_pos.y - sin(radians(new_pos.angle)) * (new_pos.speed * fixed_timeStep);
 	n_pos.x = new_pos.x;
 	n_pos.y = new_pos.y;
 	n_pos = outOfBounds(n_pos);
