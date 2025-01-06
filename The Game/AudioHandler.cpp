@@ -232,7 +232,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
 				out[i] = in[i]; // Real-time playback (10.0f = volume)
 				//out[i] = globalAudioBuffer[i]; 
-				std::cout << "in[i]" << in[i] << "globalbuffer" << globalAudioBuffer[i] << std::endl;
+				
 			}
 		}
 	else {
@@ -255,13 +255,13 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
-
-	 if (globalAudioBuffer.size() >= 512)
+ if (globalAudioBuffer.size() >= 512)
 	 { //an exei arketa dedomena
 		 float chunk [512]  ; 
-		 int playerid = *m_state->getPlayer()->geto_id();
+		 int playerid = *(m_state)->getPlayer()->geto_id();
 		 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
 		 m_state->getNet()->sendaudiodata(playerid, chunk);
+		 
 
 
 	 }
