@@ -166,7 +166,7 @@ void AudioHandler::startAudio(){
 	outputparametr.hostApiSpecificStreamInfo = nullptr; 
 
 	//open audio stream 
-	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback,nullptr);//test gia 128 framesperbuffer arxiko 256 test gia 48000hz
+	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback,nullptr);
 	if (err != paNoError) {
 		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
 		return; 
@@ -181,8 +181,7 @@ void AudioHandler::startAudio(){
 		std::cout << "Audio stream just started!" << std::endl;
 	}
 	
-	//std::cout << "Input Device: " << inputparametr.device << std::endl;
-	//std::cout << "Output Device: " << outputparametr.device << std::endl;
+	
 	
 }
 
@@ -230,15 +229,6 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		}
 		
 		
-		if (globalAudioBuffer.size() >= 512) 
-		{ //an exei arketa dedomena
-			
-			AudioHandler audiohandler;
-		
-			audiohandler.preparedata(globalAudioBuffer);
-
-		}
-	
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
 				out[i] = in[i]; // Real-time playback (10.0f = volume)
 				//out[i] = globalAudioBuffer[i]; 
@@ -263,12 +253,20 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	return data;
 }
 
- void AudioHandler::preparedata(const std::vector<float>& buffer) {
+ void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
-	 int playerid = *m_state->getPlayer()->geto_id();
-	 std::copy(buffer.begin(), buffer.begin() + 512, temp);
-	 m_state->getNet()->sendaudiodata(playerid, temp);
 
+	 if (globalAudioBuffer.size() >= 512)
+	 { //an exei arketa dedomena
+		 float chunk [512]  ; 
+		 int playerid = *m_state->getPlayer()->geto_id();
+		 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
+		 m_state->getNet()->sendaudiodata(playerid, chunk);
+
+
+	 }
+
+	 
 
 
 }

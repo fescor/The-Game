@@ -63,7 +63,19 @@ int Net::host()
 
 		}
 
+		if (!ad_packets.empty()) {
 
+			//m_state->getMutex().lock();
+			Data ad;
+			ad_packets.try_pop(ad);
+			//p_packets.pop();
+			//m_state->getMutex().unlock();
+
+
+			sendDataBroadcast(ad, VOICE_DATA);
+			enet_host_flush(client);
+
+		}
 		
 		
 
@@ -140,6 +152,17 @@ int Net::join()
 
 
 		}
+
+		if (!ad_packets.empty()) {	
+			Data ad;
+			ad_packets.try_pop(ad);
+
+			sendDataBroadcast(ad, VOICE_DATA);
+			enet_host_flush(client);
+
+		}
+
+
 		if (enet_host_service(client, &event, 0) > 0) {
 			switch (event.type)
 			{
@@ -671,6 +694,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 	case VOICE_DATA:
 		//ti tha kanei otan dexete to voice data
 		std::cout << "elava ta arxeia " << std::endl;
+		//m_state->playback(p.ad);
 		break;
 
 	}
@@ -954,15 +978,16 @@ Net::~Net()
 }
 
 void Net::sendaudiodata(int id, float arr[]) {
+
 	audiodata adpacket; 
 	adpacket.playerid = id;
 	std::copy(arr, arr + sizeof(arr) / sizeof(arr[0]), adpacket.audioData);
+	//adpacket.audioData [] = arr;
+	
 
 	Data payload;
 	payload.ad = adpacket;
 	
 	ad_packets.push(payload);
-	
-
 
 }

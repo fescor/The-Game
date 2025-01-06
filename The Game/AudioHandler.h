@@ -30,6 +30,6 @@ public:
 	void  ShowDefaultDevices() const;
 	//bool AudioRecorder(int durationSeconds, const std::string& filename);
 	static int audioCallback(const void* inputbuffer, void* outputbuffer, unsigned long framsPerBuffer, const PaStreamCallbackTimeInfo* timeinfo, PaStreamCallbackFlags statusflag, void* userData);
-	 void preparedata(const std::vector<float>& buffer);
-
+	//void preparedata(const std::vector<float>& buffer);
+	void preparedata();
 };
