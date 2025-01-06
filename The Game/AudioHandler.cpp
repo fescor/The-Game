@@ -1,4 +1,5 @@
 ﻿#include "AudioHandler.h"
+#include "GameState.h"
 #include "Player.h"
 #include "Net.h"
 #include <fstream>
@@ -19,7 +20,7 @@ std::mutex AudioHandler::buffermutex;
 // Constructor implementation
 AudioHandler::AudioHandler() {
 	AudioHandler::audioInit();
-	player = new Player("TEST");
+	
 }
 
 //katastrofeas
@@ -28,15 +29,11 @@ AudioHandler::~AudioHandler() {
 	if (stream) {
 		Pa_StopStream(stream);
 		Pa_CloseStream(stream);
-		delete player;
-		player = nullptr;
 	}
 
 	//terminate portaudio if initialized 
 	if (initialized) {
 		Pa_Terminate();
-		delete player;
-		player = nullptr;
 	}
 }
 
@@ -169,7 +166,7 @@ void AudioHandler::startAudio(){
 	outputparametr.hostApiSpecificStreamInfo = nullptr; 
 
 	//open audio stream 
-	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback, static_cast<void*>(player));//test gia 128 framesperbuffer arxiko 256 test gia 48000hz
+	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback,nullptr);//test gia 128 framesperbuffer arxiko 256 test gia 48000hz
 	if (err != paNoError) {
 		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
 		return; 
@@ -186,7 +183,9 @@ void AudioHandler::startAudio(){
 	
 	//std::cout << "Input Device: " << inputparametr.device << std::endl;
 	//std::cout << "Output Device: " << outputparametr.device << std::endl;
+	
 }
+
 
 //stop stream and playblack 
 
@@ -221,11 +220,6 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
-	Player* player = static_cast<Player*>(userData); // player object
-	
-	
-	Net hostInstance(true);//create net instance for host
-	Net clientInstance(false); //create net instance for client
 
 	if (inputBuffer) {
 		std::vector<float> chunk(in, in + framesPerBuffer); //copy chunk in local vector
@@ -238,43 +232,26 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		
 		if (globalAudioBuffer.size() >= 512) 
 		{ //an exei arketa dedomena
-			std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
-
-			//create package
-			audiodata ad;
-			//ad.playerid = *player->geto_id(); // Player ID from the Player object
-			if (player != nullptr) {
-				ad.playerid = *player->geto_id();
 			
-			
-			// Copy the audio data into the audiodata structure
-			std::copy(audioData.begin(), audioData.begin() + std::min<size_t>(audioData.size(), sizeof(ad.audioData) / sizeof(ad.audioData[0])), ad.audioData);
+			AudioHandler audiohandler;
+		
+			audiohandler.preparedata(globalAudioBuffer);
 
-			// Prepare union Data payload
-			union Data payload;
-			payload.ad = ad;
-
-			// Send the package via Net::sendDataBroadcast
-			//Net netInstance;
-			//netInstance::sendDataBroadcast(payload, VOICE_DATA);
-			hostInstance.sendDataBroadcast(payload, VOICE_DATA); 
-			clientInstance.sendDataBroadcast(payload, VOICE_DATA);
-			}
 		}
 	
-			for (unsigned long i = 0; i < framesPerBuffer; i++) {
+		for (unsigned long i = 0; i < framesPerBuffer; i++) {
 				out[i] = in[i]; // Real-time playback (10.0f = volume)
 				//out[i] = globalAudioBuffer[i]; 
 				std::cout << "in[i]" << in[i] << "globalbuffer" << globalAudioBuffer[i] << std::endl;
 			}
 		}
-		else {
-			std::cout << "No input detected, outputting silence." << std::endl;
-			for (unsigned long i = 0; i < framesPerBuffer; i++) {
-				out[i] = 0.0f; // Silence
+	else {
+		std::cout << "No input detected, outputting silence." << std::endl;
+		for (unsigned long i = 0; i < framesPerBuffer; i++) {
+			out[i] = 0.0f; // Silence
 			}
 		}
-		return paContinue;
+	return paContinue;
 		
 	}
 
@@ -286,6 +263,12 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	return data;
 }
 
-void AudioHandler::preparedata() {
+ void AudioHandler::preparedata(const std::vector<float>& buffer) {
+	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
+	 int playerid = *m_state->getPlayer()->geto_id();
+	 std::copy(buffer.begin(), buffer.begin() + 512, temp);
+	 m_state->getNet()->sendaudiodata(playerid, temp);
+
+
 
 }

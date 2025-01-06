@@ -4,16 +4,17 @@
 #include "GameState.h"
 #include <vector>
 #include <mutex>
+#include "GameState.h"
+#include "GameObject.h"
 
 
-class AudioHandler {
+class AudioHandler : public GameObject {
 private:
 	bool initialized;
 	PaStream* stream = nullptr;
-	//float pi = std::acos(-1.0f);
-	Player* player;
-	
+	float temp[]; 
 
+	
 	
 	
 public:
@@ -29,6 +30,6 @@ public:
 	void  ShowDefaultDevices() const;
 	//bool AudioRecorder(int durationSeconds, const std::string& filename);
 	static int audioCallback(const void* inputbuffer, void* outputbuffer, unsigned long framsPerBuffer, const PaStreamCallbackTimeInfo* timeinfo, PaStreamCallbackFlags statusflag, void* userData);
-	void preparedata(); 
+	 void preparedata(const std::vector<float>& buffer);
 
 };
