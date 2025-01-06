@@ -69,7 +69,7 @@ void Player::update(float dt, bool online)
 
 
 	}
-	timeStepCounter -= tickrate;
+	timeStepCounter = .0f;
 	if (!q_packets.empty()) {
 
 
@@ -94,13 +94,17 @@ void Player::update(float dt, bool online)
 
 		prev_pos = new_pos;
 
-		/*
+		
 		angle = prev_pos.angle;
 		speed = prev_pos.speed;
 		m_pos_x = prev_pos.x;
 		m_pos_y = prev_pos.y;
-		*/
+		
+		if (move.fire) {
+			graphics::playSound(m_state->getFullAssetPath("shoot2.mp3"), 1.0f, false);
+			fire();
 
+		}
 
 
 
@@ -114,7 +118,7 @@ void Player::update(float dt, bool online)
 
 		return;
 	}
-
+	return;
 
 
 	/*
@@ -305,10 +309,13 @@ void Player::resetKeyStrokes()
 
 int Player::simulateNewPos()
 {
-	bool f1 = false;
+	
 	//float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 2000.0f;
 	int o_angle = IDLE;
+	potition n_pos;
+	m_fire = false;
+	
 
 	if (input.key_A) {
 
@@ -366,21 +373,29 @@ int Player::simulateNewPos()
 
 	if (input.space) {
 
-		if (!flag) {
+		if (!fire_flag) {
 			graphics::playSound(m_state->getFullAssetPath("shoot2.mp3"), 1.0f, false);
 			fire();
+			m_fire = true;
 		}
-		flag = true;
+		fire_flag = true;
 
 		//fire(dt);
 	}
 	else {
-		flag = false;
+		fire_flag = false;
 
 	}
-
 	new_pos.x = prev_pos.x + cos(radians(angle)) * (new_pos.speed * fixed_timeStep);
 	new_pos.y = prev_pos.y - sin(radians(angle)) * (new_pos.speed * fixed_timeStep);
+	n_pos.x = new_pos.x;
+	n_pos.y = new_pos.y;
+	n_pos = outOfBounds(n_pos);
+	new_pos.x = n_pos.x;
+	new_pos.y = n_pos.y;
+	
+
+
 	
 	new_pos.frame = m_state->framecounter;
 	return o_angle;
@@ -522,6 +537,31 @@ potition Player::lerp(potition start_pos, potition goal_pos, float t)// fix lerp
 
 }
 
+potition Player::outOfBounds(potition pos)
+{
+
+
+	if (pos.x > m_state->getLevel()->getBackground()->getWidth() * 1.75 - m_state->getCanvasWidth() * 2) { // deksia an thes na pigenei mexri gonia o pextis /2 anti *2
+
+		pos.x = m_state->getLevel()->getBackground()->getWidth() * 1.75 - m_state->getCanvasWidth() * 2;   //blocking player from going outside the map 
+		//those multipliers are given from a greater force of the universe
+	}
+	if (pos.x < -m_state->getLevel()->getBackground()->getWidth() * 1.5 + m_state->getCanvasWidth() * 2) {
+
+		pos.x = -m_state->getLevel()->getBackground()->getWidth() * 1.5 + m_state->getCanvasWidth() * 2;
+
+	}
+	if (pos.y > m_state->getLevel()->getBackground()->getHeight() * 1.75 - m_state->getCanvasHeight() * 2) {//kato 
+
+		pos.y = m_state->getLevel()->getBackground()->getHeight() * 1.75 - m_state->getCanvasHeight() * 2;
+	}
+	if (pos.y < -m_state->getLevel()->getBackground()->getHeight() * 1.5 + m_state->getCanvasHeight() * 2) {
+
+		pos.y = -m_state->getLevel()->getBackground()->getHeight() * 1.5 + m_state->getCanvasHeight() * 2;
+	}
+	return pos;
+
+}
 void Player::outOfBounds()
 {
 
@@ -573,19 +613,22 @@ void Player::update(float dt)
 		
 		t += 0.5f;
 		potition c = lerp(prev_pos, new_pos, timeStepCounter/tickrate);
+		c  = outOfBounds(c);
 		m_pos_x = c.x;
 		m_pos_y = c.y;
 		angle = c.angle;
-
+		
 		m_state->m_global_offset_x = m_state->getCanvasWidth() / 2.0f - m_pos_x;
 		m_state->m_global_offset_y = m_state->getCanvasHeight() / 2.0f - m_pos_y;
-
+		
 		
 		return;
 
 
 	}
-	timeStepCounter -= tickrate;
+	
+	timeStepCounter = 0.0f;
+	//timeStepCounter -= tickrate;
 
 	///HERE IT ENTERS EVERY 40ms ////
 
@@ -596,12 +639,12 @@ void Player::update(float dt)
 
 
 	prev_pos = new_pos;
-	/*
+	
 	m_pos_y = prev_pos.y;
 	m_pos_x = prev_pos.x;
 	speed = prev_pos.speed;
 	angle = prev_pos.angle;
-	*/
+	
 
 
 	getKeyStrokes();
@@ -617,10 +660,10 @@ void Player::update(float dt)
 
 
 	
-	/*
+	
 	m_state->m_global_offset_x = m_state->getCanvasWidth() / 2.0f - m_pos_x;
 	m_state->m_global_offset_y = m_state->getCanvasHeight() / 2.0f - m_pos_y;
-	*/
+	
 
 
 	
@@ -632,7 +675,7 @@ void Player::update(float dt)
 		if (graphics::getGlobalTime() - lastPacket_timeSend >= tickrate) {
 
 
-			m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y, testcounter);
+			m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y, testcounter ,m_fire);
 			lastPacket_timeSend = graphics::getGlobalTime();
 			
 		}
@@ -647,6 +690,7 @@ void Player::update(float dt)
 	}
 	*/
 	isAngleIdle = true;
+	
 
 		
 	
@@ -671,8 +715,8 @@ void Player::init(bool online)
 	m_bullets = 200;
 	hp = 5;
 
-	flag = false;
-	
+	fire_flag = false;
+	m_fire = false;
 
 	angle = 90.0f;
 	PreviousFrameAngle = 90.0f; 

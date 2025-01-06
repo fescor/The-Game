@@ -914,7 +914,7 @@ bool Net::getOnline()
 	return online;
 }
 
-void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y, unsigned long framecounter)// this is called by game thread
+void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y, unsigned long framecounter , bool fire_flag)// this is called by game thread
 {
 	pMOVE packet;
 	packet.id = o_id;
@@ -923,6 +923,7 @@ void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y, 
 	packet.x = x;
 	packet.y = y;
 	packet.fc = framecounter;
+	packet.fire = fire_flag;
 
 	
 	Data payload;

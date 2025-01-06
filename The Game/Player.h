@@ -56,7 +56,8 @@ class Player : public GameObject, public Box, public Health
 	int  m_bullets;
 	graphics::Brush m_bullet_brush;
 	Explosion* e;
-	bool flag;
+	bool fire_flag;
+	bool m_fire;
 	void fire();
 	void loadExplosionSprites();
 	const float velocity = 2.0f * 12.0f;
@@ -98,6 +99,7 @@ class Player : public GameObject, public Box, public Health
 	int simulateNewPos();
 	potition lerp(potition start_pos , potition goal_pos , float t);
 
+	potition outOfBounds(potition pos );
 	void outOfBounds();
 
 
