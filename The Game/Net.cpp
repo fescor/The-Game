@@ -39,13 +39,6 @@ int Net::host()
 			//p_packets.pop();
 			//m_state->getMutex().unlock();
 
-			Data voicechat;
-			voicechat.vc;
-			voicechat.vc.chunk = 0.0f;
-			
-			
-
-			sendDataBroadcast(voicechat, VOICE_CHUNK);
 
 			
 

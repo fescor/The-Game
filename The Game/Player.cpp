@@ -54,15 +54,20 @@ void Player::update(float dt, bool online)
 	float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 2000.0f;
 
+	if (graphics::getKeyState(graphics::SCANCODE_H)) {
+		cout << "breakpoint";
+	}
 	std::string s = "PACKET COUNT : " + std::to_string(q_packets.unsafe_size()) + "\n";
 	timeStepCounter += dt;
 	if (timeStepCounter < tickrate) {
 
-		t += 0.5f;
+		
 		potition c = lerp(prev_pos, new_pos, timeStepCounter / tickrate);
 		m_pos_x = c.x;
 		m_pos_y = c.y;
 		angle = c.angle;
+		
+		
 
 
 		return;
@@ -145,88 +150,6 @@ void Player::update(float dt, bool online)
 
 	}
 	*/
-	
-
-	potition current_pos;
-	current_pos.x = m_pos_x;
-	current_pos.y = m_pos_y;
-	current_pos.angle = angle;
-
-
-
-	
-
-
-
-	if (!q_packets.empty() && t == 0.0f) {
-
-
-		pMOVE move;
-		if (!q_packets.try_pop(move)) {
-			cout << "failed to pop move" << endl;
-		}
-		/*
-		std::string s =
-			"DRAWING MOVE PACKET WITH ID : " + std::to_string(move.fc) + "\n" +
-			"AT FRAME " + to_string(m_state->framecounter) + "\n" +
-			"AT : " + std::to_string(graphics::getGlobalTime()) + "\n";
-		cout << s;
-		*/
-
-
-
-		if (graphics::getKeyState(graphics::SCANCODE_B))
-		{
-			cout << "breakpoint" << endl;
-		}
-
-		prev_pos = new_pos;
-
-		/*
-		angle = prev_pos.angle;
-		speed = prev_pos.speed;
-		m_pos_x = prev_pos.x;
-		m_pos_y = prev_pos.y;
-		*/
-
-
-
-
-
-
-		new_pos.x = move.x;
-		new_pos.y = move.y;
-		new_pos.angle = move.angle;
-		new_pos.speed = move.speed;
-		new_pos.frame = m_state->framecounter;
-
-
-		if ((m_state->framecounter - prev_framecounter) != 1) { cout << to_string(m_state->framecounter - prev_framecounter) << endl; }
-		prev_framecounter = m_state->framecounter;
-
-		t += 0.5f;
-
-
-	}
-	else if (t != 0.0f) {
-		
-		if (t > 1.0f) { t == 1.0f; }
-		potition c = lerp(prev_pos, new_pos, t);
-		m_pos_x = c.x;
-		m_pos_y = c.y;
-		angle = c.angle;
-		if (t == 1) { 
-			t = 0.0f; 
-		}else { 
-			t += 0.5f; 
-		}
-		
-
-	}
-
-
-
-	//cout << "NO PACKETS";
 	
 
 
@@ -437,18 +360,27 @@ potition Player::lerp(potition start_pos, potition goal_pos, float t)// fix lerp
 
 	return cur;
 	*/
+
+
+
 	
-	if (t <1.0f) {
+	if (t <=0.0f) {
+		cur.x = start_pos.x;
+		cur.y = start_pos.y;
+		cur.angle = start_pos.angle;
+
+	}
+	else if(t < 1.f){
+
 		cur.x = start_pos.x + (goal_pos.x - start_pos.x) * t;
 		cur.y = start_pos.y + (goal_pos.y - start_pos.y) * t;
 		cur.angle = start_pos.angle + (goal_pos.angle - start_pos.angle) * t;
 
 	}
-	else if(t == 1.f){
+	else{
 		cur.x = goal_pos.x;
 		cur.y = goal_pos.y;
 		cur.angle = goal_pos.angle;
-		t = 0.0f;
 
 	}
 	
@@ -841,7 +773,7 @@ void Player::draw(bool online)
 	
 
 		graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y, 1.0f, " X : " + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y) + " , SP : " + std::to_string(speed), test);
-
+		graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y + 3, 1.0f, "angle : " + std::to_string(this->angle), test);
 	if (explosion) {// implement it corectly for online players
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
 

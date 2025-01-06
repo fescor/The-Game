@@ -614,6 +614,8 @@ void Level::init()
 		// to proto find tha einai gi 0 pou den yparxei sto o_players
 		m_state->geto_playersmap().find(m_state->getMapInfo().posPlayer[i][0])->second->m_pos_y = m_state->getMapInfo().posPlayer[i][2];
 
+		m_state->geto_playersmap().find(m_state->getMapInfo().posPlayer[i][0])->second->setPrevPos(m_state->getMapInfo().posPlayer[i][1], m_state->getMapInfo().posPlayer[i][2], 0, 90.0f, m_state->framecounter);
+		m_state->geto_playersmap().find(m_state->getMapInfo().posPlayer[i][0])->second->setNewPos(m_state->getMapInfo().posPlayer[i][1], m_state->getMapInfo().posPlayer[i][2], 0, 90.0f, m_state->framecounter);
 	}
 
 
