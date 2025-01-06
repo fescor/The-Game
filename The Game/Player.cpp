@@ -54,6 +54,43 @@ void Player::update(float dt, bool online)
 	float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 2000.0f;
 
+
+	m_pos_x += cos(radians(angle)) * (speed * delta_time);
+	m_pos_y -= sin(radians(angle)) * (speed * delta_time);
+
+	if (prev_pos.x < new_pos.x) {
+		if (m_pos_x > new_pos.x) {
+			m_pos_x = new_pos.x;
+		}
+
+	}
+	else {
+		if (m_pos_x < new_pos.x) {
+			m_pos_x = new_pos.x;
+		}
+	}
+
+	if (prev_pos.y < new_pos.y) {
+		if (m_pos_y > new_pos.y) {
+			m_pos_y = new_pos.y;
+		}
+
+	}
+	else {
+		if (m_pos_y < new_pos.y) {
+			m_pos_y = new_pos.y;
+		}
+	}
+
+
+
+
+
+
+
+
+
+
 	if (graphics::getKeyState(graphics::SCANCODE_H)) {
 		cout << "breakpoint";
 	}
@@ -61,14 +98,15 @@ void Player::update(float dt, bool online)
 	timeStepCounter += dt;
 	if (timeStepCounter < tickrate) {
 
-		
+		/*
 		potition c = lerp(prev_pos, new_pos, timeStepCounter / tickrate);
+		
 		m_pos_x = c.x;
 		m_pos_y = c.y;
 		angle = c.angle;
 		
 		
-
+		*/
 
 		return;
 
@@ -360,10 +398,19 @@ potition Player::lerp(potition start_pos, potition goal_pos, float t)// fix lerp
 
 	return cur;
 	*/
-
-
-
+	if (t > 1.0f) {
+		t = 1.0f;
+	}
+	else if (t < 0.0f) {
+		t = .0f;
+	}
+	cur.x = std::lerp(start_pos.x, goal_pos.x, t);
+	cur.y = std::lerp(start_pos.y, goal_pos.y, t);
+	cur.angle = std::lerp(start_pos.angle, goal_pos.angle, t);
+	return cur;
 	
+
+
 	if (t <=0.0f) {
 		cur.x = start_pos.x;
 		cur.y = start_pos.y;
@@ -754,6 +801,31 @@ void Player::draw()
 
 void Player::draw(bool online)
 {
+	/*
+	potition c;
+	c.x = m_pos_x;
+	c.y = m_pos_y;
+	c.angle = angle;
+	
+	if (timeStepCounter < tickrate) {
+
+		cout << "T = : " << timeStepCounter/tickrate;
+		c = lerp(prev_pos, new_pos, timeStepCounter / tickrate);
+
+
+
+
+	}
+	*/
+	
+
+
+
+
+
+
+
+
 	if (shield && shieldFramecounter < 1000) {
 		graphics::drawDisk(m_pos_x + m_state->m_global_offset_x, m_pos_y + m_state->m_global_offset_y, 2.0f, m_brush_shield);
 		shieldFramecounter++;
@@ -773,7 +845,7 @@ void Player::draw(bool online)
 	
 
 		graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y, 1.0f, " X : " + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y) + " , SP : " + std::to_string(speed), test);
-		graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y + 3, 1.0f, "angle : " + std::to_string(this->angle), test);
+		graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y + 3, 1.0f, "angle : " + std::to_string(angle), test);
 	if (explosion) {// implement it corectly for online players
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
 
