@@ -18,6 +18,7 @@ std::vector<float> AudioHandler::globalAudioBuffer;
 std::mutex AudioHandler::buffermutex;
 std::vector<float> AudioHandler::playbackBuffer;
 std::mutex AudioHandler::playbackMutex;
+bool playbackFinishedFlag;
 
 // Constructor implementation
 AudioHandler::AudioHandler() {
@@ -222,6 +223,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
+	bool isPlaybackFinished = false;
 
 	if (inputBuffer) {
 		std::vector<float> chunk(in, in + framesPerBuffer); //copy chunk in local vector
@@ -232,32 +234,22 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		}
 		
 		//PLAYBACK
-		int empty_counter = 0;
+		
 		std::lock_guard<std::mutex> lock(playbackMutex);
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
 			if (!playbackBuffer.empty()) {
 				//for (i=0 ; i<= playbackBuffer.size();i++){
 					//std::cout << "Player : " << player_id << " is speaking" << std::endl;
-				std::cout << "PlaybackBuffer Size: " << playbackBuffer.size() << std::endl;
-				std::cout << "First Element: " << playbackBuffer.front() << std::endl;
-				std::cout << "input Element: " << globalAudioBuffer.front() << std::endl;
+				//std::cout << "PlaybackBuffer Size: " << playbackBuffer.size() << std::endl;
+				//std::cout << "First Element: " << playbackBuffer.front() << std::endl;
+				//std::cout << "input Element: " << globalAudioBuffer.front() << std::endl;
 				//out[i] = playbackBuffer.front(); //play the fist element
 				out[i] = playbackBuffer[i];
 				playbackBuffer.erase(playbackBuffer.begin());//erase it 
-					if (playbackBuffer.empty()) {
-						empty_counter++;
-					}
-					if (empty_counter == 3) {
-						//STOP STREAM
-						//void stopAudio();
-						//AudioHandler::stopAudio();
-						//audiohandler.stopAudio();
-					}
+				bool isPlaybackFinished = true;
 					
 			}
 		}
-		
-		
 		}
 	else {
 		std::cout << "No input detected, outputting silence." << std::endl;
@@ -265,7 +257,13 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			out[i] = 0.0f; // Silence
 			}
 		}
+
+
+	if (isPlaybackFinished) {
+		bool playbackFinishedFlag = true;
+	}
 	return paContinue;
+	
 		
 	}
 
@@ -298,4 +296,11 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	 std::lock_guard<std::mutex> lock(playbackMutex);
 	 playbackBuffer.insert(playbackBuffer.end(), buffer.begin(), buffer.end());
  
+ }
+ void AudioHandler::checkAndStopAudio() {
+	 if (playbackFinishedFlag) {
+		 std::cout << "Playback finished, stopping audio." << std::endl;
+		 stopAudio();
+		 playbackFinishedFlag = false; // Reset the flag
+	 }
  }

@@ -35,4 +35,7 @@ public:
 	//void preparedata(const std::vector<float>& buffer);
 	void preparedata();
 	void setbuffer(int i, const std::vector<float>& buffer);
+	void checkAndStopAudio();
+	bool isPlaybackFinished ;
+	bool playbackFinishedFla
 }; 
