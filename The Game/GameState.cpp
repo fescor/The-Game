@@ -53,7 +53,7 @@ int GameState::getAvailableSS(int ss)
 	for (auto i : availableSpaceship) {
 		if (i != 4) {
 			
-			return ss;
+			return i;
 		}
 	}
 
@@ -72,6 +72,7 @@ int GameState::setOPSpaceship(int id, int ss)
 	else {
 		if (id == *getPlayer()->geto_id()) {
 			getPlayer()->setPSpaceship(ss);
+			availableSpaceship[ss] = 4;
 		}
 		else {
 			o_players.find(id)->second->setPSpaceship(ss);
