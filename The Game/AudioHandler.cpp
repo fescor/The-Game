@@ -16,7 +16,7 @@ using namespace std;
 
 std::vector<float> AudioHandler::globalAudioBuffer;
 std::mutex AudioHandler::buffermutex;
-std::vector<float> playbackBuffer;
+std::vector<float> AudioHandler::playbackBuffer;
 std::mutex AudioHandler::playbackMutex;
 
 // Constructor implementation
@@ -275,7 +275,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
  void AudioHandler::setbuffer(int i, const std::vector<float>& buffer) {
 	 int player_id = i; 
-	 std::lock_guard<std::mutex> lock(playbackMutex);
+	 //std::lock_guard<std::mutex> lock(playbackMutex);
 	 playbackBuffer.insert(playbackBuffer.end(), buffer.begin(), buffer.end());
  
  }
