@@ -40,6 +40,7 @@ private:
 	bool PreviousState = false;
 	bool CurrentState;
 	std::thread pst;
+	std::thread receiver;
 	
 
 

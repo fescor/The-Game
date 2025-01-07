@@ -7,7 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <mutex>
-#include <cmath>
+
 
 using namespace std;
 #define _USE_MATH_DEFINES
@@ -22,6 +22,7 @@ std::mutex AudioHandler::playbackMutex;
 // Constructor implementation
 AudioHandler::AudioHandler() {
 	AudioHandler::audioInit();
+
 	
 }
 
@@ -231,14 +232,24 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		}
 		
 		//PLAYBACK
+		int empty_counter = 0;
 		std::lock_guard<std::mutex> lock(playbackMutex);
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
 			if (!playbackBuffer.empty()) {
-				//std::cout << "Player : " << player_id << " is speaking" << std::endl;
-				out[i] = playbackBuffer.front(); //play the fist element
-				playbackBuffer.erase(playbackBuffer.begin()); //erase it 
+				//for (i=0 ; i<= playbackBuffer.size();i++){
+					//std::cout << "Player : " << player_id << " is speaking" << std::endl;
+					out[i] = playbackBuffer.front(); //play the fist element
+					//out[i] = playbackBuffer[i];
+					playbackBuffer.erase(playbackBuffer.begin());//erase it 
+					if (playbackBuffer.empty()) {
+						empty_counter++;
+					}
+					if (empty_counter == 3) {
+						//STOP STREAM
+						void stopAudio();
+					}
+					
 			}
-		
 		}
 		
 		
@@ -275,7 +286,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
  void AudioHandler::setbuffer(int i, const std::vector<float>& buffer) {
 	 int player_id = i; 
-	 //std::lock_guard<std::mutex> lock(playbackMutex);
+	 std::lock_guard<std::mutex> lock(playbackMutex);
 	 playbackBuffer.insert(playbackBuffer.end(), buffer.begin(), buffer.end());
  
  }

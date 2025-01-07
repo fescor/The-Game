@@ -65,8 +65,9 @@ void GameState::sendToPlayback(audiodata ad) {
 	//std::vector<float> chunk; 
 	//std::copy(ad.audioData, ad.audioData + sizeof(ad.audioData) / sizeof(ad.audioData[0]), chunk);
 	//std::vector<float> chunk(ad.audioData, ad.audioData + sizeof(ad.audioData) / sizeof(ad.audioData[0]));
+	audiohandler = new AudioHandler();
+	receiver = std::thread(&AudioHandler::stopAudio, audiohandler);// thread to start the audio stream for playback
 	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
-	
 	audiohandler->setbuffer(player_id, chunk);
 }
 
