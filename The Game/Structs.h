@@ -142,10 +142,11 @@ struct spaceShip
 {
 	int o_id;
 	int spaceShip;
+	int hostSpaceship;
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(o_id , spaceShip); // serialize things by passing them to the archive
+		archive(o_id , spaceShip, hostSpaceship); // serialize things by passing them to the archive
 	}
 
 };

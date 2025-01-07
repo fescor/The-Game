@@ -690,10 +690,10 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 	case SPACE_SHIP:
 		cout << "GOT SPACE SHIP TYPE MSG" << '\n';
 		if (m_state->amHost()) {
-			sendOPSpaceship(p.ss.o_id, m_state->setOPSpaceship(p.ss.o_id, p.ss.spaceShip));
+			sendOPSpaceship(p.ss.o_id, m_state->setOPSpaceship(p.ss));
 		}
 		else {
-			m_state->setOPSpaceship(p.ss.o_id, p.ss.spaceShip);
+			m_state->setOPSpaceship(p.ss);
 		}
 
 	}
@@ -786,7 +786,7 @@ void Net::parseData(ENetPacket* net_packet, int timeDIF, ENetPeer* peer)
 		m_state->playerLoadedLevel();
 		break;
 	case SPACE_SHIP:
-		m_state->setOPSpaceship(p.ss.o_id, p.ss.spaceShip);
+	
 
 		break;
 
@@ -903,6 +903,7 @@ void Net::sendOPSpaceship(int oid , int ss)
 	Data p;
 	p.ss.o_id = oid;
 	p.ss.spaceShip = ss;
+	p.ss.hostSpaceship = m_state->getPlayer()->getPSpaceship();
 	sendDataBroadcast(p, SPACE_SHIP);
 }
 

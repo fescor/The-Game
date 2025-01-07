@@ -76,7 +76,7 @@ public:
 
 	int availableSpaceship[4] = { 4,1,2,3 };
 	int  getAvailableSS(int ass);
-	int setOPSpaceship(int id, int ss);
+	int setOPSpaceship(spaceShip p);
 
 	void setMainpointerNull();
 	void setLevelpointerNull();
