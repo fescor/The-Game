@@ -933,6 +933,17 @@ potition Player::getNewPos()
 	return new_pos;
 }
 
+void Player::setPSpaceship(int ss)
+{
+	spaceship = ss;
+
+}
+
+int Player::getPSpaceship()
+{
+	return spaceship;
+}
+
 
 
 Player::Player(int online_id)

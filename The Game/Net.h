@@ -71,6 +71,8 @@ class Net : public GameObject {
 	
 	startG createSGDtata();
 	void sendPlayerInfo();
+	void sendMySpaceShip();
+	void sendOPSpaceship(int o_id , int ss);
 	
 	
 	
@@ -80,7 +82,7 @@ class Net : public GameObject {
 	
 	///JOIN FUNCTIONS
 
-	void setmyID(int id);
+	void setmyID(setID p);
 	void validatePeer(enet_uint32 ip, int id, ENetPeer* peer);
 
 

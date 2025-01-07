@@ -59,6 +59,7 @@ private:
 	char status = 'M';
 	int dificultyLVL = 0;
 	int spaceship = 0;
+	
 
 
 	void initNet();
@@ -72,6 +73,11 @@ protected:
 
 
 public:
+
+	int availableSpaceship[4] = { 0,1,2,3 };
+	int  getAvailableSS(int ass);
+	int setOPSpaceship(int id, int ss);
+
 	void setMainpointerNull();
 	void setLevelpointerNull();
 	void setSpaceship(int i);

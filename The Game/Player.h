@@ -67,7 +67,7 @@ class Player : public GameObject, public Box, public Health
 	int sprite_counter;
 
 	int shieldFramecounter;
-
+	int spaceship = 0;
 
 	keystrokes input;
 	potition prev_pos;
@@ -141,7 +141,8 @@ public:
 
 	void setNewPos(float x, float y,float speed , float angle ,  int fc);
 	potition getNewPos();
-
+	void setPSpaceship(int spaceship);
+	int getPSpaceship();
 
 
 	Player(int online_id);

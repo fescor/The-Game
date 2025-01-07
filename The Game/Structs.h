@@ -117,13 +117,13 @@ struct PEER
 struct setID
 {
 	int id = 0;
-	
+	int availablespaceships[4] = {};
 
 
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(id); // serialize things by passing them to the archive
+		archive(id , availablespaceships); // serialize things by passing them to the archive
 	}
 
 };
@@ -137,9 +137,16 @@ struct dc
 		archive(idc); // serialize things by passing them to the archive
 	}
 
-
-
-
+};
+struct spaceShip
+{
+	int o_id;
+	int spaceShip;
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(o_id , spaceShip); // serialize things by passing them to the archive
+	}
 
 };
 
@@ -156,6 +163,7 @@ enum PACKETTYPE {
 	MAP_INFO,
 	PLAYER_INFO,
 	VOICE_CHUNK,
+	SPACE_SHIP,
 
 
 
@@ -178,7 +186,7 @@ struct packet
 		Loaded loaded_level;
 		playerInfo pi;
 		voice  vc;
-		
+		spaceShip ss;
 		
 
 
@@ -213,6 +221,10 @@ struct packet
 			case PLAYER_INFO:
 				archive(pi);
 				break;
+			case SPACE_SHIP:
+				archive(ss);
+				break;
+
 
 				
 
@@ -244,6 +256,8 @@ union Data
 	playerInfo pi;
 
 	voice vc;
+
+	spaceShip ss;
 
 
 };

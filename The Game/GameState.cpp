@@ -26,9 +26,7 @@ int* GameState::connectpeer2player(int id)
 
 void GameState::initNet()
 {
-	if (!m_player) {
-		m_player = new Player("Player"); // i create my player instance when i go online to set  online things 
-	}
+
 	
 	net = new Net(host);
 	//std::thread nt(&Net::run, net);
@@ -45,6 +43,37 @@ void GameState::deleteNet()
 	}
 	net = nullptr;
 	
+}
+
+int GameState::getAvailableSS(int ss)
+{
+
+	
+	if (availableSpaceship[ss] != 4) { return ss; }
+	for (auto i : availableSpaceship) {
+		if (i != 4) {
+			
+			return ss;
+		}
+	}
+
+
+}
+
+int GameState::setOPSpaceship(int id, int ss)
+{
+	if (amHost()) {
+		int spaceship = getAvailableSS(ss);
+
+		o_players.find(id)->second->setPSpaceship(spaceship);
+
+		return spaceship;
+	}
+	else {
+		o_players.find(id)->second->setPSpaceship(ss);
+	}
+	
+
 }
 
 void GameState::setMainpointerNull()
@@ -64,6 +93,8 @@ void GameState::setLevelpointerNull()
 void GameState::setSpaceship(int i)
 {
 	spaceship = i;
+	getPlayer()->setPSpaceship(i);
+	availableSpaceship[i] = 4;
 }
 
 int GameState::getSpaceship()
@@ -109,13 +140,17 @@ char GameState::getStatus()
 
 GameState::GameState()
 {
+
 	
 }
 
 void GameState::init()
 {
 
-	
+	if (!m_player) {
+		m_player = new Player("Player"); // i create my player instance when i go online to set  online things 
+	}
+
 	
 
 	switch (status) {
@@ -214,17 +249,20 @@ void GameState::update(float dt)
 		nt.join();
 
 		deleteNet();
-
+		/*
 		if (m_player) {
 			delete m_player;
 			m_player = nullptr;
 		}
+		*/
 
 		if (m_current_level) {
 			getLevel()->deleteLevel();
 		}
 		
-		mainscreen->setSelector(CREATE_LOBBY);
+		mainscreen->setSelector(PLAY);
+		
+		
 
 	}
 	

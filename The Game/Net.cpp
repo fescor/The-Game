@@ -358,6 +358,9 @@ void Net::sendDataBroadcast(union Data payload, PACKETTYPE type)
 		p.vc = payload.vc;
 
 		break;
+	case SPACE_SHIP:
+		p.type = type;
+		p.ss = payload.ss;
 
 	}
 
@@ -587,6 +590,9 @@ union Data Net::setPeerID()
 
 	setID setid;
 	setid.id = maxpeerID;
+	std::copy(m_state->availableSpaceship, 
+		sizeof(m_state->availableSpaceship)/sizeof(m_state->availableSpaceship[0]) + m_state->availableSpaceship ,
+		setid.availablespaceships);
 	union Data payload;
 	payload.setid = setid;
 
@@ -626,7 +632,9 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		break;
 	case SETID:
 
-		setmyID(p.setid.id);
+		setmyID(p.setid);
+		
+		sendMySpaceShip();
 
 
 
@@ -675,6 +683,13 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 
 		m_state->playerLoadedLevel();
 		break;
+	case SPACE_SHIP:
+		if (m_state->amHost()) {
+			sendOPSpaceship(p.ss.o_id, m_state->setOPSpaceship(p.ss.o_id, p.ss.spaceShip));
+		}
+		else {
+			m_state->setOPSpaceship(p.ss.o_id, p.ss.spaceShip);
+		}
 
 	}
 
@@ -717,7 +732,8 @@ void Net::parseData(ENetPacket* net_packet, int timeDIF, ENetPeer* peer)
 		break;
 	case SETID:
 
-		setmyID(p.setid.id);
+		setmyID(p.setid);
+
 
 
 
@@ -763,6 +779,10 @@ void Net::parseData(ENetPacket* net_packet, int timeDIF, ENetPeer* peer)
 	case LOADED_LEVEL:
 
 		m_state->playerLoadedLevel();
+		break;
+	case SPACE_SHIP:
+		m_state->setOPSpaceship(p.ss.o_id, p.ss.spaceShip);
+
 		break;
 
 	}
@@ -864,11 +884,30 @@ void Net::sendPlayerInfo()
 
 }
 
+void Net::sendMySpaceShip()
+{
+	Data p;
+	p.ss.o_id = *m_state->getPlayer()->geto_id();
+	p.ss.spaceShip = m_state->getPlayer()->getPSpaceship();
+	sendDataToPeer(connectedPeers.find(0)->second ,p ,SPACE_SHIP );
 
-void Net::setmyID(int id)
+}
+
+void Net::sendOPSpaceship(int oid , int ss)
+{
+	Data p;
+	p.ss.o_id = oid;
+	p.ss.spaceShip = ss;
+	sendDataBroadcast(p, SPACE_SHIP);
+}
+
+
+void Net::setmyID(setID p)
 {
 
-	m_state->getPlayer()->seto_id(id);
+	m_state->getPlayer()->seto_id(p.id);
+	
+
 	
 	cout << "HOST SET MY ONLINE ID TO : " + to_string(*(int*)m_state->getPlayer()->geto_id())<< endl;
 	
