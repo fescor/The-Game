@@ -28,12 +28,15 @@ int* GameState::connectpeer2player(int id)
 }
 
 
+
 bool GameState::PushToTalk(bool isStreaming) {
 	if (isStreaming) {
 
 	if (!audiohandler) {
+			
 			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
 			pst = std::thread(&AudioHandler::startAudio, audiohandler);
+			//KALO EINAI NA MPEI KAI ENAS ELEGXOS GIA TO AN EINAI ONLINE GIA NA MHN STELNEI SE OFLINE MODE 
 			audiohandler->preparedata();
 			pst.detach();//	 thread trexei aneksarthta
 		
@@ -55,6 +58,16 @@ bool GameState::PushToTalk(bool isStreaming) {
 		return false; 
 	}
 	
+}
+
+void GameState::sendToPlayback(audiodata ad) {
+	int player_id = ad.playerid;
+	//std::vector<float> chunk; 
+	//std::copy(ad.audioData, ad.audioData + sizeof(ad.audioData) / sizeof(ad.audioData[0]), chunk);
+	//std::vector<float> chunk(ad.audioData, ad.audioData + sizeof(ad.audioData) / sizeof(ad.audioData[0]));
+	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
+	
+	audiohandler->setbuffer(player_id, chunk);
 }
 
 /*
@@ -427,6 +440,8 @@ startG GameState::getMapData()
 	
 }
 
+
+
 void GameState::setMapData(startG strg)
 {
 
@@ -434,6 +449,8 @@ void GameState::setMapData(startG strg)
 
 
 }
+
+
 
 startG& GameState::getMapInfo()
 {

@@ -16,6 +16,8 @@ using namespace std;
 
 std::vector<float> AudioHandler::globalAudioBuffer;
 std::mutex AudioHandler::buffermutex;
+std::vector<float> playbackBuffer;
+std::mutex AudioHandler::playbackMutex;
 
 // Constructor implementation
 AudioHandler::AudioHandler() {
@@ -228,12 +230,18 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
 		}
 		
-		
+		//PLAYBACK
+		std::lock_guard<std::mutex> lock(playbackMutex);
 		for (unsigned long i = 0; i < framesPerBuffer; i++) {
-				out[i] = in[i]; // Real-time playback (10.0f = volume)
-				//out[i] = globalAudioBuffer[i]; 
-				
+			if (!playbackBuffer.empty()) {
+				//std::cout << "Player : " << player_id << " is speaking" << std::endl;
+				out[i] = playbackBuffer.front(); //play the fist element
+				playbackBuffer.erase(playbackBuffer.begin()); //erase it 
 			}
+		
+		}
+		
+		
 		}
 	else {
 		std::cout << "No input detected, outputting silence." << std::endl;
@@ -261,12 +269,13 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 		 int playerid = *(m_state)->getPlayer()->geto_id();
 		 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
 		 m_state->getNet()->sendaudiodata(playerid, chunk);
-		 
-
-
 	 }
 
-	 
-
-
 }
+
+ void AudioHandler::setbuffer(int i, const std::vector<float>& buffer) {
+	 int player_id = i; 
+	 std::lock_guard<std::mutex> lock(playbackMutex);
+	 playbackBuffer.insert(playbackBuffer.end(), buffer.begin(), buffer.end());
+ 
+ }
