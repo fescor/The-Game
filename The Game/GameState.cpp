@@ -62,21 +62,15 @@ bool GameState::PushToTalk(bool isStreaming) {
 
 void GameState::sendToPlayback(audiodata ad) {
 	int player_id = ad.playerid;
-	//std::vector<float> chunk; 
-	//std::copy(ad.audioData, ad.audioData + sizeof(ad.audioData) / sizeof(ad.audioData[0]), chunk);
-	//std::vector<float> chunk(ad.audioData, ad.audioData + sizeof(ad.audioData) / sizeof(ad.audioData[0]));
-	audiohandler = new AudioHandler();
-	receiver = std::thread(&AudioHandler::stopAudio, audiohandler);// thread to start the audio stream for playback
+	if (!audiohandler) {
+		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
+		audiohandler->startAudio();
+	}
+	//converte
 	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
+	//send to playback
 	audiohandler->setbuffer(player_id, chunk);
 }
-
-/*
-int* GameState::connectpeer2player()
-{
-	return o_players.find(id)->second->geto_id();
-}
-*/
 
 void GameState::initNet()
 {

@@ -238,15 +238,20 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			if (!playbackBuffer.empty()) {
 				//for (i=0 ; i<= playbackBuffer.size();i++){
 					//std::cout << "Player : " << player_id << " is speaking" << std::endl;
-					out[i] = playbackBuffer.front(); //play the fist element
-					//out[i] = playbackBuffer[i];
-					playbackBuffer.erase(playbackBuffer.begin());//erase it 
+				std::cout << "PlaybackBuffer Size: " << playbackBuffer.size() << std::endl;
+				std::cout << "First Element: " << playbackBuffer.front() << std::endl;
+				std::cout << "input Element: " << globalAudioBuffer.front() << std::endl;
+				//out[i] = playbackBuffer.front(); //play the fist element
+				out[i] = playbackBuffer[i];
+				playbackBuffer.erase(playbackBuffer.begin());//erase it 
 					if (playbackBuffer.empty()) {
 						empty_counter++;
 					}
 					if (empty_counter == 3) {
 						//STOP STREAM
-						void stopAudio();
+						//void stopAudio();
+						//AudioHandler::stopAudio();
+						//audiohandler.stopAudio();
 					}
 					
 			}
@@ -274,12 +279,16 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
- if (globalAudioBuffer.size() >= 512)
+	 
+ while (globalAudioBuffer.size() >= 512)
 	 { //an exei arketa dedomena
-		 float chunk [512]  ; 
-		 int playerid = *(m_state)->getPlayer()->geto_id();
+		 float chunk [512] ; 
+		 //send fist 512 frames
 		 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
+		 int playerid = *(m_state)->getPlayer()->geto_id();
 		 m_state->getNet()->sendaudiodata(playerid, chunk);
+		 //erase the data that sended
+		 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
 	 }
 
 }
