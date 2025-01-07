@@ -265,7 +265,11 @@ void GameState::update(float dt)
 		if (m_current_level) {
 			getLevel()->deleteLevel();
 		}
-		
+		for (int i = 0; i < 4; i ++) {
+			if (i != getPlayer()->getPSpaceship()) {
+				availableSpaceship[i] = i;
+			}
+		}
 		mainscreen->setSelector(PLAY);
 		
 		
