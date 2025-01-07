@@ -70,7 +70,12 @@ int GameState::setOPSpaceship(int id, int ss)
 		return spaceship;
 	}
 	else {
-		o_players.find(id)->second->setPSpaceship(ss);
+		if (id == *getPlayer()->geto_id()) {
+			getPlayer()->setPSpaceship(ss);
+		}
+		else {
+			o_players.find(id)->second->setPSpaceship(ss);
+		}
 	}
 	
 

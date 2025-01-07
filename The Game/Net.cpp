@@ -305,7 +305,11 @@ void Net::sendDataToPeer(ENetPeer* peer, union Data payload, PACKETTYPE type)
 		p.type = type;
 
 		p.pi = payload.pi;
-	
+		break;
+	case SPACE_SHIP:
+		p.type = type;
+		p.ss = payload.ss;
+		break;
 
 	}
 
@@ -684,6 +688,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		m_state->playerLoadedLevel();
 		break;
 	case SPACE_SHIP:
+		cout << "GOT SPACE SHIP TYPE MSG" << '\n';
 		if (m_state->amHost()) {
 			sendOPSpaceship(p.ss.o_id, m_state->setOPSpaceship(p.ss.o_id, p.ss.spaceShip));
 		}

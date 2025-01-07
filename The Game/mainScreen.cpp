@@ -298,7 +298,7 @@ void MainScreen::select()
 				m_state->setOnline(true, true);
 				break;
 			case JOIN_LOBBY:// join a game 
-				selector = DC;
+				selector = LOBBY_SCREEN;
 				m_state->setOnline(true , false);
 				break;
 			case DC:
@@ -583,18 +583,19 @@ void MainScreen::draw()
 
 		graphics::drawRect(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth()*0.35, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
 		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player1", m_lobby_gui);
-
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 0);
 		for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
 			i++;
 			
 			m_spaceship.texture = m_state->getFullAssetPath("spaceship" + to_string(iter->second->getPSpaceship()) + ".png");
 
 			m_spaceship.outline_opacity = 0.0f;
-
+			/*
 			graphics::drawRect(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35*i, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
 			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386*i, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player1", m_lobby_gui);
-
-
+			*/
+			graphics::drawRect(m_state->getCanvasWidth() * 0.5 , m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player1", m_lobby_gui);
 
 		}
 		
