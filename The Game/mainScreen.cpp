@@ -362,8 +362,8 @@ void MainScreen::select()
 				}
 				break;
 			case LOBBY_SCREEN_CS:
-				
-				selector = CSPACESHIP;
+				m_state->availableSpaceship[m_state->getPlayer()->getPSpaceship()] = m_state->getPlayer()->getPSpaceship();
+				selector = SELECT_SPACESHIP;
 				break;
 
 			}
