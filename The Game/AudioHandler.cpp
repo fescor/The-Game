@@ -150,7 +150,7 @@ void AudioHandler::startplaybackstream(){
 	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
 	outputparametr.hostApiSpecificStreamInfo = nullptr;
 
-	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paClipOff, nullptr, nullptr);
+	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paClipOff, playbackcallback, nullptr);
 	if (err != paNoError) {
 		std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl; 
 		return;
@@ -270,28 +270,6 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			std::lock_guard<std::mutex> lovk(buffermutex);// mutex lock
 			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
 		}
-
-		//PLAYBACK
-		/*
-		std::lock_guard<std::mutex> lock(playbackMutex);
-		if (!playbackBuffer.empty()) {
-			for (unsigned long i = 0; i < framesPerBuffer; i++) {
-
-				//for (i=0 ; i<= playbackBuffer.size();i++){
-					//std::cout << "Player : " << player_id << " is speaking" << std::endl;
-				//std::cout << "PlaybackBuffer Size: " << playbackBuffer.size() << std::endl;
-				//std::cout << "First Element: " << playbackBuffer.front() << std::endl;
-				//std::cout << "input Element: " << globalAudioBuffer.front() << std::endl;
-				//out[i] = playbackBuffer.front(); //play the fist element
-				//out[i] = playbackBuffer[i];
-				playbackBuffer.erase(playbackBuffer.begin());//erase it
-				if (playbackBuffer.empty()) {
-					 isPlaybackFinished = true;
-				}
-
-			}
-			}
-			*/
 	}
 	else {
 		std::cout << "No input detected, outputting silence." << std::endl;
@@ -346,26 +324,46 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 		 buffer.erase(buffer.begin(), buffer.begin() + (buffer.size() - maxBuffersize));
 
 	 }
-	 std::cout << "Added audio chunk for player " << player_id << ". Buffer size: " << playbackBuffer[player_id].size() << " samples.\n";
+	 std::cout << "Added audio chunk for player " << i << ". Buffer size: " << playbackBuffer[i].size() << " samples.\n";
 	 //an den uparxei stream anoikse gia to playback
 	 if (!stream) {
 		 AudioHandler::startplaybackstream();
-		 Pa_WriteStream(stream, chunk.data(), chunk.size());
+		PaError err = Pa_WriteStream(stream, playbackBuffer[i].data(), playbackBuffer[i].size());
+		 if (err != paNoError) {
+			 std::cerr << "Error writing to stream: " << Pa_GetErrorText(err) << std::endl;
+		 }
 		 if (playbackBuffer.empty()) {
 			 //when playback is finished 
-			 AudioHandler::stopAudio();
+			 stopAudio();
 		 }
 	 }
 
  }
- /*
- void AudioHandler::checkAndStopAudio() {
-	 if (playbackFinishedFlag) {
-		 std::cout << "Playback finished, stopping audio." << std::endl;
-		 stopAudio();
-		 getAndClearAudioBuffer();
-		 playbackFinishedFlag = false; // Reset the flag
-		
+
+ int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
+	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData)
+ {
+	 float* out = static_cast<float*>(outputBuffer);
+
+	 if (playbackBuffer.empty()) {
+		 std::fill(out, out + framesPerBuffer, 0.0f);  // silence 
 	 }
+	 else {
+		 // store playback size
+		 size_t dataToPlayback = min(playbackBuffer.begin()->second.size(), framesPerBuffer);
+
+		 //
+		 std::copy(playbackBuffer.begin()->second.begin(), playbackBuffer.begin()->second.begin() + dataToPlayback,out);
+
+		 // delete what you have copy 
+		 playbackBuffer.begin()->second.erase(playbackBuffer.begin()->second.begin(),playbackBuffer.begin()->second.begin() + dataToPlayback);
+
+	
+		 if (playbackBuffer.begin()->second.empty()) {
+			 playbackBuffer.erase(playbackBuffer.begin());
+		 }
+	 }
+
+	 return paContinue;  
  }
- */
+

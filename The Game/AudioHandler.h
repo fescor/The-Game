@@ -37,10 +37,8 @@ public:
 	void  ShowDefaultDevices() const;
 	//bool AudioRecorder(int durationSeconds, const std::string& filename);
 	static int audioCallback(const void* inputbuffer, void* outputbuffer, unsigned long framsPerBuffer, const PaStreamCallbackTimeInfo* timeinfo, PaStreamCallbackFlags statusflag, void* userData);
-	//void preparedata(const std::vector<float>& buffer);
+	//void preparedata(const std::vector<floatconst void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
+	static int playbackcallback (const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) ;
 	void preparedata();
 	void setbuffer(int i, const std::vector<float>& buffer);
-	void checkAndStopAudio();
-	bool isPlaybackFinished;
-	bool playbackFinishedFlag;
 };

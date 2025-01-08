@@ -63,10 +63,12 @@ bool GameState::PushToTalk(bool isStreaming) {
 void GameState::sendToPlayback(audiodata ad) {
 	int player_id = ad.playerid;
 	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
+	std::cout << "sendToPlayer chunk size is : " << chunk.size() << std::endl; 
 	if (!audiohandler) {
 		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
-		audiohandler->setbuffer(player_id, chunk);
+		
 	}
+	audiohandler->setbuffer(player_id, chunk);
 	//converte
 	
 	//send to playback
