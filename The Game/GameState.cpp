@@ -45,9 +45,9 @@ void GameState::deleteNet()
 	
 }
 
-int GameState::getAvailableSS(int ss)
+int GameState::getAvailableSS(int ss, int oid)
 {
-
+	availableSpaceship[o_players[oid]->getPSpaceship()] = o_players[oid]->getPSpaceship();
 	
 	if (availableSpaceship[ss] != 4) {
 		availableSpaceship[ss] = 4;

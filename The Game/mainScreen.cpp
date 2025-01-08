@@ -198,7 +198,7 @@ void MainScreen::moveleft()
 
 		}
 	}
-	else if (selector == LOBBY_SCREEN_CS) {
+	else if (selector == LOBBY_SCREEN_CS && m_state->amHost()) {
 		selector = LOBBY_SCREEN_STARTG;
 	}
 	else if (selector == LOBBY_SCREEN_STARTG) {
@@ -240,7 +240,7 @@ void MainScreen::moveright()
 
 
 	}
-	else if (selector == LOBBY_SCREEN_CS) {
+	else if (selector == LOBBY_SCREEN_CS && m_state->amHost()) {
 		selector = LOBBY_SCREEN_STARTG;
 	}
 	
@@ -332,7 +332,8 @@ void MainScreen::select()
 				
 				break;
 			case JOIN_LOBBY:// join a game 
-				selector = LOBBY_SCREEN_STARTG;
+				
+				selector = LOBBY_SCREEN_CS;
 				m_state->setOnline(true , false);
 				break;
 			case DC:
