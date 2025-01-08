@@ -47,18 +47,39 @@ void GameState::deleteNet()
 
 int GameState::getAvailableSS(int ss, int oid)
 {
-	availableSpaceship[o_players[oid]->getPSpaceship()] = o_players[oid]->getPSpaceship();
-	
-	if (availableSpaceship[ss] != 4) {
-		availableSpaceship[ss] = 4;
-		return ss; 
-	}
-	for (int i = 0; i < 4; i++) {
-		if (availableSpaceship[i] != 4) {
-			availableSpaceship[i] = 4;
-			return i;
+
+	if (ss == o_players[oid]->getPSpaceship() && availableSpaceship[ss] != 4) { return ss; }
+	else if (ss == o_players[oid]->getPSpaceship() && availableSpaceship[ss] == 4) {
+		for (int i = 0; i < 4; i++) {
+			if (availableSpaceship[i] != 4) {
+				availableSpaceship[i] = 4;
+				return i;
+			}
 		}
+
 	}
+	else if (ss != o_players[oid]->getPSpaceship() && availableSpaceship[ss] != 4) {
+		int prev_onlinep_spaceship = o_players[oid]->getPSpaceship();
+		availableSpaceship[prev_onlinep_spaceship] = prev_onlinep_spaceship;
+		availableSpaceship[ss] = 4;
+		return ss;
+
+
+	}
+	else if (ss != o_players[oid]->getPSpaceship() && availableSpaceship[ss] == 4) {
+		int prev_onlinep_spaceship = o_players[oid]->getPSpaceship();
+		availableSpaceship[prev_onlinep_spaceship] = prev_onlinep_spaceship;
+		for (int i = 0; i < 4; i++) {
+			if (availableSpaceship[i] != 4) {
+				availableSpaceship[i] = 4;
+				return i;
+			}
+		}
+
+	}
+
+
+
 
 
 }
@@ -66,7 +87,7 @@ int GameState::getAvailableSS(int ss, int oid)
 int GameState::setOPSpaceship(spaceShip p)
 {
 	if (amHost()) {
-		int spaceship = getAvailableSS(p.spaceShip);
+		int spaceship = getAvailableSS(p.spaceShip , p.o_id);
 
 		o_players.find(p.o_id)->second->setPSpaceship(spaceship);
 
