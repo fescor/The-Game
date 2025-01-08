@@ -49,7 +49,10 @@ int GameState::getAvailableSS(int ss)
 {
 
 	
-	if (availableSpaceship[ss] != 4) { return ss; }
+	if (availableSpaceship[ss] != 4) {
+		availableSpaceship[ss] = 4;
+		return ss; 
+	}
 	for (int i = 0; i < 4; i++) {
 		if (availableSpaceship[i] != 4) {
 			availableSpaceship[i] = 4;
@@ -77,7 +80,7 @@ int GameState::setOPSpaceship(spaceShip p)
 
 
 		}
-		if (p.spaceShip != NULL) {
+		if (p.spaceShip != 5) { // 5 means that the only host changes spaces ship
 			if (p.o_id == *getPlayer()->geto_id()) {
 				getPlayer()->setPSpaceship(p.spaceShip);
 				availableSpaceship[p.spaceShip] = 4;

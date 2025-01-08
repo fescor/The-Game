@@ -350,7 +350,13 @@ void Net::sendDataToPeer(ENetPeer* peer, union Data payload, PACKETTYPE type)
 	ENetPacket* packet = enet_packet_create(data.c_str(), data.length() + 1, ENET_PACKET_FLAG_RELIABLE);
 	enet_peer_send(peer, 0, packet); //second parameter is channel id i want to send the packet through
 
-	
+	if (type != PMOVE) {
+		cout << "sending " + to_string(type) + " MSG" << endl;
+
+		std::string s =  "AVAILABLE SPACESHIPS : { " + m_state->availableSpaceship[0] + ',' + m_state->availableSpaceship[1] + ',' + m_state->availableSpaceship[2]
+			+ ',' + m_state->availableSpaceship[3] + ' }' + '\n';
+		cout << s;
+	}
 
 }
 
@@ -408,9 +414,12 @@ void Net::sendDataBroadcast(union Data payload, PACKETTYPE type)
 	
 	
 	if (type != PMOVE) {
-		cout << "sending " + to_string(type) +  " MSG" << endl;
-	}
+		cout << "sending " + to_string(type) + " MSG" << endl;
 
+		std::string s = "AVAILABLE SPACESHIPS : { " + m_state->availableSpaceship[0] + ',' + m_state->availableSpaceship[1] + ',' + m_state->availableSpaceship[2]
+			+ ',' + m_state->availableSpaceship[3] + ' }' + '\n';
+		cout << s;
+	}
 	
 
 }
@@ -720,8 +729,9 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		else {
 			m_state->setOPSpaceship(p.ss);
 		}
-		cout << "AVAILABLE SPACESHIPS : { " + m_state->availableSpaceship[0] + ',' + m_state->availableSpaceship[1] + ',' + m_state->availableSpaceship[2]
-			+ ',' + m_state->availableSpaceship[3] + ' }' << '\n';
+		std::string s = "AVAILABLE SPACESHIPS : { " + m_state->availableSpaceship[0] + ',' + m_state->availableSpaceship[1] + ',' + m_state->availableSpaceship[2]
+			+ ',' + m_state->availableSpaceship[3] + ' }' + '\n';
+		cout << s;
 		break;
 	}
 
@@ -922,7 +932,7 @@ void Net::sendMySpaceShip()
 		Data p;
 		p.ss.o_id = 0;
 		p.ss.hostSpaceship = m_state->getPlayer()->getPSpaceship();
-		p.ss.spaceShip = NULL;
+		p.ss.spaceShip = 5; // 5 means dont change your space ship just changes mine(host)
 		sendDataBroadcast(p, SPACE_SHIP);
 
 	}
@@ -930,8 +940,10 @@ void Net::sendMySpaceShip()
 		Data p;
 		p.ss.o_id = *m_state->getPlayer()->geto_id();
 		p.ss.spaceShip = m_state->getPlayer()->getPSpaceship();
+		
 		sendDataToPeer(connectedPeers.find(0)->second, p, SPACE_SHIP);
 	}
+
 }
 
 void Net::sendOPSpaceship(int oid , int ss)
