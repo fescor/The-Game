@@ -36,10 +36,13 @@ private:
 	//push to talk
 	bool PushToTalk(bool);
 	bool isStreaming = false;
+	bool toSend = false; 
 	bool PreviousState = false;
 	bool CurrentState;
-	//AudioHandler* audiohandler = nullptr; // create instance
 	std::thread pst;
+	std::thread receiver;
+	
+
 
 
 	
@@ -141,6 +144,7 @@ public:
 
 	void createMapInfoData();
 	
+	void sendToPlayback(audiodata); //when receive audiodata send to audiohandler to playback
 
 	
 	

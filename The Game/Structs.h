@@ -201,10 +201,6 @@ struct packet
 			case VOICE_DATA:
 				archive(ad);
 
-				
-
-				
-
 		}
 		
 	}

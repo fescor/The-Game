@@ -1,4 +1,5 @@
 ﻿#include "AudioHandler.h"
+#include "GameState.h"
 #include "Player.h"
 #include "Net.h"
 #include <fstream>
@@ -6,7 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <mutex>
-#include <cmath>
+
 
 using namespace std;
 #define _USE_MATH_DEFINES
@@ -15,11 +16,16 @@ using namespace std;
 
 std::vector<float> AudioHandler::globalAudioBuffer;
 std::mutex AudioHandler::buffermutex;
+//std::vector<float> AudioHandler::playbackBuffer;
+std::map<int, std::vector<float>> AudioHandler::playbackBuffer;
+std::mutex AudioHandler::playbackMutex;
+bool playbackFinishedFlag;
 
 // Constructor implementation
 AudioHandler::AudioHandler() {
 	AudioHandler::audioInit();
-	player = new Player("TEST");
+
+	
 }
 
 //katastrofeas
@@ -28,15 +34,11 @@ AudioHandler::~AudioHandler() {
 	if (stream) {
 		Pa_StopStream(stream);
 		Pa_CloseStream(stream);
-		delete player;
-		player = nullptr;
 	}
 
 	//terminate portaudio if initialized 
 	if (initialized) {
 		Pa_Terminate();
-		delete player;
-		player = nullptr;
 	}
 }
 
@@ -127,6 +129,43 @@ void AudioHandler::ShowDefaultDevices() const {
 	}
 }
 
+void AudioHandler::startplaybackstream(){
+	if (stream && Pa_IsStreamActive(stream)) {
+		std::cerr << "Audio stream is already active!" << std::endl;
+		return; // ean exei anoiksei mhn ksana anoigeis
+	}
+	if (!initialized) {
+		cerr << "Portaudio not initialized." << endl;
+		return;
+	}
+	PaStreamParameters outputparametr;
+	outputparametr.device = Pa_GetDefaultOutputDevice(); // get default speakers as output device
+	//PaDeviceIndex outputparametr.device = Pa_GetDefaultOutputDevice();
+	if (outputparametr.device == paNoDevice) {
+		std::cerr << "Cant find default output device." << std::endl;
+		return;
+	}
+	outputparametr.channelCount = 1;
+	outputparametr.sampleFormat = paFloat32;
+	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
+	outputparametr.hostApiSpecificStreamInfo = nullptr;
+
+	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paClipOff, nullptr, nullptr);
+	if (err != paNoError) {
+		std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl; 
+		return;
+	}
+	//start stream
+	err = Pa_StartStream(stream);
+	if (err != paNoError) {
+		std::cerr << "Pa_StartStream failed: " << Pa_GetErrorText(err) << std::endl;
+		return; 
+	}
+	else {
+		std::cout << "Stream started" << std::endl;
+	}
+}
+
 
 void AudioHandler::startAudio(){
 	
@@ -169,7 +208,7 @@ void AudioHandler::startAudio(){
 	outputparametr.hostApiSpecificStreamInfo = nullptr; 
 
 	//open audio stream 
-	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback, static_cast<void*>(player));//test gia 128 framesperbuffer arxiko 256 test gia 48000hz
+	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback,nullptr);
 	if (err != paNoError) {
 		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
 		return; 
@@ -184,9 +223,10 @@ void AudioHandler::startAudio(){
 		std::cout << "Audio stream just started!" << std::endl;
 	}
 	
-	//std::cout << "Input Device: " << inputparametr.device << std::endl;
-	//std::cout << "Output Device: " << outputparametr.device << std::endl;
+	
+	
 }
+
 
 //stop stream and playblack 
 
@@ -221,11 +261,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
-	Player* player = static_cast<Player*>(userData); // player object
-	
-	
-	Net hostInstance(true);//create net instance for host
-	Net clientInstance(false); //create net instance for client
+	bool isPlaybackFinished = false;
 
 	if (inputBuffer) {
 		std::vector<float> chunk(in, in + framesPerBuffer); //copy chunk in local vector
@@ -234,48 +270,43 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			std::lock_guard<std::mutex> lovk(buffermutex);// mutex lock
 			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
 		}
-		
-		
-		if (globalAudioBuffer.size() >= 512) 
-		{ //an exei arketa dedomena
-			std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
 
-			//create package
-			audiodata ad;
-			//ad.playerid = *player->geto_id(); // Player ID from the Player object
-			if (player != nullptr) {
-				ad.playerid = *player->geto_id();
-			
-			
-			// Copy the audio data into the audiodata structure
-			std::copy(audioData.begin(), audioData.begin() + std::min<size_t>(audioData.size(), sizeof(ad.audioData) / sizeof(ad.audioData[0])), ad.audioData);
+		//PLAYBACK
+		/*
+		std::lock_guard<std::mutex> lock(playbackMutex);
+		if (!playbackBuffer.empty()) {
+			for (unsigned long i = 0; i < framesPerBuffer; i++) {
 
-			// Prepare union Data payload
-			union Data payload;
-			payload.ad = ad;
+				//for (i=0 ; i<= playbackBuffer.size();i++){
+					//std::cout << "Player : " << player_id << " is speaking" << std::endl;
+				//std::cout << "PlaybackBuffer Size: " << playbackBuffer.size() << std::endl;
+				//std::cout << "First Element: " << playbackBuffer.front() << std::endl;
+				//std::cout << "input Element: " << globalAudioBuffer.front() << std::endl;
+				//out[i] = playbackBuffer.front(); //play the fist element
+				//out[i] = playbackBuffer[i];
+				playbackBuffer.erase(playbackBuffer.begin());//erase it
+				if (playbackBuffer.empty()) {
+					 isPlaybackFinished = true;
+				}
 
-			// Send the package via Net::sendDataBroadcast
-			//Net netInstance;
-			//netInstance::sendDataBroadcast(payload, VOICE_DATA);
-			hostInstance.sendDataBroadcast(payload, VOICE_DATA); 
-			clientInstance.sendDataBroadcast(payload, VOICE_DATA);
+			}
+			}
+	}
+	else {
+		std::cout << "No input detected, outputting silence." << std::endl;
+		for (unsigned long i = 0; i < framesPerBuffer; i++) {
+			out[i] = 0.0f; // Silence
 			}
 		}
+
+
+	if (isPlaybackFinished) {
+		bool playbackFinishedFlag = true;
+	}
 	
-			for (unsigned long i = 0; i < framesPerBuffer; i++) {
-				out[i] = in[i]; // Real-time playback (10.0f = volume)
-				//out[i] = globalAudioBuffer[i]; 
-				std::cout << "in[i]" << in[i] << "globalbuffer" << globalAudioBuffer[i] << std::endl;
-			}
-		}
-		else {
-			std::cout << "No input detected, outputting silence." << std::endl;
-			for (unsigned long i = 0; i < framesPerBuffer; i++) {
-				out[i] = 0.0f; // Silence
-			}
-		}
-		return paContinue;
-		
+	*/
+	}
+	return paContinue;
 	}
 
 
@@ -286,6 +317,56 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	return data;
 }
 
-void AudioHandler::preparedata() {
+ void AudioHandler::preparedata() {
+	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
+	 
+ while (globalAudioBuffer.size() >= 512)
+	 { //an exei arketa dedomena
+		 float chunk [512] ; 
+		 //send fist 512 frames
+		 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
+		 int playerid = *(m_state)->getPlayer()->geto_id();
+		 m_state->getNet()->sendaudiodata(playerid, chunk,sizeof(chunk));
+		 //erase the data that sended
+		 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
+	 }
 
 }
+
+ void AudioHandler::setbuffer(int i, const std::vector<float>& chunk) {
+	 
+	 if (playbackBuffer.find(i) == playbackBuffer.end()) {
+		 playbackBuffer[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
+	}
+	 //take players buffer and insert the data
+	 auto& buffer = playbackBuffer[i];
+	 buffer.insert(buffer.end(), chunk.begin(), chunk.end());
+	 const size_t maxBuffersize = 1024 * 5; 
+	//an perasei to max size sbhse ta prwta pou esteile 
+	 if (buffer.size() > maxBuffersize) {
+		 buffer.erase(buffer.begin(), buffer.begin() + (buffer.size() - maxBuffersize));
+
+	 }
+	 std::cout << "Added audio chunk for player " << player_id << ". Buffer size: " << playbackBuffer[player_id].size() << " samples.\n";
+	 //an den uparxei stream anoikse gia to playback
+	 if (!stream) {
+		 AudioHandler::startplaybackstream();
+		 Pa_WriteStream(stream, chunk.data(), chunk.size());
+		 if (playbackBuffer.empty()) {
+			 //when playback is finished 
+			 AudioHandler::stopAudio();
+		 }
+	 }
+
+ }
+ /*
+ void AudioHandler::checkAndStopAudio() {
+	 if (playbackFinishedFlag) {
+		 std::cout << "Playback finished, stopping audio." << std::endl;
+		 stopAudio();
+		 getAndClearAudioBuffer();
+		 playbackFinishedFlag = false; // Reset the flag
+		
+	 }
+ }
+ */

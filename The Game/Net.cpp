@@ -63,7 +63,19 @@ int Net::host()
 
 		}
 
+		if (!ad_packets.empty()) {
 
+			//m_state->getMutex().lock();
+			Data ad;
+			ad_packets.try_pop(ad);
+			//p_packets.pop();
+			//m_state->getMutex().unlock();
+
+
+			sendDataBroadcast(ad, VOICE_DATA);
+			enet_host_flush(client);
+
+		}
 		
 		
 
@@ -117,7 +129,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost("192.168.1.10")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
+	if (!connectToHost("192.168.68.105")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
@@ -140,6 +152,17 @@ int Net::join()
 
 
 		}
+
+		if (!ad_packets.empty()) {	
+			Data ad;
+			ad_packets.try_pop(ad);
+
+			sendDataBroadcast(ad, VOICE_DATA);
+			enet_host_flush(client);
+
+		}
+
+
 		if (enet_host_service(client, &event, 0) > 0) {
 			switch (event.type)
 			{
@@ -273,13 +296,6 @@ void Net::peerConnectRoutineJoin(ENetEvent& event)
 	}
 	newPeers[event.peer->address.host] =  event.peer;
 	return;
-
-
-
-
-
-
-	
 
 }
 
@@ -604,6 +620,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 	std::stringstream ss = std::stringstream(std::string((char*)buffer, size));
 	
 
+
 	
 	packet  p;
 
@@ -677,16 +694,12 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		break;
 	case VOICE_DATA:
 		//ti tha kanei otan dexete to voice data
+
 		std::cout << "elava ta arxeia " << std::endl;
+		m_state->sendToPlayback(p.ad);
 		break;
 
 	}
-	
-
-	
-
-	
-
 
 
 }
@@ -772,16 +785,6 @@ void Net::parseData(ENetPacket* net_packet, int timeDIF, ENetPeer* peer)
 
 	}
 
-
-
-
-
-
-
-
-
-
-
 }
 
 void Net::disconnect()///telling everyone i am disconecting
@@ -792,12 +795,9 @@ void Net::disconnect()///telling everyone i am disconecting
 	dc.idc = *m_state->getPlayer()->geto_id();
 	payload.idc = dc;
 
-
-	
 	//sendDataToPeer(p, payload, DISCONNECT);
 	sendDataBroadcast(payload, DISCONNECT);
 	enet_host_flush(client);
-	
 	
 }
 
@@ -813,9 +813,6 @@ void Net::deletePeer(int id)
 		m_state->setOnline(false, false);
 		cout << "HOST DISCONECTED" << '\n';
 	}
-
-
-
 }
 
 startG Net::createSGDtata()
@@ -853,20 +850,6 @@ startG Net::createSGDtata()
 void Net::sendPlayerInfo()
 {
 	Data d;
-	
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 
@@ -921,10 +904,12 @@ void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y, 
 	packet.x = x;
 	packet.y = y;
 	packet.fc = framecounter;
+	
 
 	
 	Data payload;
 
+	//edw to antikeimeno pmove pernei ta apo panw 
 	payload.pmove = packet;
 	
 
@@ -991,5 +976,20 @@ Net::Net(bool host) {
 Net::~Net()
 {
 	
+
+}
+
+void Net::sendaudiodata(int id, float arr[], size_t size) {
+	//create pack
+	audiodata adpacket; 
+	adpacket.playerid = id;
+	//copy to vector 
+	std::copy(arr, arr + size, adpacket.audioData);
+	//create payload
+	Data payload;
+	payload.ad = adpacket;
+	
+	
+	ad_packets.push(payload);
 
 }
