@@ -47,16 +47,17 @@ void GameState::deleteNet()
 
 int GameState::getAvailableSS(int ss, int oid)
 {
-	mtx.lock();
+	
 	if (ss == o_players[oid]->getPSpaceship() && availableSpaceship[ss] != 4) {
-		mtx.unlock();
+		
 		return ss; 
 	}
 	else if (ss == o_players[oid]->getPSpaceship() && availableSpaceship[ss] == 4) {
 		for (int i = 0; i < 4; i++) {
 			if (availableSpaceship[i] != 4) {
-				availableSpaceship[i] = 4;
-				mtx.unlock();
+				changeAvailableSpaceshipArray(i, 4);
+				
+				
 				return i;
 			}
 		}
@@ -64,26 +65,28 @@ int GameState::getAvailableSS(int ss, int oid)
 	}
 	else if (ss != o_players[oid]->getPSpaceship() && availableSpaceship[ss] != 4) {
 		int prev_onlinep_spaceship = o_players[oid]->getPSpaceship();
-		availableSpaceship[prev_onlinep_spaceship] = prev_onlinep_spaceship;
-		availableSpaceship[ss] = 4;
-		mtx.unlock();
+		
+		changeAvailableSpaceshipArray(prev_onlinep_spaceship, prev_onlinep_spaceship);
+		changeAvailableSpaceshipArray(ss, 4);
+		
+		
 		return ss;
 
 
 	}
 	else if (ss != o_players[oid]->getPSpaceship() && availableSpaceship[ss] == 4) {
 		int prev_onlinep_spaceship = o_players[oid]->getPSpaceship();
-		availableSpaceship[prev_onlinep_spaceship] = prev_onlinep_spaceship;
+		changeAvailableSpaceshipArray(prev_onlinep_spaceship, prev_onlinep_spaceship);
 		for (int i = 0; i < 4; i++) {
 			if (availableSpaceship[i] != 4) {
-				availableSpaceship[i] = 4;
-				mtx.unlock();
+				changeAvailableSpaceshipArray(i, 4);
+				
 				return i;
 			}
 		}
 
 	}
-	mtx.unlock();
+	
 
 
 
@@ -177,9 +180,16 @@ int GameState::setOPSpaceship(spaceShip p)
 
 void GameState::setavailableSpaceship(int oid)
 {
+	changeAvailableSpaceshipArray(geto_playersmap().find(oid)->second->getPSpaceship(), geto_playersmap().find(oid)->second->getPSpaceship());
+}
+
+void GameState::changeAvailableSpaceshipArray(int pos, int value)
+{
 	mtx.lock();
-	availableSpaceship[geto_playersmap().find(oid)->second->getPSpaceship()] = geto_playersmap().find(oid)->second->getPSpaceship();
+	availableSpaceship[pos] = value;
 	mtx.unlock();
+
+
 }
 
 void GameState::setMainpointerNull()
@@ -203,7 +213,7 @@ bool GameState::setSpaceship(int i)
 	}
 	spaceship = i;
 	getPlayer()->setPSpaceship(i);
-	availableSpaceship[i] = 4;
+	changeAvailableSpaceshipArray(i, 4);
 	return true;
 }
 
@@ -371,7 +381,7 @@ void GameState::update(float dt)
 		}
 		for (int i = 0; i < 4; i ++) {
 			if (i != getPlayer()->getPSpaceship()) {
-				availableSpaceship[i] = i;
+				changeAvailableSpaceshipArray(i, i);
 			}
 		}
 		mainscreen->setSelector(PLAY);

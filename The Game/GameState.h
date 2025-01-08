@@ -81,6 +81,7 @@ public:
 	int  getAvailableSS(int ass, int oid);
 	int setOPSpaceship(spaceShip p);
 	void setavailableSpaceship(int oid);
+	void changeAvailableSpaceshipArray(int pos, int value);
 
 	void setMainpointerNull();
 	void setLevelpointerNull();
