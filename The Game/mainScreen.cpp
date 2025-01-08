@@ -332,7 +332,7 @@ void MainScreen::select()
 				
 				break;
 			case JOIN_LOBBY:// join a game 
-				selector = LOBBY_SCREEN;
+				selector = LOBBY_SCREEN_STARTG;
 				m_state->setOnline(true , false);
 				break;
 			case DC:

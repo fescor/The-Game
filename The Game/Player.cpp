@@ -733,7 +733,7 @@ void Player::init(bool online)
 	m_brush_player.fill_opacity = 1.0f;
 	m_brush_player.fill_secondary_opacity = 0.0f;
 	m_brush_player.outline_opacity = 1.0f;
-	m_brush_player.texture = m_state->getFullAssetPath("spaceship" + to_string(m_state->getSpaceship()) + ".png");
+	m_brush_player.texture = m_state->getFullAssetPath("spaceship" + to_string(spaceship) + ".png");
 
 	//shield brush properties
 	SETCOLOR(m_brush_shield.fill_secondary_color, 0, 0, 255);

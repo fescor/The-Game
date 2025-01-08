@@ -74,7 +74,7 @@ protected:
 
 public:
 
-	int availableSpaceship[4] = { 4,1,2,3 };
+	int availableSpaceship[4] = {4,1,2,3};
 	int  getAvailableSS(int ass);
 	int setOPSpaceship(spaceShip p);
 

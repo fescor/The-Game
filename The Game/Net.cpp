@@ -668,6 +668,9 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		break;
 	case DISCONNECT:
 
+		resetAvailableSS();
+
+
 		enet_peer_disconnect(event.peer , 0);
 		deletePeer(p.idc.idc);
 		event.peer->data = nullptr;
@@ -933,6 +936,12 @@ void Net::sendOPSpaceship(int oid , int ss)
 	p.ss.spaceShip = ss;
 	p.ss.hostSpaceship = m_state->getPlayer()->getPSpaceship();
 	sendDataBroadcast(p, SPACE_SHIP);
+}
+
+void Net::resetAvailableSS(int oid)
+{
+	// it may need mutex lock here
+	m_state->availableSpaceship[m_state->geto_playersmap().find(oid)->second->getPSpaceship()] = m_state->geto_playersmap().find(oid)->second->getPSpaceship();
 }
 
 

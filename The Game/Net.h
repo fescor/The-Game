@@ -73,6 +73,7 @@ class Net : public GameObject {
 	void sendPlayerInfo();
 	void sendMySpaceShip();
 	void sendOPSpaceship(int o_id , int ss);
+	void resetAvailableSS(int oid);
 	
 	
 	
