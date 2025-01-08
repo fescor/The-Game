@@ -62,7 +62,7 @@ void GameState::sendToPlayback(audiodata ad) {
 	//converte
 	
 	//send to playback
-	
+	//
 	//audiohandler->checkAndStopAudio();
 }
 
