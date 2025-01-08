@@ -101,42 +101,49 @@ int GameState::setOPSpaceship(spaceShip p)
 		return spaceship;
 	}
 	else {
-
+		mtx.lock();
+		availableSpaceship[0] = p.availableS[0];
+		availableSpaceship[1] = p.availableS[1];
+		availableSpaceship[2] = p.availableS[2];
+		availableSpaceship[3] = p.availableS[3];
+		mtx.unlock();
 		if (p.spaceShip != 5) {// 5 means that the only host changes spaces ship
 			if (o_players.find(0)->second->getPSpaceship() != p.hostSpaceship) {
-				mtx.lock();
-				availableSpaceship[o_players.find(0)->second->getPSpaceship()] = o_players.find(0)->second->getPSpaceship();
+				//mtx.lock();
+				//availableSpaceship[o_players.find(0)->second->getPSpaceship()] = o_players.find(0)->second->getPSpaceship();
 				o_players.find(0)->second->setPSpaceship(p.hostSpaceship);
-				availableSpaceship[p.hostSpaceship] = 4;
-				mtx.unlock();
+				//availableSpaceship[p.hostSpaceship] = 4;
+				//mtx.unlock();
 
 			}
 
 
 			if (p.o_id == *getPlayer()->geto_id()) {
 				getPlayer()->setPSpaceship(p.spaceShip);
+				/*
 				mtx.lock();
 				availableSpaceship[p.spaceShip] = 4;
 				mtx.unlock();
+				*/
 			}
 			else {
-				mtx.lock();
-				availableSpaceship[o_players.find(p.o_id)->second->getPSpaceship()] = o_players.find(p.o_id)->second->getPSpaceship();
+				//mtx.lock();
+				//availableSpaceship[o_players.find(p.o_id)->second->getPSpaceship()] = o_players.find(p.o_id)->second->getPSpaceship();
 				o_players.find(p.o_id)->second->setPSpaceship(p.spaceShip);
-				availableSpaceship[p.spaceShip] = 4;
-				mtx.unlock();
+				//availableSpaceship[p.spaceShip] = 4;
+				//mtx.unlock();
 			}
 
 		}
 		else if (p.spaceShip == 5) {
 			
 			
-			mtx.lock();
-			availableSpaceship[o_players[0]->getPSpaceship()] = o_players[0]->getPSpaceship();
+			//mtx.lock();
+			//availableSpaceship[o_players[0]->getPSpaceship()] = o_players[0]->getPSpaceship();
 			o_players[0]->setPSpaceship(p.hostSpaceship);
-			availableSpaceship[p.hostSpaceship] = 4;
+			//availableSpaceship[p.hostSpaceship] = 4;
 
-			mtx.unlock();
+			//mtx.unlock();
 
 
 		}

@@ -625,9 +625,7 @@ union Data Net::setPeerID()
 
 	setID setid;
 	setid.id = maxpeerID;
-	std::copy(m_state->availableSpaceship, 
-		sizeof(m_state->availableSpaceship)/sizeof(m_state->availableSpaceship[0]) + m_state->availableSpaceship ,
-		setid.availablespaceships);
+
 	union Data payload;
 	payload.setid = setid;
 
@@ -952,6 +950,11 @@ void Net::sendOPSpaceship(int oid , int ss)
 	p.ss.o_id = oid;
 	p.ss.spaceShip = ss;
 	p.ss.hostSpaceship = m_state->getPlayer()->getPSpaceship();
+	p.ss.availableS[0] = m_state->availableSpaceship[0];
+	p.ss.availableS[1] = m_state->availableSpaceship[1];
+	p.ss.availableS[2] = m_state->availableSpaceship[2];
+	p.ss.availableS[3] = m_state->availableSpaceship[3];
+	
 	sendDataBroadcast(p, SPACE_SHIP);
 }
 
