@@ -26,7 +26,7 @@ class Net : public GameObject {
 	
 
 
-	std::mutex net_mutex;
+	
 	map<int,ENetPeer*> connectedPeers;
 
 	map<int , unsigned int> peers2beConnected;
@@ -73,7 +73,7 @@ class Net : public GameObject {
 	void sendPlayerInfo();
 	void sendMySpaceShip();
 	void sendOPSpaceship(int o_id , int ss);
-	void resetAvailableSS(int oid);
+
 	
 	
 	

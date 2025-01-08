@@ -95,7 +95,9 @@ int Net::host()
 			case ENET_EVENT_TYPE_DISCONNECT:
 				
 				cout << "enet_peer disconected" << endl;
+
 				if (event.peer->data != nullptr) {
+					m_state->setavailableSpaceship(*(int*)event.peer->data);
 					deletePeer(*((int*)event.peer->data));
 					event.peer->data = nullptr;
 				}
@@ -178,6 +180,7 @@ int Net::join()
 				
 				cout << "enet peer disconnected " << endl;
 				if (event.peer->data != nullptr) {
+					m_state->setavailableSpaceship(*(int*)event.peer->data);
 					deletePeer(*((int*)event.peer->data));
 					event.peer->data = nullptr;
 				}
@@ -668,8 +671,8 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		break;
 	case DISCONNECT:
 
-		resetAvailableSS();
-
+		
+		m_state->setavailableSpaceship(p.idc.idc);
 
 		enet_peer_disconnect(event.peer , 0);
 		deletePeer(p.idc.idc);
@@ -717,7 +720,9 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		else {
 			m_state->setOPSpaceship(p.ss);
 		}
-
+		cout << "AVAILABLE SPACESHIPS : { " + m_state->availableSpaceship[0] + ',' + m_state->availableSpaceship[1] + ',' + m_state->availableSpaceship[2]
+			+ ',' + m_state->availableSpaceship[3] + ' }' << '\n';
+		break;
 	}
 
 	
@@ -938,11 +943,7 @@ void Net::sendOPSpaceship(int oid , int ss)
 	sendDataBroadcast(p, SPACE_SHIP);
 }
 
-void Net::resetAvailableSS(int oid)
-{
-	// it may need mutex lock here
-	m_state->availableSpaceship[m_state->geto_playersmap().find(oid)->second->getPSpaceship()] = m_state->geto_playersmap().find(oid)->second->getPSpaceship();
-}
+
 
 
 void Net::setmyID(setID p)
@@ -1036,10 +1037,6 @@ void Net::sendLoadedLevelMSG(int o_id)
 
 }
 
-std::mutex& Net::getMutex()
-{
-	return net_mutex;
-}
 
 void Net::setinGame(bool ig)
 {

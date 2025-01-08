@@ -14,9 +14,10 @@
 
 
 
+
 class GameState {
 private:
-
+	std::mutex mtx;
 	
 
 	std::string m_assets_path = "assets//";
@@ -77,6 +78,7 @@ public:
 	int availableSpaceship[4] = {4,1,2,3};
 	int  getAvailableSS(int ass);
 	int setOPSpaceship(spaceShip p);
+	void setavailableSpaceship(int oid);
 
 	void setMainpointerNull();
 	void setLevelpointerNull();

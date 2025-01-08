@@ -96,6 +96,13 @@ int GameState::setOPSpaceship(spaceShip p)
 
 }
 
+void GameState::setavailableSpaceship(int oid)
+{
+	mtx.lock();
+	availableSpaceship[geto_playersmap().find(oid)->second->getPSpaceship()] = geto_playersmap().find(oid)->second->getPSpaceship();
+	mtx.unlock();
+}
+
 void GameState::setMainpointerNull()
 {
 	mainscreen = nullptr;
