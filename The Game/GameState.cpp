@@ -50,9 +50,9 @@ int GameState::getAvailableSS(int ss)
 
 	
 	if (availableSpaceship[ss] != 4) { return ss; }
-	for (auto i : availableSpaceship) {
-		if (i != 4) {
-			
+	for (int i = 0; i < 4; i++) {
+		if (availableSpaceship[i] != 4) {
+			availableSpaceship[i] = 4;
 			return i;
 		}
 	}
@@ -70,16 +70,27 @@ int GameState::setOPSpaceship(spaceShip p)
 		return spaceship;
 	}
 	else {
-		if (p.o_id == *getPlayer()->geto_id()) {
-			getPlayer()->setPSpaceship(p.spaceShip);
-			availableSpaceship[p.spaceShip] = 4;
-		}
-		else {
-			o_players.find(p.o_id)->second->setPSpaceship(p.spaceShip);
-		}
 		if (o_players.find(0)->second->getPSpaceship() != p.hostSpaceship) {
+			availableSpaceship[o_players.find(0)->second->getPSpaceship()] = o_players.find(0)->second->getPSpaceship();
 			o_players.find(0)->second->setPSpaceship(p.hostSpaceship);
+			availableSpaceship[p.hostSpaceship] = 4;
+
+
 		}
+		if (p.spaceShip != NULL) {
+			if (p.o_id == *getPlayer()->geto_id()) {
+				getPlayer()->setPSpaceship(p.spaceShip);
+				availableSpaceship[p.spaceShip] = 4;
+			}
+			else {
+				availableSpaceship[o_players.find(p.o_id)->second->getPSpaceship()] = o_players.find(p.o_id)->second->getPSpaceship();
+				o_players.find(p.o_id)->second->setPSpaceship(p.spaceShip);
+				availableSpaceship[p.spaceShip] = 4;
+			}
+
+		}
+		
+		
 	}
 	
 

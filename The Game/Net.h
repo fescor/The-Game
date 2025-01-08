@@ -94,7 +94,7 @@ class Net : public GameObject {
 
 	public:
 
-		
+		bool changedSpaceship = false;
 		
 		Net(bool host);
 		int run();

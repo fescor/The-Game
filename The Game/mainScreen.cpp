@@ -64,6 +64,8 @@ void MainScreen::hover()// here implement hover on menus for all cases
 		}
 		break;
 	case SELECT_SPACESHIP:
+	case LOBBY_SCREEN_STARTG:
+	case LOBBY_SCREEN_CS:
 		if (graphics::getKeyState(graphics::SCANCODE_A)) {
 			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
 			moveleft();
@@ -178,22 +180,30 @@ void MainScreen::movedown()
 
 void MainScreen::moveleft()
 {
-					
+	if (selector == SELECT_SPACESHIP) {
+
+
 		spaceshipSelector--;
 		if (spaceshipSelector < 0) {
-			spaceshipSelector = 3; 
+			spaceshipSelector = 3;
 		}
 		while (m_state->availableSpaceship[spaceshipSelector] == 4) {
 			spaceshipSelector--;
 			if (spaceshipSelector < 0) {
 				spaceshipSelector = 3;
 
-				
+
 
 			}
 
 		}
-		
+	}
+	else if (selector == LOBBY_SCREEN_CS) {
+		selector = LOBBY_SCREEN_STARTG;
+	}
+	else if (selector == LOBBY_SCREEN_STARTG) {
+		selector = LOBBY_SCREEN_CS;
+	}
 						
 			
 			
@@ -210,19 +220,30 @@ void MainScreen::moveleft()
 
 void MainScreen::moveright()
 {
-	
-	spaceshipSelector++;
-	if (spaceshipSelector > 3) { spaceshipSelector = 0; }
-	while (m_state->availableSpaceship[spaceshipSelector] == 4) {
+	if (selector == SELECT_SPACESHIP) {
 		spaceshipSelector++;
-		if (spaceshipSelector >  3) {
-			spaceshipSelector = 0;
+		if (spaceshipSelector > 3) { spaceshipSelector = 0; }
+		while (m_state->availableSpaceship[spaceshipSelector] == 4) {
+			spaceshipSelector++;
+			if (spaceshipSelector > 3) {
+				spaceshipSelector = 0;
 
 
+
+			}
 
 		}
+	}
+	else if (selector == LOBBY_SCREEN_STARTG) {
+
+		selector = LOBBY_SCREEN_CS;
+
 
 	}
+	else if (selector == LOBBY_SCREEN_CS) {
+		selector = LOBBY_SCREEN_STARTG;
+	}
+	
 		
 
 	
@@ -284,7 +305,14 @@ void MainScreen::select()
 
 				
 				m_state->setSpaceship(spaceshipSelector);
-				selector = PLAY;
+				if (m_state->getOnline()) {
+					selector = LOBBY_SCREEN_CS;
+					m_state->getNet()->changedSpaceship = true;
+				}
+				else {
+					selector = PLAY;
+				}
+				
 				break;
 			case SELECT_CONTROLS:
 				selector = PLAY;
@@ -294,8 +322,14 @@ void MainScreen::select()
 				selector = CREATE_LOBBY;
 				break;
 			case CREATE_LOBBY: // host a game
-				selector = LOBBY_SCREEN;
+				
 				m_state->setOnline(true, true);
+				
+				selector = LOBBY_SCREEN_STARTG;
+				
+				
+				
+				
 				break;
 			case JOIN_LOBBY:// join a game 
 				selector = LOBBY_SCREEN;
@@ -317,6 +351,15 @@ void MainScreen::select()
 				
 				
 
+				break;
+			case LOBBY_SCREEN_STARTG:
+				if (m_state->getNet()->isHost()) {
+					m_state->setStatus('L');
+				}
+				break;
+			case LOBBY_SCREEN_CS:
+				m_state->availableSpaceship[spaceshipSelector] = spaceshipSelector;
+				selector = SELECT_SPACESHIP;
 				break;
 
 			}
@@ -376,6 +419,7 @@ void MainScreen::init()
 
 void MainScreen::draw()
 {
+	int i;
 	SETCOLOR(m_lobby_gui.outline_color, 250, 0, 0);
 	SETCOLOR(test.fill_color, 250, 0, 0);
 	m_lobby_gui.fill_opacity = 1.0f;
@@ -571,9 +615,9 @@ void MainScreen::draw()
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 3.f, 2.0f, "START GAME", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
 			break;
-	case LOBBY_SCREEN:
+	case LOBBY_SCREEN_STARTG:
 
-		int i = 1;
+		i = 1;
 		//graphics::drawText(mouse.cur_pos_x + 1, mouse.cur_pos_y + 1, 1.0f, std::to_string(mouse.cur_pos_x) + " , " + std::to_string(mouse.cur_pos_y), test);
 		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
 		graphics::drawText(m_state->getCanvasWidth() * 0.5f  - m_state->getCanvasWidth()*0.1, m_state->getCanvasHeight() * 0.5f - m_state->getCanvasHeight() * 0.3, 2.0f, "PLAYERS", m_lobby_gui);
@@ -597,20 +641,85 @@ void MainScreen::draw()
 			
 
 		}
+		
+		if (!m_state->amHost()) {
+			SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth()*0.35, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+		}else{
+			
+				SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+				graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "START GAME", m_lobby_gui);
+				SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+				graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+				SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			
+
+		}
+		break;
+	case LOBBY_SCREEN_CS:
+		i = 1;
+		//graphics::drawText(mouse.cur_pos_x + 1, mouse.cur_pos_y + 1, 1.0f, std::to_string(mouse.cur_pos_x) + " , " + std::to_string(mouse.cur_pos_y), test);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5f - m_state->getCanvasWidth() * 0.1, m_state->getCanvasHeight() * 0.5f - m_state->getCanvasHeight() * 0.3, 2.0f, "PLAYERS", m_lobby_gui);
+		m_spaceship.texture = m_state->getFullAssetPath("spaceship" + to_string(m_state->getPlayer()->getPSpaceship()) + ".png");
+
+		m_spaceship.outline_opacity = 0.0f;
+
+		graphics::drawRect(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player1", m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 0);
+		for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
+			i++;
+
+			m_spaceship.texture = m_state->getFullAssetPath("spaceship" + to_string(iter->second->getPSpaceship()) + ".png");
+
+			m_spaceship.outline_opacity = 0.0f;
+
+			graphics::drawRect((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35) * i * 1.3, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
+			graphics::drawText((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386) * i * 1.55, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player" + std::to_string(i), m_lobby_gui);
+
+
+
+		}
 
 		if (!m_state->amHost()) {
 			SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
-			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth()*0.35, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "WAITING FOR HOST TO START GAME", m_lobby_gui);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+		}
+		else {
+
+			
+
+
+
+				SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+				graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "START GAME", m_lobby_gui);
+				SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+				graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+				SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			
 		}
 
 
-		
-		
+		break;
+
+
 
 
 
 
 	}
+		
+
+
+
+		
+		
+
+
+
+
+
 	
 
 

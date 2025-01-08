@@ -29,6 +29,16 @@ int Net::host()
 
 		//cout << timeDIF << endl;
 
+
+		if (changedSpaceship) {
+
+
+			sendMySpaceShip();
+			changedSpaceship = false;
+
+
+		}
+
 		if (!p_packets.empty()) {
 
 
@@ -125,6 +135,15 @@ int Net::join()
 	while (online) {
 		timeDIF = graphics::getGlobalTime() - timeB;
 		timeB = graphics::getGlobalTime();
+
+
+
+
+
+		if (changedSpaceship) {
+			sendMySpaceShip();
+			changedSpaceship = false;
+		}
 
 		if (!p_packets.empty()) {
 
@@ -891,11 +910,20 @@ void Net::sendPlayerInfo()
 
 void Net::sendMySpaceShip()
 {
-	Data p;
-	p.ss.o_id = *m_state->getPlayer()->geto_id();
-	p.ss.spaceShip = m_state->getPlayer()->getPSpaceship();
-	sendDataToPeer(connectedPeers.find(0)->second ,p ,SPACE_SHIP );
+	if (m_state->amHost()) {
+		Data p;
+		p.ss.o_id = 0;
+		p.ss.hostSpaceship = m_state->getPlayer()->getPSpaceship();
+		p.ss.spaceShip = NULL;
+		sendDataBroadcast(p, SPACE_SHIP);
 
+	}
+	else {
+		Data p;
+		p.ss.o_id = *m_state->getPlayer()->geto_id();
+		p.ss.spaceShip = m_state->getPlayer()->getPSpaceship();
+		sendDataToPeer(connectedPeers.find(0)->second, p, SPACE_SHIP);
+	}
 }
 
 void Net::sendOPSpaceship(int oid , int ss)
