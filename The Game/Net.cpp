@@ -9,11 +9,13 @@
 #define PC_IP "10.124.68.23"
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
-#define BABUSUS "10.124.68.39"
+#define BABUSUS "10.124.68.56"
 //TODO : error when host dc hapening on peer (bug happens after peer-net sends type msg 3 )
 // TODO : when a peers no host restarts after being killed he spawns alla planets and objects again 
 // if host has the 0 spaceship when a peers goes to change spaceship it can se the one host has should not happen
 // game crashed 1 time after i changes multiple times spaceships(dont know if it has something to do with that) when it tried to move the o_player
+//---- edge case ana exeis xrono ti tha ginei an den  kataferei ena palio peer na kanei connect sto kenourgio peer pou bike 
+//----- when a player respawns he needs to drop all the pMove packets he has and update only on new ones
 
 
 using namespace std;
@@ -132,7 +134,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost(LAPTOP_IP)) {online = false;}
+	if (!connectToHost(BABUSUS)) {online = false;}
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
@@ -585,8 +587,9 @@ bool Net::connectToPeer(const std::string ip, int id)// this should be called wh
 		enet_peer_reset(peer);
 
 		//here need some return
-		m_state->setOnline(false, false);
+		
 		enet_host_destroy(client);
+		m_state->setOnline(false, false);
 		return false;
 
 	}
@@ -961,6 +964,14 @@ void Net::sendOPSpaceship(int oid , int ss)
 	p.ss.availableS[1] = m_state->availableSpaceship[1];
 	p.ss.availableS[2] = m_state->availableSpaceship[2];
 	p.ss.availableS[3] = m_state->availableSpaceship[3];
+	for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
+		p.ss.lobbyPlayersSS[iter->second->getPSpaceship()] = iter->first;
+	}
+
+
+
+
+
 	
 	sendDataBroadcast(p, SPACE_SHIP);
 }

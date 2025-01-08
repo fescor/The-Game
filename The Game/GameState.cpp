@@ -126,6 +126,14 @@ int GameState::setOPSpaceship(spaceShip p)
 			}
 
 		}
+		for (int i = 0; i < 3; i++) {
+			if (p.lobbyPlayersSS[i] != 0) {
+				o_players.find(p.lobbyPlayersSS[i])->second->setPSpaceship(i);
+
+			}
+		}
+
+
 		return 1;
 		
 

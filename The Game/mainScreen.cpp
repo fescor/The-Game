@@ -183,7 +183,7 @@ void MainScreen::moveleft()
 	if (selector == SELECT_SPACESHIP) {
 
 
-		
+		spaceshipSelector--;
 		if (spaceshipSelector < 0) {
 			spaceshipSelector = 3;
 		}
