@@ -278,7 +278,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			}
 		}
 	
-	
+	std::cout << "audiocallback size " << globalAudioBuffer.size() << std::endl;
 	return paContinue;
 }
 
@@ -292,17 +292,21 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
-	 
+	 int counter = 0;
 	 while (!globalAudioBuffer.empty())
 	 { //an exei arketa dedomena
 			 float chunk[512] = { 0 };
+			 counter++;
 			 //send fist 512 frames
 			 size_t dataToCopy = min(globalAudioBuffer.size(), size_t(512));
 			 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
 			 int playerid = *(m_state)->getPlayer()->geto_id();
-			 m_state->getNet()->sendaudiodata(playerid, chunk);
+			 m_state->getNet()->addaudiodata(playerid, chunk);
 			 //erase the data that sended
 			 //globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
+			 if (counter == 1) {
+				 std::cout << "preparedata send chunk with size : " << globalAudioBuffer.size()<< std::endl;
+			 }
 			 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + dataToCopy);
 
 		 
@@ -344,6 +348,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData)
  {
 	 float* out = static_cast<float*>(outputBuffer);
+	 std::cout << "playbackcallback has to play chunk with size : " << globalAudioBuffer.size() << std::endl;
 
 	 if (playbackBuffer.empty()) {
 		 std::fill(out, out + framesPerBuffer, 0.0f);  // silence 
