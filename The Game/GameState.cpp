@@ -101,28 +101,43 @@ int GameState::setOPSpaceship(spaceShip p)
 		return spaceship;
 	}
 	else {
-		if (o_players.find(0)->second->getPSpaceship() != p.hostSpaceship) {
-			mtx.lock();
-			availableSpaceship[o_players.find(0)->second->getPSpaceship()] = o_players.find(0)->second->getPSpaceship();
-			o_players.find(0)->second->setPSpaceship(p.hostSpaceship);
-			availableSpaceship[p.hostSpaceship] = 4;
-			mtx.unlock();
 
-		}
-		if (p.spaceShip != 5) { // 5 means that the only host changes spaces ship
+		if (p.spaceShip != 5) {// 5 means that the only host changes spaces ship
+			if (o_players.find(0)->second->getPSpaceship() != p.hostSpaceship) {
+				mtx.lock();
+				availableSpaceship[o_players.find(0)->second->getPSpaceship()] = o_players.find(0)->second->getPSpaceship();
+				o_players.find(0)->second->setPSpaceship(p.hostSpaceship);
+				availableSpaceship[p.hostSpaceship] = 4;
+				mtx.unlock();
+
+			}
+
+
 			if (p.o_id == *getPlayer()->geto_id()) {
 				getPlayer()->setPSpaceship(p.spaceShip);
 				mtx.lock();
 				availableSpaceship[p.spaceShip] = 4;
-				mtx.lock();
+				mtx.unlock();
 			}
 			else {
 				mtx.lock();
 				availableSpaceship[o_players.find(p.o_id)->second->getPSpaceship()] = o_players.find(p.o_id)->second->getPSpaceship();
 				o_players.find(p.o_id)->second->setPSpaceship(p.spaceShip);
 				availableSpaceship[p.spaceShip] = 4;
-				mtx.lock();
+				mtx.unlock();
 			}
+
+		}
+		else if (p.spaceShip == 5) {
+			
+			
+			mtx.lock();
+			availableSpaceship[o_players[0]->getPSpaceship()] = o_players[0]->getPSpaceship();
+			o_players[0]->setPSpaceship(p.hostSpaceship);
+			availableSpaceship[p.hostSpaceship] = 4;
+
+			mtx.unlock();
+
 
 		}
 		
@@ -153,11 +168,15 @@ void GameState::setLevelpointerNull()
 }
 
 
-void GameState::setSpaceship(int i)
+bool GameState::setSpaceship(int i)
 {
+	if (spaceship == i) { // if its the same do nothing
+		return false;
+	}
 	spaceship = i;
 	getPlayer()->setPSpaceship(i);
 	availableSpaceship[i] = 4;
+	return true;
 }
 
 int GameState::getSpaceship()

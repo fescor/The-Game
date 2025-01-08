@@ -82,7 +82,7 @@ public:
 
 	void setMainpointerNull();
 	void setLevelpointerNull();
-	void setSpaceship(int i);
+	bool setSpaceship(int i);
 	int getSpaceship();
 	void setdificultyLVL(int d);
 	int getdificultyLVL();

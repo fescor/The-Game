@@ -272,7 +272,7 @@ void MainScreen::select()
 
 				break;
 			case CSPACESHIP:
-				m_state->availableSpaceship[spaceshipSelector] = spaceshipSelector;
+				m_state->availableSpaceship[m_state->getPlayer()->getPSpaceship()] = m_state->getPlayer()->getPSpaceship();
 				selector = SELECT_SPACESHIP;
 		
 				break;
@@ -304,13 +304,16 @@ void MainScreen::select()
 			case SELECT_SPACESHIP:
 
 				
-				m_state->setSpaceship(spaceshipSelector);
+				
 				if (m_state->getOnline()) {
 					selector = LOBBY_SCREEN_CS;
-					m_state->getNet()->changedSpaceship = true;
+					
 				}
 				else {
 					selector = PLAY;
+				}
+				if (m_state->setSpaceship(spaceshipSelector)) {
+					m_state->getNet()->changedSpaceship = true;
 				}
 				
 				break;
