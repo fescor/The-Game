@@ -96,7 +96,7 @@ struct  audiodata
 {
 	int playerid; //who send the data
 	//std::vector<float> audioData; 
-	float audioData[1024];
+	float audioData[512];
 	template<class Archive>
 	void serialize(Archive& archive)
 	{

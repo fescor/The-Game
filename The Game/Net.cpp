@@ -129,7 +129,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost("192.168.1.10")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
+	if (!connectToHost("192.168.68.105")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
@@ -694,6 +694,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		break;
 	case VOICE_DATA:
 		//ti tha kanei otan dexete to voice data
+
 		std::cout << "elava ta arxeia " << std::endl;
 		m_state->sendToPlayback(p.ad);
 		break;
@@ -978,14 +979,13 @@ Net::~Net()
 
 }
 
-void Net::sendaudiodata(int id, float arr[]) {
-
+void Net::sendaudiodata(int id, float arr[], size_t size) {
+	//create pack
 	audiodata adpacket; 
 	adpacket.playerid = id;
-	std::copy(arr, arr + sizeof(arr) / sizeof(arr[0]), adpacket.audioData);
-	//adpacket.audioData [] = arr;
-	
-
+	//copy to vector 
+	std::copy(arr, arr + size, adpacket.audioData);
+	//create payload
 	Data payload;
 	payload.ad = adpacket;
 	

@@ -47,11 +47,6 @@ class Net : public GameObject {
 	void sendDataToPeer(ENetPeer* peer, union Data payload, PACKETTYPE type);
 	void sendDataBroadcast(union Data payload, PACKETTYPE type);
 
-
-
-
-
-
 	bool connectToHost(const std::string ip);
 
 	bool connectToPeer(const std::string ip, const int id);
@@ -97,7 +92,7 @@ public:
 
 	Net(bool host);
 	int run();
-	void sendaudiodata(int id, float arr[]);
+	void sendaudiodata(int id, float arr[], size_t size);
 
 	void setOnline(bool a);
 	bool getOnline();

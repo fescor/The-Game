@@ -62,14 +62,16 @@ bool GameState::PushToTalk(bool isStreaming) {
 
 void GameState::sendToPlayback(audiodata ad) {
 	int player_id = ad.playerid;
+	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
 	if (!audiohandler) {
 		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
-		audiohandler->startAudio();
+		audiohandler->setbuffer(player_id, chunk);
 	}
 	//converte
-	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
+	
 	//send to playback
-	audiohandler->setbuffer(player_id, chunk);
+	
+	//audiohandler->checkAndStopAudio();
 }
 
 void GameState::initNet()
