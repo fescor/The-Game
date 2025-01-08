@@ -92,7 +92,7 @@ public:
 
 	Net(bool host);
 	int run();
-	void sendaudiodata(int id, float arr[], size_t size);
+	void sendaudiodata(int id, float arr[]);
 
 	void setOnline(bool a);
 	bool getOnline();

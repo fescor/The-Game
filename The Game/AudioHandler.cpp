@@ -261,7 +261,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
-	bool isPlaybackFinished = false;
+	//bool isPlaybackFinished = false;
 
 	if (inputBuffer) {
 		std::vector<float> chunk(in, in + framesPerBuffer); //copy chunk in local vector
@@ -291,6 +291,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 			}
 			}
+			*/
 	}
 	else {
 		std::cout << "No input detected, outputting silence." << std::endl;
@@ -298,16 +299,10 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			out[i] = 0.0f; // Silence
 			}
 		}
-
-
-	if (isPlaybackFinished) {
-		bool playbackFinishedFlag = true;
-	}
 	
-	*/
-	}
+	
 	return paContinue;
-	}
+}
 
 
 std::vector<float> AudioHandler::getAndClearAudioBuffer() {
@@ -320,15 +315,19 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
 	 
- while (globalAudioBuffer.size() >= 512)
+	 while (!globalAudioBuffer.empty())
 	 { //an exei arketa dedomena
-		 float chunk [512] ; 
-		 //send fist 512 frames
-		 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
-		 int playerid = *(m_state)->getPlayer()->geto_id();
-		 m_state->getNet()->sendaudiodata(playerid, chunk,sizeof(chunk));
-		 //erase the data that sended
-		 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
+			 float chunk[512] = { 0 };
+			 //send fist 512 frames
+			 size_t dataToCopy = min(globalAudioBuffer.size(), size_t(512));
+			 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
+			 int playerid = *(m_state)->getPlayer()->geto_id();
+			 m_state->getNet()->sendaudiodata(playerid, chunk);
+			 //erase the data that sended
+			 //globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
+			 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + dataToCopy);
+
+		 
 	 }
 
 }

@@ -979,12 +979,13 @@ Net::~Net()
 
 }
 
-void Net::sendaudiodata(int id, float arr[], size_t size) {
+void Net::sendaudiodata(int id, float arr[]) {
 	//create pack
-	audiodata adpacket; 
+	audiodata adpacket;
 	adpacket.playerid = id;
 	//copy to vector 
-	std::copy(arr, arr + size, adpacket.audioData);
+	std::copy(arr, arr + 512, adpacket.audioData);
+	//std::copy(arr, arr + size, adpacket.audioData); //problima
 	//create payload
 	Data payload;
 	payload.ad = adpacket;
