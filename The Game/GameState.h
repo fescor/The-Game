@@ -77,7 +77,7 @@ protected:
 public:
 
 	//int availableSpaceship[4] = {4,1,2,3};
-	std::array<int, 4> availableSpaceship = { 4,1,2,3 };
+	std::array<int, 4> availableSpaceship = {4,1,2,3};
 	int  getAvailableSS(int ass, int oid);
 	int setOPSpaceship(spaceShip p);
 	void setavailableSpaceship(int oid);

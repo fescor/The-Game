@@ -183,7 +183,7 @@ void MainScreen::moveleft()
 	if (selector == SELECT_SPACESHIP) {
 
 
-		spaceshipSelector--;
+		
 		if (spaceshipSelector < 0) {
 			spaceshipSelector = 3;
 		}
@@ -365,6 +365,12 @@ void MainScreen::select()
 			case LOBBY_SCREEN_CS:
 				
 				m_state->changeAvailableSpaceshipArray(m_state->getPlayer()->getPSpaceship(), m_state->getPlayer()->getPSpaceship());
+				while (m_state->availableSpaceship[spaceshipSelector] == 4) {
+					spaceshipSelector++;
+					if (spaceshipSelector > 3) {
+						spaceshipSelector = 0;
+					}
+				}
 				selector = SELECT_SPACESHIP;
 				break;
 
