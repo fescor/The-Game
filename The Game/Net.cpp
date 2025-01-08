@@ -931,6 +931,10 @@ void Net::sendMySpaceShip()
 		p.ss.o_id = 0;
 		p.ss.hostSpaceship = m_state->getPlayer()->getPSpaceship();
 		p.ss.spaceShip = 5; // 5 means dont change your space ship just changes mine(host)
+		p.ss.availableS[0] = m_state->availableSpaceship[0];
+		p.ss.availableS[1] = m_state->availableSpaceship[1];
+		p.ss.availableS[2] = m_state->availableSpaceship[2];
+		p.ss.availableS[3] = m_state->availableSpaceship[3];
 		sendDataBroadcast(p, SPACE_SHIP);
 
 	}
