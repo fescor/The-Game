@@ -47,12 +47,16 @@ void GameState::deleteNet()
 
 int GameState::getAvailableSS(int ss, int oid)
 {
-
-	if (ss == o_players[oid]->getPSpaceship() && availableSpaceship[ss] != 4) { return ss; }
+	mtx.lock();
+	if (ss == o_players[oid]->getPSpaceship() && availableSpaceship[ss] != 4) {
+		mtx.unlock();
+		return ss; 
+	}
 	else if (ss == o_players[oid]->getPSpaceship() && availableSpaceship[ss] == 4) {
 		for (int i = 0; i < 4; i++) {
 			if (availableSpaceship[i] != 4) {
 				availableSpaceship[i] = 4;
+				mtx.unlock();
 				return i;
 			}
 		}
@@ -62,6 +66,7 @@ int GameState::getAvailableSS(int ss, int oid)
 		int prev_onlinep_spaceship = o_players[oid]->getPSpaceship();
 		availableSpaceship[prev_onlinep_spaceship] = prev_onlinep_spaceship;
 		availableSpaceship[ss] = 4;
+		mtx.unlock();
 		return ss;
 
 
@@ -72,11 +77,13 @@ int GameState::getAvailableSS(int ss, int oid)
 		for (int i = 0; i < 4; i++) {
 			if (availableSpaceship[i] != 4) {
 				availableSpaceship[i] = 4;
+				mtx.unlock();
 				return i;
 			}
 		}
 
 	}
+	mtx.unlock();
 
 
 
@@ -95,21 +102,26 @@ int GameState::setOPSpaceship(spaceShip p)
 	}
 	else {
 		if (o_players.find(0)->second->getPSpaceship() != p.hostSpaceship) {
+			mtx.lock();
 			availableSpaceship[o_players.find(0)->second->getPSpaceship()] = o_players.find(0)->second->getPSpaceship();
 			o_players.find(0)->second->setPSpaceship(p.hostSpaceship);
 			availableSpaceship[p.hostSpaceship] = 4;
-
+			mtx.unlock();
 
 		}
 		if (p.spaceShip != 5) { // 5 means that the only host changes spaces ship
 			if (p.o_id == *getPlayer()->geto_id()) {
 				getPlayer()->setPSpaceship(p.spaceShip);
+				mtx.lock();
 				availableSpaceship[p.spaceShip] = 4;
+				mtx.lock();
 			}
 			else {
+				mtx.lock();
 				availableSpaceship[o_players.find(p.o_id)->second->getPSpaceship()] = o_players.find(p.o_id)->second->getPSpaceship();
 				o_players.find(p.o_id)->second->setPSpaceship(p.spaceShip);
 				availableSpaceship[p.spaceShip] = 4;
+				mtx.lock();
 			}
 
 		}
