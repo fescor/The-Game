@@ -107,6 +107,27 @@ int GameState::setOPSpaceship(spaceShip p)
 		availableSpaceship[2] = p.availableS[2];
 		availableSpaceship[3] = p.availableS[3];
 		mtx.unlock();
+		if (p.spaceShip == 5) {
+			o_players[0]->setPSpaceship(p.hostSpaceship);
+		}
+		else{
+			if (p.o_id == *getPlayer()->geto_id()) {
+				getPlayer()->setPSpaceship(p.spaceShip);
+
+			}
+			else {
+				geto_playersmap().find(p.o_id)->second->setPSpaceship(p.spaceShip);
+			}
+
+		}
+		return 1;
+		
+
+
+
+
+
+
 		if (p.spaceShip != 5) {// 5 means that the only host changes spaces ship
 			if (o_players.find(0)->second->getPSpaceship() != p.hostSpaceship) {
 				//mtx.lock();
