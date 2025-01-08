@@ -121,6 +121,9 @@ int GameState::setOPSpaceship(spaceShip p)
 			else {
 				geto_playersmap().find(p.o_id)->second->setPSpaceship(p.spaceShip);
 			}
+			if (p.hostSpaceship != o_players[0]->getPSpaceship()) {
+				o_players[0]->setPSpaceship(p.hostSpaceship);
+			}
 
 		}
 		return 1;
