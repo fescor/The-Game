@@ -964,6 +964,13 @@ void Net::sendOPSpaceship(int oid , int ss)
 	p.ss.availableS[1] = m_state->availableSpaceship[1];
 	p.ss.availableS[2] = m_state->availableSpaceship[2];
 	p.ss.availableS[3] = m_state->availableSpaceship[3];
+
+	p.ss.lobbyPlayersSS[0] = 0;
+	p.ss.lobbyPlayersSS[1] = 0;
+	p.ss.lobbyPlayersSS[2] = 0;
+	p.ss.lobbyPlayersSS[3] = 0;
+
+	
 	for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
 		p.ss.lobbyPlayersSS[iter->second->getPSpaceship()] = iter->first;
 	}
