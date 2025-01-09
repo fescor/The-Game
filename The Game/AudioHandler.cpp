@@ -296,7 +296,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	 while (!globalAudioBuffer.empty())
 	 { //an exei arketa dedomena
 			 float chunk[512] = { 0 };
-			 counter++;
+			
 			 //send fist 512 frames
 			 size_t dataToCopy = min(globalAudioBuffer.size(), size_t(512));
 			 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
@@ -304,11 +304,11 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 			 m_state->getNet()->addaudiodata(playerid, chunk);
 			 //erase the data that sended
 			 //globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
-			 if (counter == 1) {
+			 if (counter < 1) {
 				 std::cout << "preparedata send chunk with size : " << globalAudioBuffer.size()<< std::endl;
 			 }
 			 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + dataToCopy);
-
+			 counter++;
 		 
 	 }
 

@@ -32,23 +32,21 @@ int* GameState::connectpeer2player(int id)
 bool GameState::PushToTalk(bool isStreaming) {
 	if (isStreaming) {
 
-	if (!audiohandler) {
+		if (!audiohandler) {
 			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
 			pst = std::thread(&AudioHandler::startAudio, audiohandler);//thread start the stream
-			//KALO EINAI NA MPEI KAI ENAS ELEGXOS GIA TO AN EINAI ONLINE GIA NA MHN STELNEI SE OFLINE MODE 
 			preperator = std::thread(&AudioHandler::preparedata, audiohandler);//thread start to send the data
 			return true;
 		}
-	}
-	else
-	{	
+	}else
+		{	
 		audiohandler->stopAudio();
 		delete audiohandler;
 		audiohandler = nullptr;
 		return false; 
 	}
 	
-}
+	}
 
 void GameState::sendToPlayback(audiodata ad) {
 	int player_id = ad.playerid;
