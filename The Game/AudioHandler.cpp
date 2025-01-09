@@ -282,7 +282,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	return paContinue;
 }
 
-
+//fix this
 std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
 	std::vector<float> data = std::move(globalAudioBuffer);	//move buffer to data (local)
@@ -292,7 +292,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
-	 int counter = 0;
+
 	 int playerid = *(m_state)->getPlayer()->geto_id();
 	 while (!globalAudioBuffer.empty())
 	 { //an exei arketa dedomena
@@ -304,11 +304,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 			 m_state->getNet()->addaudiodata(playerid, chunk);
 			 //erase the data that sended
 			 //globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
-			 if (counter < 1) {
-				 std::cout << "preparedata send chunk with size : " << globalAudioBuffer.size()<< std::endl;
-			 }
-			 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + dataToCopy);
-			 counter++;
+			 
 		 
 	 }
 

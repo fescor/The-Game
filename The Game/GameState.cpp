@@ -30,6 +30,7 @@ int* GameState::connectpeer2player(int id)
 
 
 bool GameState::PushToTalk(bool isStreaming) {
+	float CurrentTime = graphics::getGlobalTime();
 	if (isStreaming) {
 
 		if (!audiohandler) {
@@ -39,11 +40,15 @@ bool GameState::PushToTalk(bool isStreaming) {
 			return true;
 		}
 	}else
-		{	
-		audiohandler->stopAudio();
-		delete audiohandler;
-		audiohandler = nullptr;
-		return false; 
+	{	
+		ReleaseTime = CurrentTime;
+		if (CurrentTime-ReleaseTime >Waitasec){
+			audiohandler->stopAudio();
+			delete audiohandler;
+			audiohandler = nullptr;
+			return false;
+		}
+		
 	}
 	
 	}
@@ -387,6 +392,8 @@ bool GameState::loadedLevel()
 		return getLevel()->getGameLoadedStatus();
 	}
 	return false;
+	
+
 }
 	
 	
