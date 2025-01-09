@@ -292,7 +292,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
-
+	 std::cout << "prepare to send data with size: " << globalAudioBuffer.size() << std::endl;
 	 int playerid = *(m_state)->getPlayer()->geto_id();
 	 while (!globalAudioBuffer.empty())
 	 { //an exei arketa dedomena
@@ -316,22 +316,24 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 		 playbackBuffer[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
 	}
 	 //take players buffer and insert the data
-	 auto& buffer = playbackBuffer[i];
-	 buffer.insert(buffer.end(), chunk.begin(), chunk.end());
+	 auto& playerbuffer = playbackBuffer[i];
+	 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
 	 const size_t maxBuffersize = 1024 * 5; 
 	//an perasei to max size sbhse ta prwta pou esteile 
-	 if (buffer.size() > maxBuffersize) {
-		 buffer.erase(buffer.begin(), buffer.begin() + (buffer.size() - maxBuffersize));
+	 if (playerbuffer.size() > maxBuffersize) {
+		 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + (playerbuffer.size() - maxBuffersize));
 
 	 }
-	 std::cout << "Added audio chunk for player " << i << ". Buffer size: " << playbackBuffer[i].size() << " samples.\n";
+	 //std::cout << "Added audio chunk for player " << i << ". Buffer size: " << buffer.size() << " samples.\n";
 	 //an den uparxei stream anoikse gia to playback
 	 if (!stream) {
 		 AudioHandler::startplaybackstream();
+		 /*
 		PaError err = Pa_WriteStream(stream, playbackBuffer[i].data(), playbackBuffer[i].size());
 		 if (err != paNoError) {
 			 std::cerr << "Error writing to stream: " << Pa_GetErrorText(err) << std::endl;
 		 }
+		 */
 		 if (playbackBuffer.empty()) {
 			 //when playback is finished 
 			 stopAudio();
@@ -345,11 +347,15 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
  {
 	 float* out = static_cast<float*>(outputBuffer);
 	// std::cout << "playbackcallback has to play chunk with size : " << globalAudioBuffer.size() << std::endl;
-
+	 
 	 if (playbackBuffer.empty()) {
 		 std::fill(out, out + framesPerBuffer, 0.0f);  // silence 
 	 }
 	 else {
+		 for (auto& playerbuffer : playbackBuffer) {
+			 int playerID = playerbuffer.first;
+		 }
+
 		 // store playback size
 		 size_t dataToPlayback = min(playbackBuffer.begin()->second.size(), framesPerBuffer);
 

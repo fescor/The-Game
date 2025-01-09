@@ -986,7 +986,7 @@ void Net::addaudiodata(int id, float arr[]) {
 	//copy to vector 
 	std::copy(arr, arr + 512, adpacket.audioData);
 
-	std::cout << "sendaudiodata has to send chunk with size : " << sizeof(adpacket.audioData) << std::endl;
+	//std::cout << "sendaudiodata has to send chunk with size : " << sizeof(adpacket.audioData) << std::endl;
 	//std::copy(arr, arr + size, adpacket.audioData); //problima
 	//create payload
 	Data payload;
