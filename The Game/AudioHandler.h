@@ -21,6 +21,7 @@ private:
 
 
 public:
+	static std::vector<float> finalboss;
 	static std::vector <float> globalAudioBuffer; //buffer to send audio
 	static std::mutex buffermutex; //mutex for safety 
 	//static std::vector<float> playbackBuffer; // buffer to playback

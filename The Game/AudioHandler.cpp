@@ -13,10 +13,9 @@ using namespace std;
 #define _USE_MATH_DEFINES
 
 using namespace std;
-
+std::vector<float> AudioHandler::finalboss;
 std::vector<float> AudioHandler::globalAudioBuffer;
 std::mutex AudioHandler::buffermutex;
-//std::vector<float> AudioHandler::playbackBuffer;
 std::map<int, std::vector<float>> AudioHandler::playbackBuffer;
 std::mutex AudioHandler::playbackMutex;
 bool playbackFinishedFlag;
@@ -293,6 +292,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
 	 std::cout << "prepare to send data with size: " << globalAudioBuffer.size() << std::endl;
+
 	 int playerid = *(m_state)->getPlayer()->geto_id();
 	 while (!globalAudioBuffer.empty())
 	 { //an exei arketa dedomena
@@ -355,18 +355,25 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 		 for (auto& playerbuffer : playbackBuffer) {
 			 int playerID = playerbuffer.first;
 		 }
+		 for (auto& playbackBuffer : playbackBuffer) {
+			 auto& finalboss = playbackBuffer.second;
+		 }
+
 
 		 // store playback size
 		 size_t dataToPlayback = min(playbackBuffer.begin()->second.size(), framesPerBuffer);
+		 for (size_t i = 0; i < dataToPlayback; i++) {
+			 out[i] += finalboss[i];  
+		 }
 
 		 //
-		 std::copy(playbackBuffer.begin()->second.begin(), playbackBuffer.begin()->second.begin() + dataToPlayback,out);
+		 //std::copy(playbackBuffer.begin()->second.begin(), playbackBuffer.begin()->second.begin() + dataToPlayback,out);
 
 		 // delete what you have copy 
-		 playbackBuffer.begin()->second.erase(playbackBuffer.begin()->second.begin(),playbackBuffer.begin()->second.begin() + dataToPlayback);
-
+		 //playbackBuffer.begin()->second.erase(playbackBuffer.begin()->second.begin(),playbackBuffer.begin()->second.begin() + dataToPlayback);
+		 finalboss.erase(finalboss.begin(), finalboss.begin() + dataToPlayback);
 	
-		 if (playbackBuffer.begin()->second.empty()) {
+		 if (finalboss.empty()) {
 			 playbackBuffer.erase(playbackBuffer.begin());
 		 }
 	 }
