@@ -16,6 +16,7 @@
 // game crashed 1 time after i changes multiple times spaceships(dont know if it has something to do with that) when it tried to move the o_player
 //---- edge case ana exeis xrono ti tha ginei an den  kataferei ena palio peer na kanei connect sto kenourgio peer pou bike 
 //----- when a player respawns he needs to drop all the pMove packets he has and update only on new ones
+//----THIS IS KINDA IMPORTANT----for some reason when a laptop tried to connect to PC (after pc dc and connected to lobby again)
 
 
 using namespace std;
@@ -134,7 +135,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost(BABUSUS)) {online = false;}
+	if (!connectToHost(m_state->getHostIP())) {online = false;}
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
@@ -588,7 +589,7 @@ bool Net::connectToPeer(const std::string ip, int id)// this should be called wh
 
 		//here need some return
 		
-		enet_host_destroy(client);
+		enet_host_destroy(client);// this crashes shit up
 		m_state->setOnline(false, false);
 		return false;
 

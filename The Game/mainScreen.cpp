@@ -42,6 +42,9 @@ void MainScreen::hover()// here implement hover on menus for all cases
 	case JOIN_LOBBY:
 	case SEND_BROADCAST:
 	case DC:
+	case GIVE_HOST_IP_INPUT:
+	case GIVE_HOST_IP_CONNECT:
+	case GIVE_HOST_IP_BACK:
 
 		if (graphics::getKeyState(graphics::SCANCODE_W)) {
 			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
@@ -57,7 +60,7 @@ void MainScreen::hover()// here implement hover on menus for all cases
 
 		}
 		if (graphics::getKeyState(graphics::SCANCODE_SPACE)) {
-			graphics::playSound(m_state->getFullAssetPath("select2.mp3"), 1.0f, false);
+			
 			select();
 
 			return;
@@ -79,7 +82,7 @@ void MainScreen::hover()// here implement hover on menus for all cases
 			return;
 		}
 		if (graphics::getKeyState(graphics::SCANCODE_SPACE)) {
-			graphics::playSound(m_state->getFullAssetPath("select2.mp3"), 1.0f, false);
+			
 			select();
 
 			return;
@@ -89,7 +92,7 @@ void MainScreen::hover()// here implement hover on menus for all cases
 	case SELECT_CONTROLS:
 
 		if (graphics::getKeyState(graphics::SCANCODE_SPACE)) {
-			graphics::playSound(m_state->getFullAssetPath("select2.mp3"), 1.0f, false);
+			
 			select();
 
 			return;
@@ -140,6 +143,21 @@ void MainScreen::moveup()
 				return;
 
 			}
+			if (selector == GIVE_HOST_IP_INPUT) {
+				selector = GIVE_HOST_IP_BACK;
+				return;
+
+			}
+			if (selector == GIVE_HOST_IP_CONNECT) {
+				selector = GIVE_HOST_IP_INPUT;
+				return;
+
+			}
+			if (selector == GIVE_HOST_IP_BACK) {
+				selector = GIVE_HOST_IP_CONNECT;
+				return;
+
+			}
 
 			
 
@@ -171,6 +189,21 @@ void MainScreen::movedown()
 			{
 				selector = DC;
 				return;
+			}
+			if (selector == GIVE_HOST_IP_INPUT) {
+				selector = GIVE_HOST_IP_CONNECT;
+				return;
+
+			}
+			if (selector == GIVE_HOST_IP_CONNECT) {
+				selector = GIVE_HOST_IP_BACK;
+				return;
+
+			}
+			if (selector == GIVE_HOST_IP_BACK) {
+				selector = GIVE_HOST_IP_INPUT;
+				return;
+
 			}
 			selector++;
 			return;
@@ -204,6 +237,7 @@ void MainScreen::moveleft()
 	else if (selector == LOBBY_SCREEN_STARTG) {
 		selector = LOBBY_SCREEN_CS;
 	}
+
 						
 			
 			
@@ -243,7 +277,7 @@ void MainScreen::moveright()
 	else if (selector == LOBBY_SCREEN_CS && m_state->amHost()) {
 		selector = LOBBY_SCREEN_STARTG;
 	}
-	
+
 		
 
 	
@@ -253,12 +287,96 @@ void MainScreen::moveright()
 
 }
 
+void MainScreen::getKeyStrokes()
+{
+	if (uiipIter < 14) {
+		if (graphics::getKeyState(graphics::SCANCODE_0)) {
+			userinputIP[uiipIter] = '0';
+			uiipIter++;
+
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_1)) {
+			userinputIP[uiipIter] = '1';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_2)) {
+			userinputIP[uiipIter] = '2';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_3)) {
+			userinputIP[uiipIter] = '3';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_4)) {
+			userinputIP[uiipIter] = '4';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_5)) {
+			userinputIP[uiipIter] = '5';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_6)) {
+			userinputIP[uiipIter] = '6';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_7)) {
+			userinputIP[uiipIter] = '7';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_8)) {
+			userinputIP[uiipIter] = '8';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_9)) {
+			userinputIP[uiipIter] = '9';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_BACKSPACE)) {
+			if (uiipIter != 0) {
+				userinputIP[uiipIter - 1] = ' ';
+			}
+			uiipIter--;
+
+
+
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_PERIOD)) {
+			userinputIP[uiipIter] = '.';
+			uiipIter++;
+		}
+		else if (graphics::getKeyState(graphics::SCANCODE_KP_ENTER)) {
+			selector == GIVE_HOST_IP_CONNECT;
+
+		}
+
+	}
+	else {
+		if (graphics::getKeyState(graphics::SCANCODE_BACKSPACE)) {
+			if (uiipIter != 0) {
+				userinputIP[uiipIter - 1] = ' ';
+			}
+			uiipIter--;
+
+
+
+		}
+	}
+
+	
+
+
+
+
+
+
+}
+
 void MainScreen::select()
 {
 	
 			
 			
-
+			
 
 			switch (selector) {
 			case PLAY:
@@ -337,8 +455,8 @@ void MainScreen::select()
 				break;
 			case JOIN_LOBBY:// join a game 
 				
-				selector = LOBBY_SCREEN_CS;
-				m_state->setOnline(true , false);
+				selector = GIVE_HOST_IP_INPUT;
+				//m_state->setOnline(true , false);
 				break;
 			case DC:
 				selector = PLAY;
@@ -373,10 +491,24 @@ void MainScreen::select()
 				}
 				selector = SELECT_SPACESHIP;
 				break;
+				
+			case GIVE_HOST_IP_BACK:
+				selector = CREATE_LOBBY;
+
+				break;
+			case GIVE_HOST_IP_CONNECT:
+				m_state->setOnline(true, false);
+				selector = LOBBY_SCREEN_CS;
+				break;
+
+			case  GIVE_HOST_IP_INPUT:
+
+				return;
+				
 
 			}
 
-		
+			graphics::playSound(m_state->getFullAssetPath("select2.mp3"), 1.0f, false);
 
 	
 }
@@ -405,11 +537,12 @@ void MainScreen::update(float dt)
 		float sleep_time = 100.0f;
 
 		hover();	
+		if (selector == GIVE_HOST_IP_INPUT) {
+			getKeyStrokes();
+		}
 		std::this_thread::sleep_for(std::chrono::duration<float, milli>(sleep_time));
 
-		graphics::getMouseState(mouse);
-		mouse_x = mouse.cur_pos_x;
-		mouse_y = mouse.cur_pos_y;
+
 }
 
 void MainScreen::init()
@@ -432,6 +565,7 @@ void MainScreen::init()
 void MainScreen::draw()
 {
 	int i;
+	
 	SETCOLOR(m_lobby_gui.outline_color, 250, 0, 0);
 	SETCOLOR(test.fill_color, 250, 0, 0);
 	m_lobby_gui.fill_opacity = 1.0f;
@@ -687,8 +821,8 @@ void MainScreen::draw()
 
 			m_spaceship.outline_opacity = 0.0f;
 
-			graphics::drawRect((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35) * i * 1.3, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
-			graphics::drawText((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386) * i * 1.55, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player" + std::to_string(i), m_lobby_gui);
+			graphics::drawRect((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35) * 2*i*0.6 , m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
+			graphics::drawText((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386) * 2*i*0.8 , m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player" + std::to_string(i), m_lobby_gui);
 
 
 
@@ -715,6 +849,85 @@ void MainScreen::draw()
 
 		break;
 
+
+
+	case GIVE_HOST_IP_INPUT:
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47,m_state->getCanvasHeight()  - m_state->getCanvasHeight() *0.85, 1.1f,
+			" TYPE TO THE BOX BELOW THE LOCAL IP ADDRESS(LAN ADDRESS) OF THE LOBBY HOST.", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.80, 1.f,
+			" BE AWARE THAT IN SOME ROUTERS DEFULT SETTINGS CHANGES THE LAN ADDRESS ", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.75, 1.f,
+			" PERIODICLY IF THAT HAPPENS WHILE YOU ARE PLAYING OR EVEN WHILE YOU ARE IN A ", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.465, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.70, 1.f,
+			"LOBBY THAT WOULD CAUSE A DISCONECTION. ", m_lobby_gui);
+
+
+		m_lobby_gui.fill_opacity = 0.0f;
+		m_lobby_gui.fill_opacity = 1.0f;
+		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+		SETCOLOR(m_lobby_gui.outline_color, 255, 0, 0);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.075, m_state->getCanvasHeight() * 0.5 - m_state->getCanvasHeight() * 0.1, 2.0f, "HOST IP", m_lobby_gui);
+		m_lobby_gui.fill_opacity = 0.0f;
+		graphics::drawRect(m_state->getCanvasWidth()*.5f , m_state->getCanvasHeight()*0.5f , m_state->getCanvasWidth() - m_state->getCanvasWidth()*0.3, 4, m_lobby_gui);
+		m_lobby_gui.fill_opacity = 1.0f;
+		graphics::drawText(m_state->getCanvasWidth() * .25f, m_state->getCanvasHeight() * 0.525f, 3, std::string(userinputIP), m_lobby_gui);
+
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+		graphics::drawText(m_state->getCanvasWidth() * 0.35, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.27, 3.0f, "CONNECT", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.41, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.42, 3.0f, "BACK", m_lobby_gui);
+		break;
+	case GIVE_HOST_IP_CONNECT:
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.85, 1.1f,
+			" TYPE TO THE BOX BELOW THE LOCAL IP ADDRESS(LAN ADDRESS) OF THE LOBBY HOST.", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.80, 1.f,
+			" BE AWARE THAT IN SOME ROUTERS DEFULT SETTINGS CHANGES THE LAN ADDRESS ", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.75, 1.f,
+			" PERIODICLY IF THAT HAPPENS WHILE YOU ARE PLAYING OR EVEN WHILE YOU ARE IN A ", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.465, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.70, 1.f,
+			"LOBBY THAT WOULD CAUSE A DISCONECTION. ", m_lobby_gui);
+		m_lobby_gui.fill_opacity = 0.0f;
+		m_lobby_gui.fill_opacity = 1.0f;
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+		SETCOLOR(m_lobby_gui.outline_color, 255, 255, 255);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.075, m_state->getCanvasHeight() * 0.5 - m_state->getCanvasHeight() * 0.1, 2.0f, "HOST IP", m_lobby_gui);
+		m_lobby_gui.fill_opacity = 0.0f;
+		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+		graphics::drawRect(m_state->getCanvasWidth() * .5f, m_state->getCanvasHeight() * 0.5f, m_state->getCanvasWidth() - m_state->getCanvasWidth() * 0.3, 4, m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+		m_lobby_gui.fill_opacity = 1.0f;
+		graphics::drawText(m_state->getCanvasWidth() * .25f, m_state->getCanvasHeight() * 0.525f, 3, std::string(userinputIP), m_lobby_gui);
+		
+		graphics::drawText(m_state->getCanvasWidth() * 0.35, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.27, 3.0f, "CONNECT", m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 250, 250);
+		graphics::drawText(m_state->getCanvasWidth() * 0.41, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.42, 3.0f, "BACK", m_lobby_gui);
+
+		break;
+	case GIVE_HOST_IP_BACK:
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.85, 1.1f,
+			" TYPE TO THE BOX BELOW THE LOCAL IP ADDRESS(LAN ADDRESS) OF THE LOBBY HOST.", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.80, 1.f,
+			" BE AWARE THAT IN SOME ROUTERS DEFULT SETTINGS CHANGES THE LAN ADDRESS ", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.47, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.75, 1.f,
+			" PERIODICLY IF THAT HAPPENS WHILE YOU ARE PLAYING OR EVEN WHILE YOU ARE IN A ", m_lobby_gui);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.465, m_state->getCanvasHeight() - m_state->getCanvasHeight() * 0.70, 1.f,
+			"LOBBY THAT WOULD CAUSE A DISCONECTION. ", m_lobby_gui);
+		m_lobby_gui.fill_opacity = 0.0f;
+		m_lobby_gui.fill_opacity = 1.0f;
+		
+		SETCOLOR(m_lobby_gui.outline_color, 255, 255, 255);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.075, m_state->getCanvasHeight() * 0.5 - m_state->getCanvasHeight() * 0.1, 2.0f, "HOST IP", m_lobby_gui);
+		m_lobby_gui.fill_opacity = 0.0f;
+		graphics::drawRect(m_state->getCanvasWidth() * .5f, m_state->getCanvasHeight() * 0.5f, m_state->getCanvasWidth() - m_state->getCanvasWidth() * 0.3, 4, m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+		m_lobby_gui.fill_opacity = 1.0f;
+		graphics::drawText(m_state->getCanvasWidth() * .25f, m_state->getCanvasHeight() * 0.525f, 3, std::string(userinputIP), m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+		graphics::drawText(m_state->getCanvasWidth() * 0.35, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.27, 3.0f, "CONNECT", m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+		graphics::drawText(m_state->getCanvasWidth() * 0.41, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.42, 3.0f, "BACK", m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+		break;
 
 
 

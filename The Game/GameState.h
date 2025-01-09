@@ -40,7 +40,9 @@ private:
 	std::map<int , std::unique_ptr<Player>> o_players; //amma pernaei to map se allh sinartish malon thelei sharedpointer
 	bool online = false;
 	bool host = false;
+	std::string host_ip;
 	int playersLoadedLevel = 0;
+
 
 	startG mapinfo = {};
 	
@@ -90,6 +92,7 @@ public:
 	void setdificultyLVL(int d);
 	int getdificultyLVL();
 	void setOnline(bool _online, bool _host);
+	std::string getHostIP();
 	bool getOnline();
 
 	/////THIS FUNCTIONS SHOULD BE CALLED BY NET ONLY/////

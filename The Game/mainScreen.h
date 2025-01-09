@@ -39,6 +39,11 @@ class MainScreen : public GameObject {
 	void movedown();
 	void moveleft();
 	void moveright();
+	void getKeyStrokes();
+
+	//char userinputIP[15] = {'x','x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'};
+	char userinputIP[15] = {};
+	int uiipIter = 0;
 	
 	void select();
 
@@ -78,6 +83,10 @@ enum HOVER {
 	LOBBY_SCREEN,
 	LOBBY_SCREEN_STARTG,
 	LOBBY_SCREEN_CS,
+	GIVE_HOST_IP_INPUT,
+	GIVE_HOST_IP_CONNECT,
+	GIVE_HOST_IP_BACK,
+
 
 
 

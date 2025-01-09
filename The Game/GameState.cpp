@@ -31,7 +31,7 @@ void GameState::initNet()
 	net = new Net(host);
 	//std::thread nt(&Net::run, net);
 	
-	nt = std::thread(&Net::run, net);
+	nt = std::thread(&Net::run,  net);
 	
 }
 
@@ -250,7 +250,13 @@ void GameState::setOnline(bool _online ,bool _host)
 {
 	online = _online;
 	host = _host;
+	
 	return ;
+}
+
+std::string GameState::getHostIP()
+{
+	return host_ip;
 }
 
 bool GameState::getOnline()
