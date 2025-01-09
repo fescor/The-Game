@@ -30,28 +30,32 @@ int* GameState::connectpeer2player(int id)
 
 
 bool GameState::PushToTalk(bool isStreaming) {
-	float CurrentTime = graphics::getGlobalTime();
 	if (isStreaming) {
 
 		if (!audiohandler) {
 			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
-			pst = std::thread(&AudioHandler::startAudio, audiohandler);//thread start the stream
-			preperator = std::thread(&AudioHandler::preparedata, audiohandler);//thread start to send the data
-			return true;
+			
 		}
+		pst = std::thread(&AudioHandler::startAudio, audiohandler);//thread start the stream
+		preperator = std::thread(&AudioHandler::preparedata, audiohandler);//thread start to send the data
+		return true;
 	}else
-	{	
-		ReleaseTime = CurrentTime;
-		if (CurrentTime-ReleaseTime >Waitasec){
-			audiohandler->stopAudio();
-			delete audiohandler;
-			audiohandler = nullptr;
-			return false;
+	{		
+		if (pst.joinable()) {
+			pst.join();
 		}
+		if (preperator.joinable()) {
+			preperator.join();
+		}
+		audiohandler->stopAudio();
+		delete audiohandler;
+		audiohandler = nullptr;
+		return false;
+	}
 		
-	}
+}
 	
-	}
+	
 
 void GameState::sendToPlayback(audiodata ad) {
 	int player_id = ad.playerid;
@@ -227,6 +231,7 @@ void GameState::update(float dt)
 
 	}
 
+	float CurrentTime = graphics::getGlobalTime();
 	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
 	if ((CurrentState) && (!PreviousState)) {
 
@@ -237,13 +242,16 @@ void GameState::update(float dt)
 		}
 	}
 	if ((!CurrentState) && (PreviousState)) {
-		if (isStreaming) {
-
-			isStreaming = false;
-			GameState::PushToTalk(false);
-			
-		}
+		ReleaseTime = CurrentTime;
 	}
+		
+		if (isStreaming && !CurrentState) {
+			if(CurrentTime - ReleaseTime > Waitasec){
+				isStreaming = false;
+				GameState::PushToTalk(false);
+			}
+		}
+	
 
 	PreviousState = CurrentState; //update state
 

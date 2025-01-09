@@ -278,7 +278,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			}
 		}
 	
-	std::cout << "audiocallback size " << globalAudioBuffer.size() << std::endl;
+	//std::cout << "audiocallback size " << globalAudioBuffer.size() << std::endl;
 	return paContinue;
 }
 
@@ -344,7 +344,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData)
  {
 	 float* out = static_cast<float*>(outputBuffer);
-	 std::cout << "playbackcallback has to play chunk with size : " << globalAudioBuffer.size() << std::endl;
+	// std::cout << "playbackcallback has to play chunk with size : " << globalAudioBuffer.size() << std::endl;
 
 	 if (playbackBuffer.empty()) {
 		 std::fill(out, out + framesPerBuffer, 0.0f);  // silence 
