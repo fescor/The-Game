@@ -43,7 +43,7 @@ private:
 	std::thread preperator; 
 	std::thread receiver;
 	float ReleaseTime = 0.0f;
-	const float Waitasec = 1000.0f;
+	const float Waitasec = 500.0f;
 
 
 

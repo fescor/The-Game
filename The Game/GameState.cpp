@@ -215,14 +215,6 @@ void GameState::update(float dt)
 		init();
 
 	}
-
-
-
-
-
-
-	//
-
 	if (status == 'L' && m_current_level == nullptr) {
 
 		init();
@@ -242,8 +234,14 @@ void GameState::update(float dt)
 		}
 	}
 	if ((!CurrentState) && (PreviousState)) {
-		ReleaseTime = CurrentTime;
+		//ReleaseTime = CurrentTime;
+		if (isStreaming){
+			isStreaming = false;
+			GameState::PushToTalk(false);
+		}
 	}
+		
+	/*
 		
 		if (isStreaming && !CurrentState) {
 			if(CurrentTime - ReleaseTime > Waitasec){
@@ -251,7 +249,7 @@ void GameState::update(float dt)
 				GameState::PushToTalk(false);
 			}
 		}
-	
+	*/
 
 	PreviousState = CurrentState; //update state
 

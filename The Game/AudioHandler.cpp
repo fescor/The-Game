@@ -16,9 +16,9 @@ using namespace std;
 std::vector<float> AudioHandler::finalboss;
 std::vector<float> AudioHandler::globalAudioBuffer;
 std::mutex AudioHandler::buffermutex;
-std::map<int, std::vector<float>> AudioHandler::playbackBuffer;
+std::map<int, std::vector<float>> AudioHandler::playbackMap;
 std::mutex AudioHandler::playbackMutex;
-bool playbackFinishedFlag;
+
 
 // Constructor implementation
 AudioHandler::AudioHandler() {
@@ -266,7 +266,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		std::vector<float> chunk(in, in + framesPerBuffer); //copy chunk in local vector
 
 		{
-			std::lock_guard<std::mutex> lovk(buffermutex);// mutex lock
+			std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
 			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
 		}
 	}
@@ -296,12 +296,12 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	 int playerid = *(m_state)->getPlayer()->geto_id();
 	 while (!globalAudioBuffer.empty())
 	 { //an exei arketa dedomena
-			 float chunk[512] = { 0 };
+			 float preparechunk[512] = { 0 };
 			 //send fist 512 frames
 			 size_t dataToCopy = min(globalAudioBuffer.size(), size_t(512));
-			 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
+			 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, preparechunk);
 			 
-			 m_state->getNet()->addaudiodata(playerid, chunk);
+			 m_state->getNet()->addaudiodata(playerid, preparechunk);
 			 //erase the data that sended
 			 //globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
 			 
@@ -312,11 +312,11 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
  void AudioHandler::setbuffer(int i, const std::vector<float>& chunk) {
 	 
-	 if (playbackBuffer.find(i) == playbackBuffer.end()) {
-		 playbackBuffer[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
+	 if (playbackMap.find(i) == playbackMap.end()) {
+		 playbackMap[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
 	}
 	 //take players buffer and insert the data
-	 auto& playerbuffer = playbackBuffer[i];
+	 auto& playerbuffer = playbackMap[i];
 	 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
 	 const size_t maxBuffersize = 1024 * 5; 
 	//an perasei to max size sbhse ta prwta pou esteile 
@@ -334,7 +334,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 			 std::cerr << "Error writing to stream: " << Pa_GetErrorText(err) << std::endl;
 		 }
 		 */
-		 if (playbackBuffer.empty()) {
+		 if (playbackMap.empty()) {
 			 //when playback is finished 
 			 stopAudio();
 		 }
@@ -345,16 +345,37 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
  int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
 	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData)
  {
-	 float* out = static_cast<float*>(outputBuffer);
-	// std::cout << "playbackcallback has to play chunk with size : " << globalAudioBuffer.size() << std::endl;
-	 
-	 if (playbackBuffer.empty()) {
-		 std::fill(out, out + framesPerBuffer, 0.0f);  // silence 
+	 /*
+	 int i = 0;
+	 std::vector<float> temp_vector = playbackBuffer.find(id_toupaixti);
+	 for (auto iter = temp_vector.begin(); iter != temp_vector.end(); iter++) {
+		 out[i] = iter;
+		 i++
 	 }
-	 else {
-		 for (auto& playerbuffer : playbackBuffer) {
-			 int playerID = playerbuffer.first;
+	 float* out = static_cast<float*>(outputBuffer);
+	 for (auto& playerbuffer : playbackBuffer) {
+		 int playerID = playerbuffer.first;
+	 }
+	// std::cout << "playbackcallback has to play chunk with size : " << globalAudioBuffer.size() << std::endl;
+	
+	 {
+		 //thread safety 
+		 std::lock_guard<std::mutex> lock(playbackMutex);// mutex lock
+		 for (auto& a : playbackBuffer) {
+			 out.push_back(std::)
 		 }
+		 for (auto it = playbackBuffer.begin(); it != playbackBuffer.end();) {
+			 size_t dataToPlayback = min(playbackBuffer.begin()->second.size(), framesPerBuffer);
+
+			 for (size_t i = 0; i < dataToPlayback; i++) {
+				 out[i] = it->second;
+				 
+
+			 }
+
+		 }
+		
+		
 		 for (auto& playbackBuffer : playbackBuffer) {
 			 //finalboss.push_back(std::move(playbackBuffer.second)); 
 			 finalboss.insert(finalboss.end(), playbackBuffer.second.begin(), playbackBuffer.second.end());
@@ -362,11 +383,8 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 
 
 		 // store playback size
-		 size_t dataToPlayback = min(playbackBuffer.begin()->second.size(), framesPerBuffer);
-		 for (size_t i = 0; i < dataToPlayback; i++) {
-			 out[i] += finalboss[i];  
-		 }
-
+		 
+		 
 		 //
 		 //std::copy(playbackBuffer.begin()->second.begin(), playbackBuffer.begin()->second.begin() + dataToPlayback,out);
 
@@ -379,6 +397,36 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 		 }
 	 }
 
+*/
+	 float* out = static_cast<float*>(outputBuffer);
+	 {
+		 std::lock_guard<std::mutex> lock(playbackMutex);
+		 for (auto& it : playbackMap) {
+			 auto& playerbuffer = it.second; 
+
+			 if (!playerbuffer.empty()) { 
+				 //how many samples to play
+				 size_t dataToPlayback;
+				 if (framesPerBuffer >= playerbuffer.size()) {
+					  dataToPlayback = framesPerBuffer;
+				 }
+				 else {
+					 dataToPlayback = playerbuffer.size();
+
+				 }
+				 //add audio to output
+				 for (size_t i = 0; i < dataToPlayback; i++) {
+					 out[i] = playerbuffer[i];
+				 }
+			
+				//erase what you have played 
+				 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
+			 }
+
+		 }
+	 }
+
+	
 	 return paContinue;  
  }
 
