@@ -15,7 +15,7 @@ using namespace std;
 using namespace std;
 std::vector<float> AudioHandler::finalboss;
 std::vector<float> AudioHandler::globalAudioBuffer;
-std::vector <float> temp_vector;
+std::vector <float> AudioHandler::temp_vector;
 std::mutex AudioHandler::buffermutex;
 std::map<int, std::vector<float>> AudioHandler::playbackMap;
 std::mutex AudioHandler::playbackMutex;
@@ -342,61 +342,10 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
  int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
 	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData)
+
  {
-	 /*
-	 int i = 0;
-	 std::vector<float> temp_vector = playbackBuffer.find(id_toupaixti);
-	 for (auto iter = temp_vector.begin(); iter != temp_vector.end(); iter++) {
-		 out[i] = iter;
-		 i++
-	 }
 	 float* out = static_cast<float*>(outputBuffer);
-	 for (auto& playerbuffer : playbackBuffer) {
-		 int playerID = playerbuffer.first;
-	 }
-	// std::cout << "playbackcallback has to play chunk with size : " << globalAudioBuffer.size() << std::endl;
-	
-	 {
-		 //thread safety 
-		 std::lock_guard<std::mutex> lock(playbackMutex);// mutex lock
-		 for (auto& a : playbackBuffer) {
-			 out.push_back(std::)
-		 }
-		 for (auto it = playbackBuffer.begin(); it != playbackBuffer.end();) {
-			 size_t dataToPlayback = min(playbackBuffer.begin()->second.size(), framesPerBuffer);
-
-			 for (size_t i = 0; i < dataToPlayback; i++) {
-				 out[i] = it->second;
-				 
-
-			 }
-
-		 }
-		
-		
-		 for (auto& playbackBuffer : playbackBuffer) {
-			 //finalboss.push_back(std::move(playbackBuffer.second)); 
-			 finalboss.insert(finalboss.end(), playbackBuffer.second.begin(), playbackBuffer.second.end());
-		 }
-
-
-		 // store playback size
-		 
-		 
-		 //
-		 //std::copy(playbackBuffer.begin()->second.begin(), playbackBuffer.begin()->second.begin() + dataToPlayback,out);
-
-		 // delete what you have copy 
-		 //playbackBuffer.begin()->second.erase(playbackBuffer.begin()->second.begin(),playbackBuffer.begin()->second.begin() + dataToPlayback);
-		 finalboss.erase(finalboss.begin(), finalboss.begin() + dataToPlayback);
-	
-		 if (finalboss.empty()) {
-			 playbackBuffer.erase(playbackBuffer.begin());
-		 }
-	 }
-
-*/
-	 float* out = static_cast<float*>(outputBuffer);
+	 std::fill(out, out + framesPerBuffer, 0.0f);
 	 {
 		 std::lock_guard<std::mutex> lock(playbackMutex);
 		 for (auto& it : playbackMap) {
@@ -404,14 +353,8 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 			 if (!playerbuffer.empty()) { 
 				 //how many samples to play
-				 size_t dataToPlayback;
-				 if (framesPerBuffer >= playerbuffer.size()) {
-					  dataToPlayback = framesPerBuffer;
-				 }
-				 else {
-					 dataToPlayback = playerbuffer.size();
-
-				 }
+				 size_t dataToPlayback= min(framesPerBuffer,playerbuffer.size());
+				 
 				 //add audio to output
 				 for (size_t i = 0; i < dataToPlayback; i++) {
 					 out[i] += playerbuffer[i];
@@ -420,7 +363,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 				//erase what you have played 
 				 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
 			 }
-
+			 
 		 }
 	 }
 
