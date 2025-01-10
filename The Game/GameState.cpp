@@ -259,6 +259,12 @@ std::string GameState::getHostIP()
 	return host_ip;
 }
 
+void GameState::setHostIP(std::string ip)
+{
+	ip.erase(ip.end());
+	host_ip = ip;
+}
+
 bool GameState::getOnline()
 {
 	return online;
@@ -609,6 +615,7 @@ void GameState::createMapInfoData()
 	mapinfo.posPlayer[0][0] = 0;
 	mapinfo.posPlayer[0][1] = getPlayer()->m_pos_x;
 	mapinfo.posPlayer[0][2] = getPlayer()->m_pos_y;
+	getPlayer()->setSpawnPos(mapinfo.posPlayer[0][1], mapinfo.posPlayer[0][2]);
 
 
 	// this is the pos of connected peer i give them(as host)

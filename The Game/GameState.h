@@ -64,6 +64,7 @@ private:
 	int dificultyLVL = 0;
 	int spaceship = 0;
 	
+	
 
 
 	void initNet();
@@ -77,6 +78,8 @@ protected:
 
 
 public:
+	bool  connectionFailed = false;
+	bool connectingToHost = false;
 
 	//int availableSpaceship[4] = {4,1,2,3};
 	std::array<int, 4> availableSpaceship = {4,1,2,3};
@@ -93,6 +96,7 @@ public:
 	int getdificultyLVL();
 	void setOnline(bool _online, bool _host);
 	std::string getHostIP();
+	void setHostIP(std::string ip);
 	bool getOnline();
 
 	/////THIS FUNCTIONS SHOULD BE CALLED BY NET ONLY/////

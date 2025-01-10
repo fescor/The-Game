@@ -74,14 +74,18 @@ class Level : public GameObject
 	int siege = 1;
 	int score = 0;
 	bool efyges = false;
+	void respawnPlayer();
+	
+	float timeOfdeath = 0;
 
 	bool allPlayersLoadedLevel();
 	bool gameLoaded = false;
 
 	
+	
 
 public:
-	
+	bool playerRespawning = false;
 	
 	
 	

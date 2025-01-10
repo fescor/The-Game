@@ -152,6 +152,29 @@ struct spaceShip
 	}
 
 };
+struct planetDead
+{
+	int planet_oid;
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(planet_oid); // serialize things by passing them to the archive
+	}
+
+
+
+};
+struct tokenConsume
+{
+	int token_oid;
+
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(token_oid); // serialize things by passing them to the archive
+	}
+};
+
 
 
 
@@ -167,6 +190,9 @@ enum PACKETTYPE {
 	PLAYER_INFO,
 	VOICE_CHUNK,
 	SPACE_SHIP,
+	PLANET,
+	TOKEN,
+
 
 
 
@@ -190,6 +216,9 @@ struct packet
 		playerInfo pi;
 		voice  vc;
 		spaceShip ss;
+		planetDead pd;
+		tokenConsume tc;
+
 		
 
 
@@ -227,6 +256,12 @@ struct packet
 			case SPACE_SHIP:
 				archive(ss);
 				break;
+			case PLANET:
+				archive(pd);
+				break;
+			case TOKEN:
+				archive(tc);
+				break;
 
 
 				
@@ -262,5 +297,8 @@ union Data
 
 	spaceShip ss;
 
+	planetDead pd;
+
+	tokenConsume tc;
 
 };

@@ -83,6 +83,8 @@ bool Level::inView(float x, float y)// checking for collisions is very expensive
 	return false;
 }
 
+
+
 bool Level::allPlayersLoadedLevel()
 {
 	return m_state->geto_playersmap().size() == m_state->getPlayersLoadedLevel();
@@ -422,6 +424,10 @@ void Level::Pshoot(Bullet* b)
 void Level::update(float dt)
 {
 
+
+
+
+
 	//if (m_planets.size() == 0 && levelDiffuculty != 3) {
 	if (m_planets.empty() && levelDiffuculty != 3) {
 		graphics::setFont(m_state->getFullAssetPath("font.ttf"));
@@ -469,33 +475,64 @@ void Level::update(float dt)
 
 	if (m_state->getPlayer()->returnHP() <= 0) {
 
+		if (m_state->getOnline()) {
 
-		if (!efyges) {
-			graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
-			efyges = true;
+			if (m_state->getPlayer()->getLives() == 1) {
+				//he is dead game over do the game over thingy
+				if (!efyges) {
+					graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
+					efyges = true;
+				}
+				return;
+			}
+			else {
+				m_state->getPlayer()->reduceLives();
+				m_state->getPlayer()->respawn();
+				
+				playerRespawning = true;
+				std::this_thread::sleep_for(std::chrono::duration<float, milli>(3000));
+				timeOfdeath = graphics::getGlobalTime();
+				
+				
+				
+				
+
+
+			}
+
+
+
+		}
+		else {
+			if (!efyges) {
+				graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
+				efyges = true;
+			}
+
+			graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "GAME OVER", m_brush_player_bullet_count);
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 5.0f, 3.0f, "PRESS R TO RESTART", m_brush_player_bullet_count);
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 10.0f, 3.0f, "PRESS M FOR MAIN MENU", m_brush_player_bullet_count);
+			if (graphics::getKeyState(graphics::SCANCODE_R)) {
+
+
+				restart(); //delete the main objects of the level (planets bullets and asteroids) and clear their vectors
+				m_state->init();
+
+
+
+
+
+			}
+			if (graphics::getKeyState(graphics::SCANCODE_M)) {
+				deleteLevel();
+
+			}
+			//cout << "a";
+			return;
+
 		}
 
-		graphics::setFont(m_state->getFullAssetPath("font.ttf"));
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "GAME OVER", m_brush_player_bullet_count);
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 5.0f, 3.0f, "PRESS R TO RESTART", m_brush_player_bullet_count);
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 10.0f, 3.0f, "PRESS M FOR MAIN MENU", m_brush_player_bullet_count);
-		if (graphics::getKeyState(graphics::SCANCODE_R)) {
-
-
-			restart(); //delete the main objects of the level (planets bullets and asteroids) and clear their vectors
-			m_state->init();
-
-
-
-
-
-		}
-		if (graphics::getKeyState(graphics::SCANCODE_M)) {
-			deleteLevel();
-
-		}
-		//cout << "a";
-		return;
 	}
 
 
@@ -676,6 +713,7 @@ void Level::init(startG mapinfo)
 			m_state->getPlayer()->m_pos_y = mapinfo.posPlayer[i][2];
 			m_state->getPlayer()->setPrevPos(mapinfo.posPlayer[i][1] , mapinfo.posPlayer[i][2] , 0 , 90.0f , m_state->framecounter);
 			m_state->getPlayer()->setNewPos(mapinfo.posPlayer[i][1], mapinfo.posPlayer[i][2], 0 ,90.0f ,   m_state->framecounter);
+			m_state->getPlayer()->setSpawnPos(mapinfo.posPlayer[i][1], mapinfo.posPlayer[i][2]);
 		}
 		else {
 			m_state->geto_playersmap().find(mapinfo.posPlayer[i][0])->second->m_pos_x = mapinfo.posPlayer[i][1];
@@ -720,29 +758,38 @@ void Level::draw()
 	
 	
 	m_background->draw();
-	
-	if (m_state->getPlayer()->isActive()) {
-		
-		m_state->getPlayer()->draw();
+
+	for (auto& planet : m_planets) {
+
+		planet.second->draw();
+
+
 	}
+
+
+	for (auto& asteroids : m_asteroids) {
+
+		asteroids.second->draw();
+	}
+
+	for (auto t = m_tokens.begin(); t != m_tokens.end(); ++t) {
+		t->second->draw();
+	}
+
+
 	for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
 
 		if (iter->second->isActive()) { iter->second->draw(true); }
 
-	}
-	
-	for (auto& planet: m_planets ) {
 
-		planet.second->draw();
-		
 
 	}
-	
-	
-	for (auto& asteroids : m_asteroids) {
-		
-		asteroids.second->draw();
+	if (m_state->getPlayer()->isActive()) {
+
+		m_state->getPlayer()->draw();
 	}
+	
+
 	
 	/*
 	for (int i = 0; i < m_planets.size(); i++) {
@@ -759,9 +806,7 @@ void Level::draw()
 
 		b->draw();
 	}
-	for (auto t = m_tokens.begin(); t != m_tokens.end(); ++t) {
-		t->second->draw();
-	}
+
 
 
 	
@@ -785,24 +830,30 @@ void Level::draw()
 
 	m_brush_player_bullet_count.texture = m_state->getFullAssetPath("bullets-icon.png");
 	graphics::drawRect(27.0f, 0.5, 1.0f, 1.0f, m_brush_player_bullet_count);
+	
+	for (int i = 0; i < m_state->getPlayer()->getLives(); i++) {
+		
+		m_brush_player_bullet_count.texture = m_state->getFullAssetPath("health-icon.png");
+		graphics::drawRect(16.0f + i, 0.5, 0.6f, 0.5f, m_brush_player_bullet_count);
 
-	m_brush_player_bullet_count.texture = m_state->getFullAssetPath("health-icon.png");
-	graphics::drawRect(11.0f, 0.5, 0.6f, 0.5f, m_brush_player_bullet_count);
+
+	}
+	
 
 	graphics::setFont(m_state->getFullAssetPath("font.ttf"));
 	//graphics::drawText(13.0f, 0.8f, 1.2f, "PLANETS LEFT : " + to_string(m_planets.size()), m_brush_player_bullet_count);
-	graphics::drawText(13.0f, 0.8f, 1.2f, "PLANETS LEFT : " + to_string(m_planets.size()), m_brush_player_bullet_count);
+	graphics::drawText(m_state -> getCanvasWidth()*0.1, m_state->getCanvasHeight(), 1.2f, "PLANETS LEFT : " + to_string(m_planets.size()), m_brush_player_bullet_count);
 
 	if (levelDiffuculty == 3) {
 
 
 		graphics::setFont(m_state->getFullAssetPath("font.ttf"));
-		graphics::drawText(21.0f, 0.8f, 1.2f, "SCORE: " + to_string(score), m_brush_player_bullet_count);
+		graphics::drawText(m_state->getCanvasWidth() * 0.6, m_state->getCanvasHeight(), 1.2f, "SCORE: " + to_string(score), m_brush_player_bullet_count);
 
 
 
 		graphics::setFont(m_state->getFullAssetPath("font.ttf"));
-		graphics::drawText(14.0f, m_state->getCanvasHeight(), 1.2f, "SIEGE : " + to_string(siege), m_brush_player_bullet_count);
+		graphics::drawText(m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight(), 1.2f, "SIEGE : " + to_string(siege), m_brush_player_bullet_count);
 
 
 
@@ -822,7 +873,20 @@ void Level::draw()
 		
 		
 	}
-	
+	if (playerRespawning &&  graphics::getGlobalTime() - timeOfdeath < 5000) {
+
+
+		graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+		graphics::drawText(m_state->getCanvasWidth()*0.35, m_state->getCanvasHeight(), 1.0f, "YOU DIED! " + std::to_string(m_state->getPlayer()->getLives()) + " LIVES REMAINING", m_brush_player_bullet_count);
+		
+	}
+	else {
+		playerRespawning = false;
+	}
+
+
+
+
 
 
 

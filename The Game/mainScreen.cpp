@@ -34,10 +34,6 @@ void MainScreen::hover()// here implement hover on menus for all cases
 	case CSPACESHIP:
 	case CONTROLS:
 	case ONLINE:
-	case CD_EASY:
-	case CD_HARD:
-	case CD_AREUSURE:
-	case CD_SURVAVAL:
 	case CREATE_LOBBY:
 	case JOIN_LOBBY:
 	case SEND_BROADCAST:
@@ -45,6 +41,8 @@ void MainScreen::hover()// here implement hover on menus for all cases
 	case GIVE_HOST_IP_INPUT:
 	case GIVE_HOST_IP_CONNECT:
 	case GIVE_HOST_IP_BACK:
+	case CD_GAMEMODE_BACKTOLOBBY:
+	
 
 		if (graphics::getKeyState(graphics::SCANCODE_W)) {
 			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
@@ -69,6 +67,8 @@ void MainScreen::hover()// here implement hover on menus for all cases
 	case SELECT_SPACESHIP:
 	case LOBBY_SCREEN_STARTG:
 	case LOBBY_SCREEN_CS:
+	case LOBBY_SCREEN_DISCONNECT:
+	case LOBBY_SCREEN_GAMEMODES:
 		if (graphics::getKeyState(graphics::SCANCODE_A)) {
 			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
 			moveleft();
@@ -80,6 +80,19 @@ void MainScreen::hover()// here implement hover on menus for all cases
 			moveright();
 
 			return;
+		}
+		if (graphics::getKeyState(graphics::SCANCODE_W)) {
+			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
+			moveup();
+			return;
+
+		}
+
+		if (graphics::getKeyState(graphics::SCANCODE_S)) {
+			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
+			movedown();
+			return;
+
 		}
 		if (graphics::getKeyState(graphics::SCANCODE_SPACE)) {
 			
@@ -100,8 +113,33 @@ void MainScreen::hover()// here implement hover on menus for all cases
 
 		break;
 
+	case CD_EASY:
+	case CD_HARD:
+	case CD_AREUSURE:
+	case CD_SURVAVAL:
+	
+		if (graphics::getKeyState(graphics::SCANCODE_W)) {
+			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
+			moveup();
+			return;
 
+		}
 
+		if (graphics::getKeyState(graphics::SCANCODE_S)) {
+			graphics::playSound(m_state->getFullAssetPath("hover.mp3"), 1.0f, false);
+			movedown();
+			return;
+
+		}
+		if (graphics::getKeyState(graphics::SCANCODE_SPACE)) {
+			if (m_state->amHost()) {
+				select();
+			}
+			
+
+			return;
+		}
+		break;
 
 
 	}
@@ -121,19 +159,22 @@ void MainScreen::moveup()
 	
 
 		
+	if (!m_state->getOnline() || m_state->getOnline() && m_state->amHost()) {
+		if (selector == PLAY) {
+			selector = ONLINE;
 
+			return;
+		}
+		if (selector == CD_EASY) {
+			selector = CD_SURVAVAL;
+
+			return;
+
+		}
+
+	}
 			
-			if (selector == PLAY) {
-				selector = ONLINE;
-				
-				return;
-			}
-			if (selector == CD_EASY) {
-				selector = CD_SURVAVAL;
-				
-				return;
-
-			}
+			
 			if (selector == CREATE_LOBBY) {
 				selector = JOIN_LOBBY;
 				return;
@@ -158,6 +199,37 @@ void MainScreen::moveup()
 				return;
 
 			}
+			if (m_state->amHost()) {
+				if (selector == LOBBY_SCREEN_STARTG) {
+					selector = LOBBY_SCREEN_GAMEMODES;
+					return;
+				}
+				else if (selector == LOBBY_SCREEN_CS) {
+					selector = LOBBY_SCREEN_DISCONNECT;
+					return;
+
+				}
+				else if (selector == LOBBY_SCREEN_GAMEMODES) {
+					selector = LOBBY_SCREEN_STARTG;
+					return;
+				}
+				else if (selector == LOBBY_SCREEN_DISCONNECT) {
+					selector = LOBBY_SCREEN_CS;
+					return;
+				}
+
+
+			}
+			else {
+				if (selector == LOBBY_SCREEN_GAMEMODES || selector == LOBBY_SCREEN_CS) {
+					selector = LOBBY_SCREEN_DISCONNECT;
+					return;
+				}
+				if (selector == CD_EASY) {
+					selector = CD_GAMEMODE_BACKTOLOBBY;
+					return;
+				}
+			}
 
 			
 
@@ -168,43 +240,81 @@ void MainScreen::moveup()
 
 void MainScreen::movedown()
 {
-		
-			if (selector == ONLINE) {
-				selector = PLAY;
+	if (!m_state->getOnline() || m_state->getOnline() && m_state->amHost()) {
+
+		if (selector == ONLINE) {
+
+			selector = PLAY;
+
+
+			return;
+
+		}
+		if (selector == CD_SURVAVAL) {
+			selector = CD_EASY;
+
+			return;
+		}
+	}
+		if (selector == JOIN_LOBBY) {
+			selector = CREATE_LOBBY;
+			return;
+		}
+		if (selector == SEND_BROADCAST)
+		{
+			selector = DC;
+			return;
+		}
+		if (selector == GIVE_HOST_IP_INPUT) {
+			selector = GIVE_HOST_IP_CONNECT;
+			return;
+
+		}
+		if (selector == GIVE_HOST_IP_CONNECT) {
+			selector = GIVE_HOST_IP_BACK;
+			return;
+
+		}
+		if (selector == GIVE_HOST_IP_BACK) {
+			selector = GIVE_HOST_IP_INPUT;
+			return;
+
+		}
+	
+			if (m_state->amHost()) {
+				if (selector == LOBBY_SCREEN_GAMEMODES) {
+					selector = LOBBY_SCREEN_STARTG;
+					return;
+				}
+				if (selector == LOBBY_SCREEN_DISCONNECT) {
+					selector = LOBBY_SCREEN_CS;
+					return;
+				}
+				if (selector == LOBBY_SCREEN_STARTG) {
+					selector = LOBBY_SCREEN_GAMEMODES;
+					return;
+				}
+				if (selector == LOBBY_SCREEN_CS) {
+					selector = LOBBY_SCREEN_DISCONNECT;
+					return;
+				}
+
+			}
+			else {
+				if (selector == LOBBY_SCREEN_DISCONNECT) {
+					selector = LOBBY_SCREEN_CS;
+					return;
+				}
+				if (selector == LOBBY_SCREEN_GAMEMODES) {
+					selector = LOBBY_SCREEN_DISCONNECT;
+					return;
+				}
+				if (selector == CD_GAMEMODE_BACKTOLOBBY) {
+					selector = CD_EASY ;
+					return;
+				}
+			}
 			
-
-				return;
-
-			}
-			if (selector == CD_SURVAVAL) {
-				selector = CD_EASY;
-		
-				return;
-			}
-			if (selector == JOIN_LOBBY) {
-				selector = CREATE_LOBBY;
-				return;
-			}
-			if (selector == SEND_BROADCAST)
-			{
-				selector = DC;
-				return;
-			}
-			if (selector == GIVE_HOST_IP_INPUT) {
-				selector = GIVE_HOST_IP_CONNECT;
-				return;
-
-			}
-			if (selector == GIVE_HOST_IP_CONNECT) {
-				selector = GIVE_HOST_IP_BACK;
-				return;
-
-			}
-			if (selector == GIVE_HOST_IP_BACK) {
-				selector = GIVE_HOST_IP_INPUT;
-				return;
-
-			}
 			selector++;
 			return;
 		
@@ -231,12 +341,36 @@ void MainScreen::moveleft()
 
 		}
 	}
-	else if (selector == LOBBY_SCREEN_CS && m_state->amHost()) {
-		selector = LOBBY_SCREEN_STARTG;
+	if (m_state->amHost()) {
+		if (selector == LOBBY_SCREEN_CS ) {
+			selector = LOBBY_SCREEN_STARTG;
+			return;
+		}
+		else if (selector == LOBBY_SCREEN_STARTG) {
+			selector = LOBBY_SCREEN_CS;
+			return;
+		}
+		else if (selector == LOBBY_SCREEN_GAMEMODES) {
+			selector = LOBBY_SCREEN_DISCONNECT;
+			return;
+		}
+		else if (selector == LOBBY_SCREEN_DISCONNECT) {
+			selector = LOBBY_SCREEN_GAMEMODES;
+			return;
+		}
+
 	}
-	else if (selector == LOBBY_SCREEN_STARTG) {
-		selector = LOBBY_SCREEN_CS;
+	else {
+		if (selector == LOBBY_SCREEN_CS) {
+			selector = LOBBY_SCREEN_GAMEMODES;
+			return;
+		}
+		if (selector == LOBBY_SCREEN_GAMEMODES) {
+			selector = LOBBY_SCREEN_CS;
+			return;
+		}
 	}
+	
 
 						
 			
@@ -268,15 +402,38 @@ void MainScreen::moveright()
 
 		}
 	}
-	else if (selector == LOBBY_SCREEN_STARTG) {
+	if (m_state->amHost()) {
+		if (selector == LOBBY_SCREEN_STARTG) {
 
-		selector = LOBBY_SCREEN_CS;
+			selector = LOBBY_SCREEN_CS;
+			return;
 
 
+		}
+		else if (selector == LOBBY_SCREEN_CS ) {
+			selector = LOBBY_SCREEN_STARTG;
+			return;
+		}
+		else if (selector == LOBBY_SCREEN_DISCONNECT) {
+			selector = LOBBY_SCREEN_GAMEMODES;
+			return;
+		}
+		else if (selector == LOBBY_SCREEN_GAMEMODES) {
+			selector = LOBBY_SCREEN_DISCONNECT;
+			return;
+		}
 	}
-	else if (selector == LOBBY_SCREEN_CS && m_state->amHost()) {
-		selector = LOBBY_SCREEN_STARTG;
+	else {
+		if (selector == LOBBY_SCREEN_GAMEMODES) {
+			selector = LOBBY_SCREEN_CS;
+			return;
+		}
+		if (selector == LOBBY_SCREEN_CS) {
+			selector = LOBBY_SCREEN_GAMEMODES;
+			return;
+		}
 	}
+	
 
 		
 
@@ -336,7 +493,9 @@ void MainScreen::getKeyStrokes()
 				userinputIP[uiipIter - 1] = ' ';
 			}
 			uiipIter--;
-
+			if (uiipIter < 0) {
+				uiipIter = 0;
+			}
 
 
 		}
@@ -401,24 +560,38 @@ void MainScreen::select()
 			case CD_EASY:
 				m_state->setdificultyLVL(0);
 				selector = PLAY;
+				if (m_state->getOnline() ) {
+					
+					selector = LOBBY_SCREEN_GAMEMODES;
+				}
 				
 
 				break;
 			case CD_HARD:
 				m_state->setdificultyLVL(1);
 				selector = PLAY;
+				if (m_state->getOnline()) {
+					selector = LOBBY_SCREEN_GAMEMODES;
+				}
 
 				break;
 
 			case CD_AREUSURE:
 				m_state->setdificultyLVL(2);
 				selector = PLAY;
+				if (m_state->getOnline()) {
+					selector = LOBBY_SCREEN_GAMEMODES;
+				}
 
 
 				break;
 			case CD_SURVAVAL:
 				m_state->setdificultyLVL(3);
 				selector = PLAY;
+				if (m_state->getOnline()) {
+					selector = LOBBY_SCREEN_GAMEMODES;
+				}
+
 				break;
 			case SELECT_SPACESHIP:
 
@@ -496,16 +669,34 @@ void MainScreen::select()
 				selector = CREATE_LOBBY;
 
 				break;
+
+			case LOBBY_SCREEN_DISCONNECT:
+				
+				m_state->setOnline(false, false);
+				//selector = CREATE_LOBBY;
+
+				break;
 			case GIVE_HOST_IP_CONNECT:
+				if (std::string(userinputIP).empty()) {
+					break;
+				}
+				m_state->setHostIP(std::string(userinputIP));
 				m_state->setOnline(true, false);
+				m_state->connectingToHost = true;
+				
+				
 				selector = LOBBY_SCREEN_CS;
 				break;
 
 			case  GIVE_HOST_IP_INPUT:
 
 				return;
-				
-
+			case LOBBY_SCREEN_GAMEMODES:
+				selector = CD_EASY;
+				break;
+			case CD_GAMEMODE_BACKTOLOBBY:
+				selector = LOBBY_SCREEN_GAMEMODES;
+				break;
 			}
 
 			graphics::playSound(m_state->getFullAssetPath("select2.mp3"), 1.0f, false);
@@ -576,6 +767,8 @@ void MainScreen::draw()
 	m_main_text.fill_opacity = 1.0f;
 	switch (selector) {
 	case PLAY:
+
+		
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "START", m_main_text);
 
@@ -651,6 +844,16 @@ void MainScreen::draw()
 
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 6.0f, 2.0f, "SURVIVAL", m_main_text);
 
+		if (!m_state->amHost()) {
+
+			SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 - m_state->getCanvasHeight()*0.4, 1.0f, "NOTE : ONLY HOST CAN CHANGE THE GAME MODE FOR THE LOBBY!", m_main_text);
+			
+			SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+			graphics::drawText(m_state->getCanvasWidth()*0.3f, m_state->getCanvasHeight() - 1.0f, 2.0f, "BACK TO LOBBY", m_main_text);
+
+		}
+
 
 
 
@@ -670,6 +873,15 @@ void MainScreen::draw()
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 4.0f, 2.0f, "ARE YOU SURE?", m_main_text);
 
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 6.0f, 2.0f, "SURVIVAL", m_main_text);
+		if (!m_state->amHost()) {
+
+			SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+				graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 - m_state->getCanvasHeight() * 0.4, 1.0f, "NOTE : ONLY HOST CAN CHANGE THE GAME MODE FOR THE LOBBY!", m_main_text);
+
+			SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+				graphics::drawText(m_state->getCanvasWidth() * 0.3f, m_state->getCanvasHeight() - 1.0f, 2.0f, "BACK TO LOBBY", m_main_text);
+
+		}
 
 
 
@@ -692,6 +904,15 @@ void MainScreen::draw()
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255);
 
 		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 6.0f, 2.0f, "SURVIVAL", m_main_text);
+		if (!m_state->amHost()) {
+
+			SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+				graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 - m_state->getCanvasHeight() * 0.4, 1.0f, "NOTE : ONLY HOST CAN CHANGE THE GAME MODE FOR THE LOBBY!", m_main_text);
+
+			SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+				graphics::drawText(m_state->getCanvasWidth() * 0.3f, m_state->getCanvasHeight() - 1.0f, 2.0f, "BACK TO LOBBY", m_main_text);
+
+		}
 
 
 		break;
@@ -713,7 +934,47 @@ void MainScreen::draw()
 		SETCOLOR(m_main_text.fill_color, 255, 0, 0)
 			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 6.0f, 2.0f, "SURVIVAL", m_main_text);
 		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+			if (!m_state->amHost()) {
+
+				SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+					graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 - m_state->getCanvasHeight() * 0.4, 1.0f, "NOTE : ONLY HOST CAN CHANGE THE GAME MODE FOR THE LOBBY!", m_main_text);
+
+				SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+					graphics::drawText(m_state->getCanvasWidth() * 0.3f, m_state->getCanvasHeight() - 1.0f, 2.0f, "BACK TO LOBBY", m_main_text);
+
+			}
+
 			break;
+	case CD_GAMEMODE_BACKTOLOBBY:
+		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 2.0f, "EASY", m_main_text);
+
+
+		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 2.0f, 2.0f, "HARD", m_main_text);
+
+
+
+		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 - 4.0f, 1.0f, "PLAY UNTIL YOU DIE : Kill every planet to complete a siege.Earn 100 points from killing", m_main_text);
+		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 - 3.0f, 1.0f, "a planets and 1000 points for completing a siege", m_main_text);
+
+
+		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 4.0f, 2.0f, "ARE YOU SURE?", m_main_text);
+
+
+		
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 6.0f, 2.0f, "SURVIVAL", m_main_text);
+		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+			if (!m_state->amHost()) {
+
+				SETCOLOR(m_main_text.fill_color, 255, 0, 0)
+					graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 - m_state->getCanvasHeight() * 0.4, 1.0f, "NOTE : ONLY HOST CAN CHANGE THE GAME MODE FOR THE LOBBY!", m_main_text);
+
+				
+					graphics::drawText(m_state->getCanvasWidth() * 0.3f, m_state->getCanvasHeight() - 1.0f, 2.0f, "BACK TO LOBBY", m_main_text);
+
+			}
+		SETCOLOR(m_main_text.fill_color, 255, 255, 255)
+		break;
+
 	case SELECT_SPACESHIP:
 
 
@@ -794,9 +1055,12 @@ void MainScreen::draw()
 		}else{
 			
 				SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
-				graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "START GAME", m_lobby_gui);
+				graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "START GAME", m_lobby_gui);
 				SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
-				graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+				graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+				graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "GAME MODES", m_lobby_gui);
+				graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "DISCONNECT", m_lobby_gui);
+
 				SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
 			
 
@@ -827,23 +1091,31 @@ void MainScreen::draw()
 
 
 		}
-
-		if (!m_state->amHost()) {
+		if (m_state->amHost()) {
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "START GAME", m_lobby_gui);
 			SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
-			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "GAME MODES", m_lobby_gui);
+			
+			graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "DISCONNECT", m_lobby_gui);
+
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+
 		}
 		else {
-
 			
 
-
-
-				SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
-				graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "START GAME", m_lobby_gui);
-				SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
-				graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
-				SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			graphics::drawText(m_state->getCanvasWidth() * 0.6, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "GAME MODES", m_lobby_gui);
 			
+			graphics::drawText(m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "DISCONNECT", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+
+
 		}
 
 
@@ -928,10 +1200,114 @@ void MainScreen::draw()
 		graphics::drawText(m_state->getCanvasWidth() * 0.41, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.42, 3.0f, "BACK", m_lobby_gui);
 		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
 		break;
+	case LOBBY_SCREEN_DISCONNECT:
+		i = 1;
+		//graphics::drawText(mouse.cur_pos_x + 1, mouse.cur_pos_y + 1, 1.0f, std::to_string(mouse.cur_pos_x) + " , " + std::to_string(mouse.cur_pos_y), test);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5f - m_state->getCanvasWidth() * 0.1, m_state->getCanvasHeight() * 0.5f - m_state->getCanvasHeight() * 0.3, 2.0f, "PLAYERS", m_lobby_gui);
+		m_spaceship.texture = m_state->getFullAssetPath("spaceship" + to_string(m_state->getPlayer()->getPSpaceship()) + ".png");
+
+		m_spaceship.outline_opacity = 0.0f;
+
+		graphics::drawRect(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player1", m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 0);
+		for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
+			i++;
+
+			m_spaceship.texture = m_state->getFullAssetPath("spaceship" + to_string(iter->second->getPSpaceship()) + ".png");
+
+			m_spaceship.outline_opacity = 0.0f;
+
+			graphics::drawRect((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35) * 2 * i * 0.6, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
+			graphics::drawText((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386) * 2 * i * 0.8, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player" + std::to_string(i), m_lobby_gui);
 
 
 
+		}
+		if (m_state->amHost()) {
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "START GAME", m_lobby_gui);
 
+			graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "GAME MODES", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "DISCONNECT", m_lobby_gui);
+
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+
+		}
+		else {
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			
+
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+
+			graphics::drawText(m_state->getCanvasWidth() * 0.6, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "GAME MODES", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+			graphics::drawText(m_state->getCanvasWidth() * 0.4 , m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "DISCONNECT", m_lobby_gui);
+
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+
+		}
+		
+
+		break;
+	case LOBBY_SCREEN_GAMEMODES:
+		i = 1;
+		//graphics::drawText(mouse.cur_pos_x + 1, mouse.cur_pos_y + 1, 1.0f, std::to_string(mouse.cur_pos_x) + " , " + std::to_string(mouse.cur_pos_y), test);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5f - m_state->getCanvasWidth() * 0.1, m_state->getCanvasHeight() * 0.5f - m_state->getCanvasHeight() * 0.3, 2.0f, "PLAYERS", m_lobby_gui);
+		m_spaceship.texture = m_state->getFullAssetPath("spaceship" + to_string(m_state->getPlayer()->getPSpaceship()) + ".png");
+
+		m_spaceship.outline_opacity = 0.0f;
+
+		graphics::drawRect(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
+		graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player1", m_lobby_gui);
+		SETCOLOR(m_lobby_gui.fill_color, 255, 255, 0);
+		for (auto iter = m_state->geto_playersmap().begin(); iter != m_state->geto_playersmap().end(); iter++) {
+			i++;
+
+			m_spaceship.texture = m_state->getFullAssetPath("spaceship" + to_string(iter->second->getPSpaceship()) + ".png");
+
+			m_spaceship.outline_opacity = 0.0f;
+
+			graphics::drawRect((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.35) * 2 * i * 0.6, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
+			graphics::drawText((m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.386) * 2 * i * 0.8, m_state->getCanvasHeight() * 0.5 + 1.0f, 1.0f, "Player" + std::to_string(i), m_lobby_gui);
+
+
+
+		}
+
+
+		if (m_state->amHost()) {
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "START GAME", m_lobby_gui);
+
+			graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "GAME MODES", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			graphics::drawText(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "DISCONNECT", m_lobby_gui);
+
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+
+		}
+		else {
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+
+
+			graphics::drawText(m_state->getCanvasWidth() * 0.5 - m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "CHANGE SPACESHIP", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 0, 0);
+			graphics::drawText(m_state->getCanvasWidth() * 0.6, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.2, 2.0f, "GAME MODES", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			graphics::drawText(m_state->getCanvasWidth() * 0.4, m_state->getCanvasHeight() * 0.5 + m_state->getCanvasHeight() * 0.4, 2.0f, "DISCONNECT", m_lobby_gui);
+			SETCOLOR(m_lobby_gui.fill_color, 255, 255, 255);
+			
+
+		}
+		break;
 
 	}
 		

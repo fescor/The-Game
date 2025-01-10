@@ -65,6 +65,7 @@ class Player : public GameObject, public Box, public Health
 	float PreviousFrameAngle;
 	float speed;
 	int sprite_counter;
+	int lives = 3;
 
 	int shieldFramecounter;
 	int spaceship = 0;
@@ -73,6 +74,7 @@ class Player : public GameObject, public Box, public Health
 	potition prev_pos;
 	potition new_pos;
 	potition current_pos;
+	potition spawn_pos;
 
 
 
@@ -102,7 +104,7 @@ class Player : public GameObject, public Box, public Health
 	potition outOfBounds(potition pos );
 	void outOfBounds();
 
-
+	float fadeInPlayer = 0;
 
 
 
@@ -128,6 +130,9 @@ public:
 	void init(bool online) override;
 	void draw() 	override;
 	void draw(bool online) override;
+	int getLives();
+	void reduceLives();
+	void respawn();
 
 
 
@@ -138,6 +143,7 @@ public:
 
 	void setPrevPos(float x, float y, float speed , float angle  , int fc);
 	potition getprevPos();
+	void setSpawnPos(float x, float y);
 
 	void setNewPos(float x, float y,float speed , float angle ,  int fc);
 	potition getNewPos();

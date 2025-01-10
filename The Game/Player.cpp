@@ -340,6 +340,7 @@ int Player::simulateNewPos()
 			m_fire = true;
 		}
 		fire_flag = true;
+		m_fire = false;
 
 		//fire(dt);
 	}
@@ -755,8 +756,11 @@ float Player::getX()
 }
 
 void Player::draw()
-{
-	
+{	
+
+
+
+
 	if (shield && shieldFramecounter < 1000) {
 		graphics::drawDisk(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5f, 2.0f, m_brush_shield);
 		shieldFramecounter++;
@@ -769,6 +773,7 @@ void Player::draw()
 	SETCOLOR(test.fill_color, 255, 0, 0);
 
 	m_brush_player.outline_opacity = 0.0f;
+
 	graphics::setOrientation(angle - 90.0f);
 	graphics::drawRect(m_state->getCanvasWidth() * 0.5f, m_state->getCanvasHeight() * 0.5f, 2.0f, 2.0f, m_brush_player);
 	graphics::resetPose();
@@ -881,6 +886,36 @@ void Player::draw(bool online)
 
 }
 
+int Player::getLives()
+{
+	return lives;
+}
+
+void Player::reduceLives()
+{
+	lives--;
+}
+
+void Player::respawn()
+{
+	this->changeHP(5);// reset hp
+	m_bullets = 200;//reset bullets 
+	m_pos_x = spawn_pos.x;
+	m_pos_y = spawn_pos.y;
+	prev_pos.x = spawn_pos.x;
+	prev_pos.y = spawn_pos.y;
+	prev_pos.angle = 90;
+	prev_pos.speed = 0;
+	new_pos.x = spawn_pos.x;
+	new_pos.y = spawn_pos.y;
+	new_pos.angle = 90;
+	new_pos.speed = 0;
+
+	speed = 0;
+	angle = 90;
+
+}
+
 void Player::seto_id(int i)
 {
 	o_id = i;
@@ -916,6 +951,12 @@ void Player::setPrevPos(float x , float y ,float speed , float angle ,  int fc)
 potition Player::getprevPos()
 {
 	return prev_pos;
+}
+
+void Player::setSpawnPos(float x, float y)
+{
+	spawn_pos.x = x;
+	spawn_pos.y = y;
 }
 
 void Player::setNewPos(float x, float y,float speed , float angle , int fc)

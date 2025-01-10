@@ -26,7 +26,7 @@ int Net::host()
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	ENetEvent event;
-	
+	online = true;
 
 	while (online) {
 		timeDIF = graphics::getGlobalTime() - timeB ;
@@ -135,7 +135,8 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost(m_state->getHostIP())) {online = false;}
+	//if (!connectToHost(m_state->getHostIP())) {online = false;}
+	online = connectToHost(m_state->getHostIP());
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
@@ -143,6 +144,8 @@ int Net::join()
 	while (online) {
 		timeDIF = graphics::getGlobalTime() - timeB;
 		timeB = graphics::getGlobalTime();
+		m_state->connectionFailed = false;
+		m_state->connectingToHost = false;
 
 
 
@@ -450,7 +453,7 @@ int Net::run() {
 		m_state->setOnline(false, false);
 		return EXIT_FAILURE;
 	}
-	online = true;
+	
 
 	if (_host) {
 		host();
@@ -538,7 +541,9 @@ bool Net::connectToHost(const std::string ip) // this is called when i connect t
 	else {
 		cout << "conection failed" << endl; // afto den to thelw na vgenei apthn SINARTHSH EPIDI DEN KATAFERA NA KANW CONNECT
 		enet_peer_reset(peer);
-
+		m_state->connectionFailed = true;
+		m_state->connectingToHost = false;
+		
 		//here need some return
 		//m_state->setOnline(false, false);
 		//enet_host_destroy(client);

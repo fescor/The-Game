@@ -108,6 +108,9 @@ class Net : public GameObject {
 		std::mutex& getMutex();
 		void setinGame(bool ig);
 		bool getinGame();
+
+		
+
 		~Net();
 
 };

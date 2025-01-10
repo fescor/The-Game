@@ -40,7 +40,7 @@ class MainScreen : public GameObject {
 	void moveleft();
 	void moveright();
 	void getKeyStrokes();
-
+	
 	//char userinputIP[15] = {'x','x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'};
 	char userinputIP[15] = {};
 	int uiipIter = 0;
@@ -49,6 +49,7 @@ class MainScreen : public GameObject {
 
 
 public:
+	float timer = 0.0f;
 	int getSelector();
 	void setSelector(int s);
 	MainScreen();
@@ -74,6 +75,7 @@ enum HOVER {
 	CD_HARD,
 	CD_AREUSURE,
 	CD_SURVAVAL,
+	CD_GAMEMODE_BACKTOLOBBY,
 	SELECT_SPACESHIP,
 	SELECT_CONTROLS,
 	CREATE_LOBBY,
@@ -83,6 +85,8 @@ enum HOVER {
 	LOBBY_SCREEN,
 	LOBBY_SCREEN_STARTG,
 	LOBBY_SCREEN_CS,
+	LOBBY_SCREEN_DISCONNECT,
+	LOBBY_SCREEN_GAMEMODES,
 	GIVE_HOST_IP_INPUT,
 	GIVE_HOST_IP_CONNECT,
 	GIVE_HOST_IP_BACK,
