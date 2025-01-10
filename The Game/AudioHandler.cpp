@@ -356,7 +356,8 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 			 int playerID = playerbuffer.first;
 		 }
 		 for (auto& playbackBuffer : playbackBuffer) {
-			 auto& finalboss = playbackBuffer.second;
+			 //finalboss.push_back(std::move(playbackBuffer.second)); 
+			 finalboss.insert(finalboss.end(), playbackBuffer.second.begin(), playbackBuffer.second.end());
 		 }
 
 

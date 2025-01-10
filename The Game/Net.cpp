@@ -129,7 +129,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost("192.168.68.105")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
+	if (!connectToHost("192.168.1.10")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
