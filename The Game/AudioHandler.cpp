@@ -144,7 +144,7 @@ void AudioHandler::startplaybackstream(){
 		std::cerr << "Cant find default output device." << std::endl;
 		return;
 	}
-	outputparametr.channelCount = 2;
+	outputparametr.channelCount = 1;
 	outputparametr.sampleFormat = paFloat32;
 	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
 	outputparametr.hostApiSpecificStreamInfo = nullptr;
