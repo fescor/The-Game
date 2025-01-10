@@ -23,10 +23,12 @@ private:
 public:
 	static std::vector<float> finalboss;
 	static std::vector <float> globalAudioBuffer; //buffer to send audio
+	static std::vector <float> temp_vector;//temp vector to copy globalaudiobuffer
 	static std::mutex buffermutex; //mutex for safety 
 	//static std::vector<float> playbackBuffer; // buffer to playback
 	static std::map<int, std::vector<float>> playbackMap;
 	static std::mutex playbackMutex; // mutex for playbacksafety
+	
 	//static  std::vector<float> getAndClearAudioBuffer();
 	void ShowAudioDevices();
 	AudioHandler();   // Constructor

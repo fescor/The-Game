@@ -15,6 +15,7 @@ using namespace std;
 using namespace std;
 std::vector<float> AudioHandler::finalboss;
 std::vector<float> AudioHandler::globalAudioBuffer;
+std::vector <float> temp_vector;
 std::mutex AudioHandler::buffermutex;
 std::map<int, std::vector<float>> AudioHandler::playbackMap;
 std::mutex AudioHandler::playbackMutex;
@@ -286,19 +287,24 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
 	 std::cout << "prepare to send data with size: " << globalAudioBuffer.size() << std::endl;
 
+	 {
+		 std::lock_guard<std::mutex> lock(buffermutex);
+		 temp_vector = std::move(globalAudioBuffer);
+		 globalAudioBuffer.clear();
+	 }
 	 int playerid = *(m_state)->getPlayer()->geto_id();
-	 while (!globalAudioBuffer.empty())
+	 while (!temp_vector.empty())
 	 { //an exei arketa dedomena
 			 float preparechunk[512] = { 0 };
 			 //send fist 512 frames
-			 size_t dataToCopy = min(globalAudioBuffer.size(), size_t(512));
-			 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + dataToCopy, preparechunk);
+			 size_t dataToCopy = min(temp_vector.size(), size_t(512));
+			 std::copy(temp_vector.begin(), temp_vector.begin() + dataToCopy, preparechunk);
 			 
 			 m_state->getNet()->addaudiodata(playerid, preparechunk);
 			 //erase the data that sended
-			 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
+			 temp_vector.erase(temp_vector.begin(), temp_vector.begin() + 512);
 			 
-			 if (globalAudioBuffer.empty()) {
+			 if (temp_vector.empty()) {
 				 //when you send everything stop the stream 
 				 stopAudio();
 			 }
