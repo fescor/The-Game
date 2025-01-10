@@ -27,7 +27,7 @@ public:
 	//static std::vector<float> playbackBuffer; // buffer to playback
 	static std::map<int, std::vector<float>> playbackMap;
 	static std::mutex playbackMutex; // mutex for playbacksafety
-	static  std::vector<float> getAndClearAudioBuffer();
+	//static  std::vector<float> getAndClearAudioBuffer();
 	void ShowAudioDevices();
 	AudioHandler();   // Constructor
 	~AudioHandler(); //katastrofeas

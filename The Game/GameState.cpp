@@ -47,6 +47,7 @@ bool GameState::PushToTalk(bool isStreaming) {
 		if (preperator.joinable()) {
 			preperator.join();
 		}
+		std::cout << "afhses to k " << std::endl;
 		audiohandler->stopAudio();
 		delete audiohandler;
 		audiohandler = nullptr;

@@ -144,7 +144,7 @@ void AudioHandler::startplaybackstream(){
 		std::cerr << "Cant find default output device." << std::endl;
 		return;
 	}
-	outputparametr.channelCount = 1;
+	outputparametr.channelCount = 2;
 	outputparametr.sampleFormat = paFloat32;
 	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
 	outputparametr.hostApiSpecificStreamInfo = nullptr;
@@ -281,13 +281,6 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	return paContinue;
 }
 
-//fix this
-std::vector<float> AudioHandler::getAndClearAudioBuffer() {
-	std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
-	std::vector<float> data = std::move(globalAudioBuffer);	//move buffer to data (local)
-	globalAudioBuffer.clear();// katharismos buffer
-	return data;
-}
 
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
@@ -305,13 +298,13 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 			 //erase the data that sended
 			 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
 			 
-		 
-	 }
-	 if (globalAudioBuffer.empty()) {
-		 //when you send everything stop the stream 
-		 stopAudio();
-	 }
+			 if (globalAudioBuffer.empty()) {
+				 //when you send everything stop the stream 
+				 stopAudio();
+			 }
 
+	 }
+	 
 }
 
  void AudioHandler::setbuffer(int i, const std::vector<float>& chunk) {
@@ -322,13 +315,8 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	 //take players buffer and insert the data
 	 auto& playerbuffer = playbackMap[i];
 	 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
-	 const size_t maxBuffersize = 1024 * 5; 
-	//an perasei to max size sbhse ta prwta pou esteile 
-	 if (playerbuffer.size() > maxBuffersize) {
-		 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + (playerbuffer.size() - maxBuffersize));
-
-	 }
-	 //std::cout << "Added audio chunk for player " << i << ". Buffer size: " << buffer.size() << " samples.\n";
+	 
+	 
 	 //an den uparxei stream anoikse gia to playback
 	 if (!stream) {
 		 AudioHandler::startplaybackstream();
@@ -434,3 +422,12 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 	 return paContinue;  
  }
 
+ /*
+ //fix this
+ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
+	 std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
+	 std::vector<float> data = std::move(globalAudioBuffer);	//move buffer to data (local)
+	 globalAudioBuffer.clear();// katharismos buffer
+	 return data;
+ }
+ */
