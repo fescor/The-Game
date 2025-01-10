@@ -299,13 +299,17 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 			 float preparechunk[512] = { 0 };
 			 //send fist 512 frames
 			 size_t dataToCopy = min(globalAudioBuffer.size(), size_t(512));
-			 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, preparechunk);
+			 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + dataToCopy, preparechunk);
 			 
 			 m_state->getNet()->addaudiodata(playerid, preparechunk);
 			 //erase the data that sended
-			 //globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
+			 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
 			 
 		 
+	 }
+	 if (globalAudioBuffer.empty()) {
+		 //when you send everything stop the stream 
+		 stopAudio();
 	 }
 
 }
@@ -334,7 +338,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 			 std::cerr << "Error writing to stream: " << Pa_GetErrorText(err) << std::endl;
 		 }
 		 */
-		 if (playbackMap.empty()) {
+		 if (playerbuffer.empty()) {
 			 //when playback is finished 
 			 stopAudio();
 		 }
@@ -416,7 +420,7 @@ std::vector<float> AudioHandler::getAndClearAudioBuffer() {
 				 }
 				 //add audio to output
 				 for (size_t i = 0; i < dataToPlayback; i++) {
-					 out[i] = playerbuffer[i];
+					 out[i] += playerbuffer[i];
 				 }
 			
 				//erase what you have played 
