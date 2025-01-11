@@ -12,12 +12,11 @@
 #define BABUSUS "10.124.68.56"
 //TODO : error when host dc hapening on peer (bug happens after peer-net sends type msg 3 )
 // TODO : when a peers no host restarts after being killed he spawns alla planets and objects again 
-// if host has the 0 spaceship when a peers goes to change spaceship it can se the one host has should not happen
-// game crashed 1 time after i changes multiple times spaceships(dont know if it has something to do with that) when it tried to move the o_player
+
 //---- edge case ana exeis xrono ti tha ginei an den  kataferei ena palio peer na kanei connect sto kenourgio peer pou bike 
-//----- when a player respawns he needs to drop all the pMove packets he has and update only on new ones
+
 //----THIS IS KINDA IMPORTANT----for some reason when a laptop tried to connect to PC (after pc dc and connected to lobby again)
-// if a peer disconeects from a game then when he joins again lobby he doesnt send msg that he joined...
+
 
 
 using namespace std;

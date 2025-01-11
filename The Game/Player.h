@@ -158,6 +158,8 @@ public:
 	void setPSpaceship(int spaceship);
 	int getPSpaceship();
 
+	void clearQueuedPackets();
+
 
 	Player(int online_id);
 	~Player();

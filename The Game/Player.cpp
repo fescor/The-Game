@@ -907,6 +907,13 @@ void Player::respawn()
 	speed = 0;
 	angle = 90;
 
+	if (m_state->getOnline()) {
+		for (auto& o_player : m_state->geto_playersmap()) {
+			o_player.second->clearQueuedPackets();
+		}
+
+	}
+
 }
 
 void Player::seto_id(int i)
@@ -976,6 +983,12 @@ void Player::setPSpaceship(int ss)
 int Player::getPSpaceship()
 {
 	return spaceship;
+}
+
+void Player::clearQueuedPackets()
+{
+	q_packets.clear();
+
 }
 
 
