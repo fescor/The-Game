@@ -135,7 +135,7 @@ void AudioHandler::ShowDefaultDevices() const {
 }
 
 void AudioHandler::startplaybackstream(){
-	if ( Pa_IsStreamActive(stream)) {
+	if (stream && Pa_IsStreamActive(stream)) {
 		std::cerr << "Audio stream is already active!" << std::endl;
 		return; // ean exei anoiksei mhn ksana anoigeis
 	}
@@ -156,8 +156,8 @@ void AudioHandler::startplaybackstream(){
 	outputparametr.hostApiSpecificStreamInfo = nullptr;
 	
 
-
-	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 1024, paClipOff, playbackcallback, nullptr);
+	//paClipOff: disable clipping, paDitherOff: disable dithering
+	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paFloat32, playbackcallback, nullptr);
 	if (err != paNoError) {
 		std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl; 
 		return;
@@ -216,7 +216,7 @@ void AudioHandler::startAudio(){
 	outputparametr.hostApiSpecificStreamInfo = nullptr; 
 
 	//open audio stream 
-	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback,nullptr);
+	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paFloat32, audioCallback,nullptr);
 	if (err != paNoError) {
 		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
 		return; 
@@ -354,7 +354,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 				 size_t dataToPlayback = min(framesPerBuffer, playerbuffer.size());
 				 for (size_t i = 0; i < dataToPlayback; i++) {
 					 out[i] += playerbuffer[i];
-					 std::cout << "now : " << out[i]<< std::endl;
+					 
 				 }
 				 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
 				 // Reset the flag if buffer is empty after playback	
