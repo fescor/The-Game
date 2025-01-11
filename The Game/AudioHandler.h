@@ -46,4 +46,5 @@ public:
 	void preparedata();
 	void setbuffer(int i, const std::vector<float>& buffer);
 	bool closecall();
+	static bool dataready ;
 };

@@ -21,7 +21,9 @@ std::mutex AudioHandler::buffermutex;
 std::map<int, std::vector<float>> AudioHandler::playbackMap;
 std::mutex AudioHandler::playbackMutex;
 bool streamcloseflag = false;
+bool AudioHandler::dataready = false;
 std::condition_variable playbackCondition;
+
 
 
 // Constructor implementation
@@ -320,58 +322,47 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 }
 
  void AudioHandler::setbuffer(int i, const std::vector<float>& chunk) {
-	
-	 if (playbackMap.find(i) == playbackMap.end()) {
-		 playbackMap[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
-	}
-	 //take players buffer and insert the data
-	 auto& playerbuffer = playbackMap[i];
-	 std::vector<float> temp_buffer(chunk.begin(), chunk.end()); //COPY TO A TEMP VECTOR
-	 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
-	 //temp_buffer
-	
-	 
-	 
-	 
-	 
-	 
+	 {
+		 if (playbackMap.find(i) == playbackMap.end()) {
+			 playbackMap[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
+		 }
+		 //take players buffer and insert the data
+		 auto& playerbuffer = playbackMap[i];
+		 std::vector<float> temp_buffer(chunk.begin(), chunk.end()); //COPY TO A TEMP VECTOR
+		 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
+		 //temp_buffer
+		 dataready = true;
+	 }
  }
 
  int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
-	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData)
-
- {
+	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
 	 float* out = static_cast<float*>(outputBuffer);
 	 std::fill(out, out + framesPerBuffer, 0.0f);
-	 {
-		 std::lock_guard<std::mutex> lock(playbackMutex);
-		 for (auto& it : playbackMap) {
-			 auto& playerbuffer = it.second; 
 
-			 if (!playerbuffer.empty()) { 
-				 //how many samples to play
-				 size_t dataToPlayback= min(framesPerBuffer,playerbuffer.size());
-				 
-				 //add audio to output
-				 for (size_t i = 0; i < dataToPlayback; i++) {
-					 out[i] += playerbuffer[i];
-				 }
-			
-				//erase what you have played 
-				 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
+	 std::unique_lock<std::mutex> lock(playbackMutex);
+	 playbackCondition.wait(lock, [] { return dataready; }); // Wait until data is ready
+
+	 for (auto& it : playbackMap) {
+		 auto& playerbuffer = it.second;
+		 if (!playerbuffer.empty()) {
+			 size_t dataToPlayback = min(framesPerBuffer, playerbuffer.size());
+			 for (size_t i = 0; i < dataToPlayback; i++) {
+				 out[i] += playerbuffer[i];
 			 }
-			 else {
-				 streamcloseflag = true ;
+			 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
+			 // Reset the flag if buffer is empty after playback
+			 if (playerbuffer.empty()) {
+				 dataready= false;
 			 }
-			 
 		 }
 	 }
-	 
-	
-	 return paContinue;  
+	 return paContinue;
  }
 
+
  bool AudioHandler::closecall() {
+	
 	 std::lock_guard<std::mutex> lock(playbackMutex);
 	 for (auto& it : playbackMap) {
 		 if (!it.second.empty()) {

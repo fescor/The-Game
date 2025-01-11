@@ -257,7 +257,7 @@ void GameState::update(float dt)
 	}
 
 	PreviousState = CurrentState; //update state
-	CheckAndStopStream();
+	//CheckAndStopStream();
 
 
 	switch (status) {
