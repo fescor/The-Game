@@ -427,6 +427,11 @@ void Net::sendDataBroadcast(union Data payload, PACKETTYPE type)
 	case SPACE_SHIP:
 		p.type = type;
 		p.ss = payload.ss;
+		break;
+	case LEVEL_PACKET:
+		p.type = type;
+		p.lvlp = payload.lvlp;
+		break;
 
 	}
 
