@@ -35,6 +35,7 @@ class Net : public GameObject {
 	ENetAddress address;
 	
 	concurrency::concurrent_queue<Data> p_packets;
+	concurrency::concurrent_queue<Data> level_packets;
 
 	map<enet_uint32 , ENetPeer*> newPeers; // peers connected waiting for validation;
 	int host();
@@ -103,6 +104,7 @@ class Net : public GameObject {
 		void setOnline(bool a);
 		bool getOnline();
 		void addpMOVEToQueue(int o_id , float angle , float speed , float x , float y , unsigned long framecounter , bool fire_flag);
+		void addLevelPacketToQueue(int o_id , int type);
 		bool isHost();
 		void sendLoadedLevelMSG(int o_id);
 		std::mutex& getMutex();

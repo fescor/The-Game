@@ -45,6 +45,18 @@ int Net::host()
 
 
 		}
+		if (!level_packets.empty()) {
+
+			Data p;
+			level_packets.try_pop(p);
+
+			
+
+			sendDataBroadcast(p, LEVEL_PACKET);
+			enet_host_flush(client);
+
+
+		}
 
 		if (!p_packets.empty()) {
 
@@ -155,6 +167,18 @@ int Net::join()
 		if (changedSpaceship) {
 			sendMySpaceShip();
 			changedSpaceship = false;
+		}
+		if (!level_packets.empty()) {
+
+			Data p;
+			level_packets.try_pop(p);
+
+
+
+			sendDataBroadcast(p, LEVEL_PACKET);
+			enet_host_flush(client);
+
+
 		}
 
 		if (!p_packets.empty()) {
@@ -740,9 +764,16 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		else {
 			m_state->setOPSpaceship(p.ss);
 		}
-		std::string s = "AVAILABLE SPACESHIPS : { " + m_state->availableSpaceship[0] + ',' + m_state->availableSpaceship[1] + ',' + m_state->availableSpaceship[2]
-			+ ',' + m_state->availableSpaceship[3] + ' }' + '\n';
-		cout << s;
+
+		break;
+	case LEVEL_PACKET:
+		if (p.lvlp.type == 0) {
+			m_state->deletePlanet(p.lvlp.o_id);
+
+		}
+		else {
+			m_state->deleteToken(p.lvlp.o_id);
+		}
 		break;
 	}
 
@@ -1058,6 +1089,25 @@ void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y, 
 	//m_state->getMutex().lock();
 	p_packets.push(payload);
 	//m_state->getMutex().unlock();
+
+
+}
+
+void Net::addLevelPacketToQueue(int o_id , int type)
+{
+
+	
+		levelPacketDelete lvlpacket;;
+		lvlpacket.o_id = o_id;
+		lvlpacket.type = type;
+		Data payload;
+		payload.lvlp = lvlpacket;
+
+		level_packets.push(payload);
+
+
+	
+	
 
 
 }

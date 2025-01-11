@@ -15,6 +15,12 @@
 
 class Level : public GameObject
 {
+	std::mutex mutex_lvl;
+
+	std::vector<int> planetToDeleteNET;
+	std::vector<int> tokenToDeleteNET;
+
+
 	graphics::Brush m_brush_player_hp;
 	graphics::Brush m_brush_player_bullet_count;
 	
@@ -109,6 +115,9 @@ public:
 	std::unordered_map<int, Planet*>& getm_planets();
 	std::unordered_map<int, Tokens*>& getm_tokens();
 	void deleteLevel();
+	void addToVectorDeleteP(int oid);
+	void addToVectorDeleteT(int oid);
+
 	~Level();
 
 };

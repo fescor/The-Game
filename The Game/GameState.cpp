@@ -42,6 +42,7 @@ void GameState::deleteNet()
 		delete net;
 	}
 	net = nullptr;
+	o_players.clear();
 	
 }
 
@@ -576,7 +577,26 @@ startG& GameState::getMapInfo()
 {
 	return mapinfo;
 }
+void GameState::deletePlanet(int o_id)
+{
+	mtx.lock();
+	getLevel()->addToVectorDeleteP(o_id);
+	mtx.unlock();
 
+}
+
+void GameState::deleteToken(int o_id)
+{
+
+
+	mtx.lock();
+	getLevel()->addToVectorDeleteT(o_id);
+	mtx.unlock();
+
+
+
+
+}
 void GameState::createMapInfoData()
 {
 

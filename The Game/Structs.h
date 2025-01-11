@@ -152,27 +152,20 @@ struct spaceShip
 	}
 
 };
-struct planetDead
+
+
+
+struct levelPacketDelete
 {
-	int planet_oid;
+
+	int o_id;
+	int type;
 	template<class Archive>
 	void serialize(Archive& archive)
 	{
-		archive(planet_oid); // serialize things by passing them to the archive
+		archive(o_id , type); // serialize things by passing them to the archive
 	}
 
-
-
-};
-struct tokenConsume
-{
-	int token_oid;
-
-	template<class Archive>
-	void serialize(Archive& archive)
-	{
-		archive(token_oid); // serialize things by passing them to the archive
-	}
 };
 
 
@@ -190,8 +183,7 @@ enum PACKETTYPE {
 	PLAYER_INFO,
 	VOICE_CHUNK,
 	SPACE_SHIP,
-	PLANET,
-	TOKEN,
+	LEVEL_PACKET,
 
 
 
@@ -216,8 +208,7 @@ struct packet
 		playerInfo pi;
 		voice  vc;
 		spaceShip ss;
-		planetDead pd;
-		tokenConsume tc;
+		levelPacketDelete lvlp;
 
 		
 
@@ -256,12 +247,10 @@ struct packet
 			case SPACE_SHIP:
 				archive(ss);
 				break;
-			case PLANET:
-				archive(pd);
+			case LEVEL_PACKET:
+				archive(lvlp);
 				break;
-			case TOKEN:
-				archive(tc);
-				break;
+
 
 
 				
@@ -296,9 +285,7 @@ union Data
 	voice vc;
 
 	spaceShip ss;
-
-	planetDead pd;
-
-	tokenConsume tc;
+	
+	levelPacketDelete lvlp;
 
 };

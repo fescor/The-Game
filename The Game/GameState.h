@@ -147,7 +147,8 @@ public:
 
 	void createMapInfoData();
 	
-
+	void deletePlanet(int o_id);
+	void deleteToken(int o_id);
 	
 	
 

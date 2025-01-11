@@ -176,6 +176,11 @@ void Level::collectToken()
 					break; 
 
 				}
+				if (m_state->getNet()->getOnline()) {
+					m_state->getNet()->addLevelPacketToQueue(it->first, 1);
+				}
+
+
 				delete it->second;
 				m_tokens.erase(it);
 				return;
@@ -226,9 +231,14 @@ void Level::bulletColissionPlanet()
 
 
 					//if (m_planets[j]->returnHP() == 0) {
-					if (planet->returnHP() == 0) {
+					if (planet->returnHP() <= 0) {
 						score += 100;
 						//delete m_planets[j];
+						if (m_state->getNet()->getOnline()) {
+							m_state->getNet()->addLevelPacketToQueue(pair.first, 0);
+						}
+						
+
 						delete planet;
 						delete m_asteroids[pair.first];
 						m_asteroids.erase(pair.first);
@@ -594,6 +604,28 @@ void Level::update(float dt)
 		b->update(dt);
 
 	}
+
+	if (m_state->getOnline()) {
+		
+		for (auto& planet_id : planetToDeleteNET) {
+
+			
+			m_planets.erase(planet_id);
+			
+		}
+		for (auto& token_id : tokenToDeleteNET) {
+
+			
+			m_tokens.erase(token_id);
+			
+		}
+
+
+	}
+
+
+
+
 	
 	m_minimap->update(dt);
 
@@ -923,6 +955,20 @@ void Level::deleteLevel()
 
 
 }
+
+void Level::addToVectorDeleteP(int oid)
+{
+	planetToDeleteNET.push_back(oid);
+
+
+}
+
+void Level::addToVectorDeleteT(int oid)
+{
+	tokenToDeleteNET.push_back(oid);
+}
+
+
 
 void Level::restart() 
 {
