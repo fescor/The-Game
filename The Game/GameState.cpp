@@ -43,6 +43,7 @@ void GameState::deleteNet()
 	}
 	net = nullptr;
 	o_players.clear();
+	playersLoadedLevel = 0;
 	
 }
 

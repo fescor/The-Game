@@ -17,7 +17,7 @@
 //---- edge case ana exeis xrono ti tha ginei an den  kataferei ena palio peer na kanei connect sto kenourgio peer pou bike 
 //----- when a player respawns he needs to drop all the pMove packets he has and update only on new ones
 //----THIS IS KINDA IMPORTANT----for some reason when a laptop tried to connect to PC (after pc dc and connected to lobby again)
-// sometimes loading doesnt happen doesnt send loading msg the peer i think 
+// if a peer disconeects from a game then when he joins again lobby he doesnt send msg that he joined...
 
 
 using namespace std;
@@ -776,8 +776,12 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 			m_state->deletePlanet(p.lvlp.o_id);
 
 		}
-		else {
+		else if( p.lvlp.type == 1){
 			m_state->deleteToken(p.lvlp.o_id);
+		}
+		else if (p.lvlp.type == 2) {
+
+
 		}
 		break;
 	}
