@@ -17,7 +17,7 @@ private:
 	//PaStream* pb_stream = nullprt;
 
 	int player_id;
-
+	
 
 
 public:
@@ -44,4 +44,5 @@ public:
 	static int playbackcallback (const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) ;
 	void preparedata();
 	void setbuffer(int i, const std::vector<float>& buffer);
+	void closecall();
 };

@@ -47,8 +47,9 @@ bool GameState::PushToTalk(bool isStreaming) {
 		if (preperator.joinable()) {
 			preperator.join();
 		}
-		std::cout << "afhses to k " << std::endl;
+		
 		audiohandler->stopAudio();
+
 		delete audiohandler;
 		audiohandler = nullptr;
 		return false;
@@ -59,19 +60,19 @@ bool GameState::PushToTalk(bool isStreaming) {
 	
 
 void GameState::sendToPlayback(audiodata ad) {
+
 	int player_id = ad.playerid;
 	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
-	std::cout << "sendToPlayer chunk size is : " << chunk.size() << std::endl; 
 	if (!audiohandler) {
 		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
-		
+
 	}
-	audiohandler->setbuffer(player_id, chunk);
-	//converte
-	
-	//send to playback
-	//
-	//audiohandler->checkAndStopAudio();
+	playbackstarter = std::thread(&AudioHandler::startplaybackstream,audiohandler);
+	receiver = std::thread(&AudioHandler::setbuffer, audiohandler, player_id, chunk);
+	//audiohandler->startplaybackstream();
+	//audiohandler->startplaybackstream();
+	//audiohandler->setbuffer(player_id, chunk);
+
 }
 
 void GameState::initNet()
@@ -143,14 +144,10 @@ bool GameState::getOnline()
 	return online;
 }
 
-
-
 void GameState::setStatus(char s)
 {
 	status = s;
 }
-
-
 
 char GameState::getStatus()
 {
@@ -241,16 +238,6 @@ void GameState::update(float dt)
 			GameState::PushToTalk(false);
 		}
 	}
-		
-	/*
-		
-		if (isStreaming && !CurrentState) {
-			if(CurrentTime - ReleaseTime > Waitasec){
-				isStreaming = false;
-				GameState::PushToTalk(false);
-			}
-		}
-	*/
 
 	PreviousState = CurrentState; //update state
 

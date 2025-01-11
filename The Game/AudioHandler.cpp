@@ -19,6 +19,8 @@ std::vector <float> AudioHandler::temp_vector;
 std::mutex AudioHandler::buffermutex;
 std::map<int, std::vector<float>> AudioHandler::playbackMap;
 std::mutex AudioHandler::playbackMutex;
+bool streamcloseflag = false;
+std::condition_variable playbackCondition;
 
 
 // Constructor implementation
@@ -149,6 +151,8 @@ void AudioHandler::startplaybackstream(){
 	outputparametr.sampleFormat = paFloat32;
 	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
 	outputparametr.hostApiSpecificStreamInfo = nullptr;
+	
+
 
 	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paClipOff, playbackcallback, nullptr);
 	if (err != paNoError) {
@@ -164,6 +168,7 @@ void AudioHandler::startplaybackstream(){
 	else {
 		std::cout << "Stream started" << std::endl;
 	}
+	
 }
 
 
@@ -314,30 +319,19 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 }
 
  void AudioHandler::setbuffer(int i, const std::vector<float>& chunk) {
-	 
+	
 	 if (playbackMap.find(i) == playbackMap.end()) {
 		 playbackMap[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
 	}
 	 //take players buffer and insert the data
 	 auto& playerbuffer = playbackMap[i];
 	 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
+		
 	 
 	 
-	 //an den uparxei stream anoikse gia to playback
-	 if (!stream) {
-		 AudioHandler::startplaybackstream();
-		 /*
-		PaError err = Pa_WriteStream(stream, playbackBuffer[i].data(), playbackBuffer[i].size());
-		 if (err != paNoError) {
-			 std::cerr << "Error writing to stream: " << Pa_GetErrorText(err) << std::endl;
-		 }
-		 */
-		 if (playerbuffer.empty()) {
-			 //when playback is finished 
-			 stopAudio();
-		 }
-	 }
-
+	 
+	 
+	 
  }
 
  int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
@@ -363,20 +357,19 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 				//erase what you have played 
 				 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
 			 }
+			 else {
+				 streamcloseflag = true ;
+			 }
 			 
 		 }
 	 }
-
+	 
 	
 	 return paContinue;  
  }
 
- /*
- //fix this
- std::vector<float> AudioHandler::getAndClearAudioBuffer() {
-	 std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
-	 std::vector<float> data = std::move(globalAudioBuffer);	//move buffer to data (local)
-	 globalAudioBuffer.clear();// katharismos buffer
-	 return data;
+ void AudioHandler::closecall() {
+	 if (streamcloseflag == true) {
+		 Pa_CloseStream(stream);
+	 }
  }
- */

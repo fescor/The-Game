@@ -693,9 +693,6 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		m_state->playerLoadedLevel();
 		break;
 	case VOICE_DATA:
-		//ti tha kanei otan dexete to voice data
-
-		std::cout << "elava ta arxeia " << std::endl;
 		m_state->sendToPlayback(p.ad);
 		break;
 
