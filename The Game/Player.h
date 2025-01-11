@@ -28,6 +28,7 @@ struct potition
 	int frame = NULL;
 	float angle = NULL;
 	float speed = NULL;
+	bool fire = false;
 
 	bool operator == (potition& b) {
 		return (x == b.x && y == b.y && angle == b.angle);
@@ -43,7 +44,7 @@ class Player : public GameObject, public Box, public Health
 	float lastPacket_timeSend = .0;
 	float maxTimeLerp = 50.0f; // this should be the 40ms of the tickrate + rtt/2 (round trip time of packet /2 cuz i want the time elapse in send bot send and  back)
 	float elapsedTimeLerp = 0.0f;
-	float t = 0.0f;
+	
 
 
 
@@ -71,10 +72,17 @@ class Player : public GameObject, public Box, public Health
 	int spaceship = 0;
 
 	keystrokes input;
+
 	potition prev_pos;
 	potition new_pos;
 	potition current_pos;
+
+	bool updated_flag = false;
+
+
 	potition spawn_pos;
+
+
 
 
 

@@ -14,7 +14,7 @@
 // TODO : interpolate from prev potition to new potition with the fixed tickrate so between tickrates you neet to interpolate in the update,  smooth the renderin te quifsa
 
 
-using namespace std;
+
 #define TURN_LEFT 1
 #define TURN_RIGHT 2
 #define IDLE 0
@@ -81,6 +81,7 @@ void Player::update(float dt, bool online)
 			m_pos_y = new_pos.y;
 		}
 	}
+	
 
 
 
@@ -108,11 +109,17 @@ void Player::update(float dt, bool online)
 		
 		*/
 
-		return;
+		//return;
 
 
 	}
 	timeStepCounter = .0f;
+
+
+
+
+
+
 	if (!q_packets.empty()) {
 
 
@@ -135,6 +142,7 @@ void Player::update(float dt, bool online)
 			cout << "breakpoint" << endl;
 		}
 
+		
 		prev_pos = new_pos;
 
 		
@@ -143,11 +151,15 @@ void Player::update(float dt, bool online)
 		m_pos_x = prev_pos.x;
 		m_pos_y = prev_pos.y;
 		
+
+		
+		
 		if (move.fire) {
 			graphics::playSound(m_state->getFullAssetPath("shoot2.mp3"), 1.0f, false);
 			fire();
 
 		}
+		
 
 
 
@@ -158,37 +170,14 @@ void Player::update(float dt, bool online)
 		new_pos.angle = move.angle;
 		new_pos.speed = move.speed;
 		new_pos.frame = m_state->framecounter;
+		new_pos.fire = move.fire;
+		updated_flag = true;
 
 		return;
 	}
 	return;
 
 
-	/*
-	cout << s;
-	current_pos.angle = angle;
-	current_pos.speed = speed;
-	current_pos.x = m_pos_x;
-	current_pos.y = m_pos_y;
-
-	elapsedTimeLerp += dt;
-	float t = elapsedTimeLerp / maxTimeLerp;
-	if (elapsedTimeLerp >= maxTimeLerp) {
-		
-		m_pos_x = new_pos.x;
-		m_pos_y = new_pos.y;
-		angle = new_pos.angle;
-		elapsedTimeLerp = 0.0f;
-	}
-	else {
-		current_pos = lerp(prev_pos,new_pos ,  t);
-		m_pos_x = current_pos.x;
-		m_pos_y = current_pos.y;
-		angle = current_pos.angle;
-
-	}
-	*/
-	
 
 
 }
@@ -274,8 +263,8 @@ int Player::simulateNewPos()
 	//float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 2000.0f;
 	int o_angle = IDLE;
-	potition n_pos;
-	m_fire = false;
+
+	
 	
 
 	if (input.key_A) {
@@ -340,7 +329,7 @@ int Player::simulateNewPos()
 			m_fire = true;
 		}
 		fire_flag = true;
-		m_fire = false;
+		
 
 		//fire(dt);
 	}
@@ -350,11 +339,9 @@ int Player::simulateNewPos()
 	}
 	new_pos.x = prev_pos.x + cos(radians(new_pos.angle)) * (new_pos.speed * fixed_timeStep);
 	new_pos.y = prev_pos.y - sin(radians(new_pos.angle)) * (new_pos.speed * fixed_timeStep);
-	n_pos.x = new_pos.x;
-	n_pos.y = new_pos.y;
-	n_pos = outOfBounds(n_pos);
-	new_pos.x = n_pos.x;
-	new_pos.y = n_pos.y;
+
+	new_pos = outOfBounds(new_pos);
+
 	
 
 
@@ -591,7 +578,7 @@ void Player::update(float dt)
 	timeStepCounter += dt;
 	if (timeStepCounter < tickrate) {
 		
-		t += 0.5f;
+		
 		potition c = lerp(prev_pos, new_pos, timeStepCounter/tickrate);
 		c  = outOfBounds(c);
 		m_pos_x = c.x;
@@ -600,7 +587,9 @@ void Player::update(float dt)
 		
 		m_state->m_global_offset_x = m_state->getCanvasWidth() / 2.0f - m_pos_x;
 		m_state->m_global_offset_y = m_state->getCanvasHeight() / 2.0f - m_pos_y;
-		
+
+		//m_state->m_global_offset_x = m_state->getCanvasWidth() / 2.0f - m_pos_x;
+		//m_state->m_global_offset_y = m_state->getCanvasHeight() / 2.0f - m_pos_y;
 		
 		return;
 
@@ -612,18 +601,19 @@ void Player::update(float dt)
 
 	///HERE IT ENTERS EVERY 40ms ////
 
-	bool f1 = false;
+	
 	float delta_time = dt / 2000.0f;
 	float fixed_timeStep = tickrate / 2000.0f;
 	int o_angle = IDLE;
 
-
+	
 	prev_pos = new_pos;
 	
 	m_pos_y = prev_pos.y;
 	m_pos_x = prev_pos.x;
 	speed = prev_pos.speed;
 	angle = prev_pos.angle;
+	
 	
 
 
@@ -651,13 +641,16 @@ void Player::update(float dt)
 	
 	
 	testcounter++;
-	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle)) {
+	if (m_state->getOnline() && !(speed == 0.0f && isAngleIdle && !m_fire) ) {
 		if (graphics::getGlobalTime() - lastPacket_timeSend >= tickrate) {
 
-
+			
 			m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y, testcounter ,m_fire);
 			lastPacket_timeSend = graphics::getGlobalTime();
-			
+			if (m_fire) {
+				cout << "preza";
+				m_fire = false;
+			}
 		}
 	}
 	/*
@@ -723,6 +716,8 @@ void Player::init(bool online)
 	new_pos.angle = 90.0f;
 	new_pos.speed = 0.0f;
 	new_pos.frame = m_state->framecounter;
+
+	current_pos = new_pos;
 
 	
 
@@ -806,7 +801,7 @@ void Player::draw()
 
 void Player::draw(bool online)
 {
-	/*
+	
 	potition c;
 	c.x = m_pos_x;
 	c.y = m_pos_y;
@@ -814,16 +809,14 @@ void Player::draw(bool online)
 	
 	if (timeStepCounter < tickrate) {
 
-		cout << "T = : " << timeStepCounter/tickrate;
+		cout << "T = : " << timeStepCounter / tickrate;
 		c = lerp(prev_pos, new_pos, timeStepCounter / tickrate);
 
 
 
 
-	}
-	*/
-	
 
+	}
 
 
 
@@ -849,8 +842,8 @@ void Player::draw(bool online)
 		SETCOLOR(test.fill_color, 255, 255, 0);
 	
 
-		graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y, 1.0f, " X : " + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y) + " , SP : " + std::to_string(speed), test);
-		graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y + 3, 1.0f, "angle : " + std::to_string(angle), test);
+	graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y, 1.0f, " X : " + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y) + " , SP : " + std::to_string(speed), test);
+	graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y + 3, 1.0f, "angle : " + std::to_string(angle), test);
 	if (explosion) {// implement it corectly for online players
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
 
