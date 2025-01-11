@@ -45,6 +45,7 @@ private:
 	std::thread playbackstarter; 
 	float ReleaseTime = 0.0f;
 	const float Waitasec = 500.0f;
+	void CheckAndStopStream();
 
 
 

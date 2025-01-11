@@ -28,6 +28,7 @@ public:
 	//static std::vector<float> playbackBuffer; // buffer to playback
 	static std::map<int, std::vector<float>> playbackMap;
 	static std::mutex playbackMutex; // mutex for playbacksafety
+	//std::vector <float> temp_buffer; //buffer that when is empty playback should finish 
 	
 	//static  std::vector<float> getAndClearAudioBuffer();
 	void ShowAudioDevices();
@@ -44,5 +45,5 @@ public:
 	static int playbackcallback (const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) ;
 	void preparedata();
 	void setbuffer(int i, const std::vector<float>& buffer);
-	void closecall();
+	bool closecall();
 };

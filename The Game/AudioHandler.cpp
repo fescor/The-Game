@@ -16,6 +16,7 @@ using namespace std;
 std::vector<float> AudioHandler::finalboss;
 std::vector<float> AudioHandler::globalAudioBuffer;
 std::vector <float> AudioHandler::temp_vector;
+
 std::mutex AudioHandler::buffermutex;
 std::map<int, std::vector<float>> AudioHandler::playbackMap;
 std::mutex AudioHandler::playbackMutex;
@@ -325,8 +326,10 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	}
 	 //take players buffer and insert the data
 	 auto& playerbuffer = playbackMap[i];
+	 std::vector<float> temp_buffer(chunk.begin(), chunk.end()); //COPY TO A TEMP VECTOR
 	 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
-		
+	 //temp_buffer
+	
 	 
 	 
 	 
@@ -368,8 +371,12 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	 return paContinue;  
  }
 
- void AudioHandler::closecall() {
-	 if (streamcloseflag == true) {
-		 Pa_CloseStream(stream);
+ bool AudioHandler::closecall() {
+	 std::lock_guard<std::mutex> lock(playbackMutex);
+	 for (auto& it : playbackMap) {
+		 if (!it.second.empty()) {
+			 return false; // Buffer is not empty, playback is not finished
+		 }
 	 }
+	 return true; // All buffers are empty, playback is finished
  }

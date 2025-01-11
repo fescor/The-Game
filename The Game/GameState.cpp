@@ -67,13 +67,30 @@ void GameState::sendToPlayback(audiodata ad) {
 		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
 
 	}
+	if (playbackstarter.joinable()) {
+		playbackstarter.join();
+	}
+	//std::cout << "Starting thread for startstream..." << std::endl;
 	playbackstarter = std::thread(&AudioHandler::startplaybackstream,audiohandler);
+	if (receiver.joinable()) {
+		receiver.join();
+	}
+	//std::cout << "Starting thread for setbuffer..." << std::endl;
 	receiver = std::thread(&AudioHandler::setbuffer, audiohandler, player_id, chunk);
-	//audiohandler->startplaybackstream();
-	//audiohandler->startplaybackstream();
-	//audiohandler->setbuffer(player_id, chunk);
-
+	
 }
+void GameState::CheckAndStopStream() {
+	if (audiohandler) {
+		if (audiohandler->closecall()) {
+			audiohandler->stopAudio();
+			delete audiohandler;
+			audiohandler = nullptr;
+			std::cout << "Playback finished and stream stopped." << std::endl;
+		}
+	}
+}
+
+
 
 void GameState::initNet()
 {
@@ -240,7 +257,7 @@ void GameState::update(float dt)
 	}
 
 	PreviousState = CurrentState; //update state
-
+	CheckAndStopStream();
 
 
 	switch (status) {
