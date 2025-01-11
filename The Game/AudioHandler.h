@@ -19,16 +19,20 @@ private:
 	//PaStream* pb_stream = nullprt;
 
 	int player_id;
-
+	
 
 
 public:
+	static std::vector<float> finalboss;
 	static std::vector <float> globalAudioBuffer; //buffer to send audio
+	static std::vector <float> temp_vector;//temp vector to copy globalaudiobuffer
 	static std::mutex buffermutex; //mutex for safety 
 	//static std::vector<float> playbackBuffer; // buffer to playback
-	static std::map<int, std::vector<float>> playbackBuffer;
+	static std::map<int, std::vector<float>> playbackMap;
 	static std::mutex playbackMutex; // mutex for playbacksafety
-	static  std::vector<float> getAndClearAudioBuffer();
+	//std::vector <float> temp_buffer; //buffer that when is empty playback should finish 
+	
+	//static  std::vector<float> getAndClearAudioBuffer();
 	void ShowAudioDevices();
 	AudioHandler();   // Constructor
 	~AudioHandler(); //katastrofeas
@@ -39,10 +43,9 @@ public:
 	void  ShowDefaultDevices() const;
 	//bool AudioRecorder(int durationSeconds, const std::string& filename);
 	static int audioCallback(const void* inputbuffer, void* outputbuffer, unsigned long framsPerBuffer, const PaStreamCallbackTimeInfo* timeinfo, PaStreamCallbackFlags statusflag, void* userData);
-	//void preparedata(const std::vector<float>& buffer);
+	//void preparedata(const std::vector<floatconst void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
+	static int playbackcallback (const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) ;
 	void preparedata();
 	void setbuffer(int i, const std::vector<float>& buffer);
-	void checkAndStopAudio();
-	bool isPlaybackFinished;
-	bool playbackFinishedFlag;
+	bool closecall();
 };

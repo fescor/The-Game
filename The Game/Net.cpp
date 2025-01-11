@@ -129,7 +129,7 @@ int Net::host()
 int Net::join()
 {	
 	ENetEvent event;
-	if (!connectToHost("192.168.68.105")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
+	if (!connectToHost("192.168.1.10")) { online = false; } // laptopip : 192.168.1.10 pcip : 192.168.68.105 
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	
@@ -693,9 +693,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		m_state->playerLoadedLevel();
 		break;
 	case VOICE_DATA:
-		//ti tha kanei otan dexete to voice data
-
-		std::cout << "elava ta arxeia " << std::endl;
+		std::cout << "elava ta arxeia" << std::endl;
 		m_state->sendToPlayback(p.ad);
 		break;
 
@@ -979,12 +977,15 @@ Net::~Net()
 
 }
 
-void Net::sendaudiodata(int id, float arr[], size_t size) {
+void Net::addaudiodata(int id, float arr[]) {
 	//create pack
-	audiodata adpacket; 
+	audiodata adpacket;
 	adpacket.playerid = id;
 	//copy to vector 
-	std::copy(arr, arr + size, adpacket.audioData);
+	std::copy(arr, arr + 512, adpacket.audioData);
+
+	//std::cout << "sendaudiodata has to send chunk with size : " << sizeof(adpacket.audioData) << std::endl;
+	//std::copy(arr, arr + size, adpacket.audioData); //problima
 	//create payload
 	Data payload;
 	payload.ad = adpacket;

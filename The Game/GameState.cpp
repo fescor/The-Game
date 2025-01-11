@@ -32,47 +32,65 @@ int* GameState::connectpeer2player(int id)
 bool GameState::PushToTalk(bool isStreaming) {
 	if (isStreaming) {
 
-	if (!audiohandler) {
-			
+		if (!audiohandler) {
 			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
-			pst = std::thread(&AudioHandler::startAudio, audiohandler);
-			//KALO EINAI NA MPEI KAI ENAS ELEGXOS GIA TO AN EINAI ONLINE GIA NA MHN STELNEI SE OFLINE MODE 
-			audiohandler->preparedata();
-			pst.detach();//	 thread trexei aneksarthta
-		
-			return true;
-
+			
 		}
-	}
-	else
-	{	
-		//otan afhnoume to koumpi perimenei to thread na teleiwsei gia na ginei to join
+		pst = std::thread(&AudioHandler::startAudio, audiohandler);//thread start the stream
+		preperator = std::thread(&AudioHandler::preparedata, audiohandler);//thread start to send the data
+		return true;
+	}else
+	{		
 		if (pst.joinable()) {
 			pst.join();
 		}
+		if (preperator.joinable()) {
+			preperator.join();
+		}
 		
-		pst = std::thread(&AudioHandler::stopAudio, audiohandler);
-		pst.join(); //molis to thread kleisei to stream
+		audiohandler->stopAudio();
+
 		delete audiohandler;
 		audiohandler = nullptr;
-		return false; 
+		return false;
 	}
-	
+		
 }
+	
+	
 
 void GameState::sendToPlayback(audiodata ad) {
+
 	int player_id = ad.playerid;
 	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
 	if (!audiohandler) {
 		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
-		audiohandler->setbuffer(player_id, chunk);
+
 	}
-	//converte
+	if (playbackstarter.joinable()) {
+		playbackstarter.join();
+	}
+	//std::cout << "Starting thread for startstream..." << std::endl;
+	playbackstarter = std::thread(&AudioHandler::startplaybackstream,audiohandler);
+	if (receiver.joinable()) {
+		receiver.join();
+	}
+	//std::cout << "Starting thread for setbuffer..." << std::endl;
+	receiver = std::thread(&AudioHandler::setbuffer, audiohandler, player_id, chunk);
 	
-	//send to playback
-	
-	//audiohandler->checkAndStopAudio();
 }
+void GameState::CheckAndStopStream() {
+	if (audiohandler) {
+		if (audiohandler->closecall()) {
+			audiohandler->stopAudio();
+			delete audiohandler;
+			audiohandler = nullptr;
+			std::cout << "Playback finished and stream stopped." << std::endl;
+		}
+	}
+}
+
+
 
 void GameState::initNet()
 {
@@ -143,14 +161,10 @@ bool GameState::getOnline()
 	return online;
 }
 
-
-
 void GameState::setStatus(char s)
 {
 	status = s;
 }
-
-
 
 char GameState::getStatus()
 {
@@ -216,14 +230,6 @@ void GameState::update(float dt)
 		init();
 
 	}
-
-
-
-
-
-
-	//
-
 	if (status == 'L' && m_current_level == nullptr) {
 
 		init();
@@ -232,6 +238,7 @@ void GameState::update(float dt)
 
 	}
 
+	float CurrentTime = graphics::getGlobalTime();
 	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
 	if ((CurrentState) && (!PreviousState)) {
 
@@ -242,16 +249,15 @@ void GameState::update(float dt)
 		}
 	}
 	if ((!CurrentState) && (PreviousState)) {
-		if (isStreaming) {
-
+		//ReleaseTime = CurrentTime;
+		if (isStreaming){
 			isStreaming = false;
 			GameState::PushToTalk(false);
-			
 		}
 	}
 
 	PreviousState = CurrentState; //update state
-
+	CheckAndStopStream();
 
 
 	switch (status) {
@@ -397,6 +403,8 @@ bool GameState::loadedLevel()
 		return getLevel()->getGameLoadedStatus();
 	}
 	return false;
+	
+
 }
 	
 	

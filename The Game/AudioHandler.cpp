@@ -13,13 +13,16 @@ using namespace std;
 #define _USE_MATH_DEFINES
 
 using namespace std;
-
+std::vector<float> AudioHandler::finalboss;
 std::vector<float> AudioHandler::globalAudioBuffer;
+std::vector <float> AudioHandler::temp_vector;
+
 std::mutex AudioHandler::buffermutex;
-//std::vector<float> AudioHandler::playbackBuffer;
-std::map<int, std::vector<float>> AudioHandler::playbackBuffer;
+std::map<int, std::vector<float>> AudioHandler::playbackMap;
 std::mutex AudioHandler::playbackMutex;
-bool playbackFinishedFlag;
+bool streamcloseflag = false;
+std::condition_variable playbackCondition;
+
 
 // Constructor implementation
 AudioHandler::AudioHandler() {
@@ -149,8 +152,10 @@ void AudioHandler::startplaybackstream(){
 	outputparametr.sampleFormat = paFloat32;
 	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
 	outputparametr.hostApiSpecificStreamInfo = nullptr;
+	
 
-	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paClipOff, nullptr, nullptr);
+
+	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paClipOff, playbackcallback, nullptr);
 	if (err != paNoError) {
 		std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl; 
 		return;
@@ -164,6 +169,7 @@ void AudioHandler::startplaybackstream(){
 	else {
 		std::cout << "Stream started" << std::endl;
 	}
+	
 }
 
 
@@ -261,36 +267,15 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
 	float* out = static_cast<float*>(outputBuffer); //output data
-	bool isPlaybackFinished = false;
+	//bool isPlaybackFinished = false;
 
 	if (inputBuffer) {
 		std::vector<float> chunk(in, in + framesPerBuffer); //copy chunk in local vector
 
 		{
-			std::lock_guard<std::mutex> lovk(buffermutex);// mutex lock
+			std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
 			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
 		}
-
-		//PLAYBACK
-		/*
-		std::lock_guard<std::mutex> lock(playbackMutex);
-		if (!playbackBuffer.empty()) {
-			for (unsigned long i = 0; i < framesPerBuffer; i++) {
-
-				//for (i=0 ; i<= playbackBuffer.size();i++){
-					//std::cout << "Player : " << player_id << " is speaking" << std::endl;
-				//std::cout << "PlaybackBuffer Size: " << playbackBuffer.size() << std::endl;
-				//std::cout << "First Element: " << playbackBuffer.front() << std::endl;
-				//std::cout << "input Element: " << globalAudioBuffer.front() << std::endl;
-				//out[i] = playbackBuffer.front(); //play the fist element
-				//out[i] = playbackBuffer[i];
-				playbackBuffer.erase(playbackBuffer.begin());//erase it
-				if (playbackBuffer.empty()) {
-					 isPlaybackFinished = true;
-				}
-
-			}
-			}
 	}
 	else {
 		std::cout << "No input detected, outputting silence." << std::endl;
@@ -298,75 +283,100 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			out[i] = 0.0f; // Silence
 			}
 		}
-
-
-	if (isPlaybackFinished) {
-		bool playbackFinishedFlag = true;
-	}
 	
-	*/
-	}
+	//std::cout << "audiocallback size " << globalAudioBuffer.size() << std::endl;
 	return paContinue;
-	}
-
-
-std::vector<float> AudioHandler::getAndClearAudioBuffer() {
-	std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
-	std::vector<float> data = std::move(globalAudioBuffer);	//move buffer to data (local)
-	globalAudioBuffer.clear();// katharismos buffer
-	return data;
 }
+
 
  void AudioHandler::preparedata() {
 	//std::vector<float> audioData = AudioHandler::getAndClearAudioBuffer();
-	 
- while (globalAudioBuffer.size() >= 512)
-	 { //an exei arketa dedomena
-		 float chunk [512] ; 
-		 //send fist 512 frames
-		 std::copy(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512, chunk);
-		 int playerid = *(m_state)->getPlayer()->geto_id();
-		 m_state->getNet()->sendaudiodata(playerid, chunk,sizeof(chunk));
-		 //erase the data that sended
-		 globalAudioBuffer.erase(globalAudioBuffer.begin(), globalAudioBuffer.begin() + 512);
-	 }
+	 std::cout << "prepare to send data with size: " << globalAudioBuffer.size() << std::endl;
 
+	 {
+		 std::lock_guard<std::mutex> lock(buffermutex);
+		 temp_vector = std::move(globalAudioBuffer);
+		 globalAudioBuffer.clear();
+	 }
+	 int playerid = *(m_state)->getPlayer()->geto_id();
+	 while (!temp_vector.empty())
+	 { //an exei arketa dedomena
+			 float preparechunk[512] = { 0 };
+			 //send fist 512 frames
+			 size_t dataToCopy = min(temp_vector.size(), size_t(512));
+			 std::copy(temp_vector.begin(), temp_vector.begin() + dataToCopy, preparechunk);
+			 
+			 m_state->getNet()->addaudiodata(playerid, preparechunk);
+			 //erase the data that sended
+			 temp_vector.erase(temp_vector.begin(), temp_vector.begin() + 512);
+			 
+			 if (temp_vector.empty()) {
+				 //when you send everything stop the stream 
+				 stopAudio();
+			 }
+
+	 }
+	 
 }
 
  void AudioHandler::setbuffer(int i, const std::vector<float>& chunk) {
-	 
-	 if (playbackBuffer.find(i) == playbackBuffer.end()) {
-		 playbackBuffer[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
+	
+	 if (playbackMap.find(i) == playbackMap.end()) {
+		 playbackMap[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
 	}
 	 //take players buffer and insert the data
-	 auto& buffer = playbackBuffer[i];
-	 buffer.insert(buffer.end(), chunk.begin(), chunk.end());
-	 const size_t maxBuffersize = 1024 * 5; 
-	//an perasei to max size sbhse ta prwta pou esteile 
-	 if (buffer.size() > maxBuffersize) {
-		 buffer.erase(buffer.begin(), buffer.begin() + (buffer.size() - maxBuffersize));
+	 auto& playerbuffer = playbackMap[i];
+	 std::vector<float> temp_buffer(chunk.begin(), chunk.end()); //COPY TO A TEMP VECTOR
+	 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
+	 //temp_buffer
+	
+	 
+	 
+	 
+	 
+	 
+ }
 
-	 }
-	 std::cout << "Added audio chunk for player " << player_id << ". Buffer size: " << playbackBuffer[player_id].size() << " samples.\n";
-	 //an den uparxei stream anoikse gia to playback
-	 if (!stream) {
-		 AudioHandler::startplaybackstream();
-		 Pa_WriteStream(stream, chunk.data(), chunk.size());
-		 if (playbackBuffer.empty()) {
-			 //when playback is finished 
-			 AudioHandler::stopAudio();
+ int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
+	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData)
+
+ {
+	 float* out = static_cast<float*>(outputBuffer);
+	 std::fill(out, out + framesPerBuffer, 0.0f);
+	 {
+		 std::lock_guard<std::mutex> lock(playbackMutex);
+		 for (auto& it : playbackMap) {
+			 auto& playerbuffer = it.second; 
+
+			 if (!playerbuffer.empty()) { 
+				 //how many samples to play
+				 size_t dataToPlayback= min(framesPerBuffer,playerbuffer.size());
+				 
+				 //add audio to output
+				 for (size_t i = 0; i < dataToPlayback; i++) {
+					 out[i] += playerbuffer[i];
+				 }
+			
+				//erase what you have played 
+				 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
+			 }
+			 else {
+				 streamcloseflag = true ;
+			 }
+			 
 		 }
 	 }
+	 
+	
+	 return paContinue;  
+ }
 
- }
- /*
- void AudioHandler::checkAndStopAudio() {
-	 if (playbackFinishedFlag) {
-		 std::cout << "Playback finished, stopping audio." << std::endl;
-		 stopAudio();
-		 getAndClearAudioBuffer();
-		 playbackFinishedFlag = false; // Reset the flag
-		
+ bool AudioHandler::closecall() {
+	 std::lock_guard<std::mutex> lock(playbackMutex);
+	 for (auto& it : playbackMap) {
+		 if (!it.second.empty()) {
+			 return false; // Buffer is not empty, playback is not finished
+		 }
 	 }
+	 return true; // All buffers are empty, playback is finished
  }
- */

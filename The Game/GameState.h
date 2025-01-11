@@ -40,8 +40,12 @@ private:
 	bool PreviousState = false;
 	bool CurrentState;
 	std::thread pst;
+	std::thread preperator; 
 	std::thread receiver;
-	
+	std::thread playbackstarter; 
+	float ReleaseTime = 0.0f;
+	const float Waitasec = 500.0f;
+	void CheckAndStopStream();
 
 
 
