@@ -135,7 +135,7 @@ void AudioHandler::ShowDefaultDevices() const {
 }
 
 void AudioHandler::startplaybackstream(){
-	if (stream && Pa_IsStreamActive(stream)) {
+	if ( Pa_IsStreamActive(stream)) {
 		std::cerr << "Audio stream is already active!" << std::endl;
 		return; // ean exei anoiksei mhn ksana anoigeis
 	}
@@ -157,7 +157,7 @@ void AudioHandler::startplaybackstream(){
 	
 
 
-	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paClipOff, playbackcallback, nullptr);
+	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 1024, paClipOff, playbackcallback, nullptr);
 	if (err != paNoError) {
 		std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl; 
 		return;
@@ -302,7 +302,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	 }
 	 int playerid = *(m_state)->getPlayer()->geto_id();
 	 while (!temp_vector.empty())
-	 { //an exei arketa dedomena
+	 { 
 			 float preparechunk[512] = { 0 };
 			 //send fist 512 frames
 			 size_t dataToCopy = min(temp_vector.size(), size_t(512));
@@ -332,28 +332,35 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
 		 //temp_buffer
 		 dataready = true;
+		 std::cout << "Buffer for player " << i << " has been updated with chunk of size: " << chunk.size() << std::endl;
 	 }
+	 playbackCondition.notify_one();
+
  }
 
  int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
 	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
 	 float* out = static_cast<float*>(outputBuffer);
 	 std::fill(out, out + framesPerBuffer, 0.0f);
-
-	 std::unique_lock<std::mutex> lock(playbackMutex);
-	 playbackCondition.wait(lock, [] { return dataready; }); // Wait until data is ready
-
-	 for (auto& it : playbackMap) {
-		 auto& playerbuffer = it.second;
-		 if (!playerbuffer.empty()) {
-			 size_t dataToPlayback = min(framesPerBuffer, playerbuffer.size());
-			 for (size_t i = 0; i < dataToPlayback; i++) {
-				 out[i] += playerbuffer[i];
-			 }
-			 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
-			 // Reset the flag if buffer is empty after playback
-			 if (playerbuffer.empty()) {
-				 dataready= false;
+	 std::cout << "playbackcallback called" << std::endl;
+	 while (!dataready) {
+		 std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Wait for data to be ready
+	 }
+	 {
+		 std::lock_guard<std::mutex> lock(playbackMutex);
+		 for (auto& it : playbackMap) {
+			 auto& playerbuffer = it.second;
+			 if (!playerbuffer.empty()) {
+				 size_t dataToPlayback = min(framesPerBuffer, playerbuffer.size());
+				 for (size_t i = 0; i < dataToPlayback; i++) {
+					 out[i] += playerbuffer[i];
+					 std::cout << "now : " << out[i]<< std::endl;
+				 }
+				 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
+				 // Reset the flag if buffer is empty after playback	
+				 if (playerbuffer.empty()) {
+					 dataready = false;
+				 }
 			 }
 		 }
 	 }
