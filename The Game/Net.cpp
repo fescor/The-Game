@@ -93,7 +93,19 @@ int Net::host()
 
 		}
 
+		if (!ad_packets.empty()) {
 
+			//m_state->getMutex().lock();
+			Data ad;
+			ad_packets.try_pop(ad);
+			//p_packets.pop();
+			//m_state->getMutex().unlock();
+
+
+			sendDataBroadcast(ad, VOICE_DATA);
+			enet_host_flush(client);
+
+		}
 		
 		
 
@@ -115,6 +127,9 @@ int Net::host()
 			case ENET_EVENT_TYPE_DISCONNECT:
 				
 				cout << "enet_peer disconected" << endl;
+				//stop playback stream when a peer disconnects
+				bool streamflag = false;
+				m_state->PlaybackStreamOpen(streamflag);
 
 				if (event.peer->data != nullptr) {
 					m_state->setavailableSpaceship(*(int*)event.peer->data);
@@ -196,6 +211,17 @@ int Net::join()
 
 
 		}
+
+		if (!ad_packets.empty()) {	
+			Data ad;
+			ad_packets.try_pop(ad);
+
+			sendDataBroadcast(ad, VOICE_DATA);
+			enet_host_flush(client);
+
+		}
+
+
 		if (enet_host_service(client, &event, 0) > 0) {
 			switch (event.type)
 			{
@@ -214,6 +240,10 @@ int Net::join()
 			case ENET_EVENT_TYPE_DISCONNECT:
 				
 				cout << "enet peer disconnected " << endl;
+				//stop playback stream when a peer disconnects
+				bool streamflag = false;
+				m_state->PlaybackStreamOpen(streamflag);
+
 				if (event.peer->data != nullptr) {
 					m_state->setavailableSpaceship(*(int*)event.peer->data);
 					deletePeer(*((int*)event.peer->data));
@@ -291,7 +321,11 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 	
 
 
-	cout << "A new Player connected with ID :  " + std::to_string(maxpeerID) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+	//cout << "A new Player connected with ID :  " + std::to_string(maxpeerID) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+	//open playback stream when a new peer connects
+	bool streamflag = true;
+	m_state->PlaybackStreamOpen(streamflag);
+
 
 
 	
@@ -320,6 +354,9 @@ void Net::peerConnectRoutineJoin(ENetEvent& event)
 			
 
 			cout << "A new Player connected with ID :  " + std::to_string(peer.first) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+			//open playback stream when a new peer connects
+			bool streamflag = true;
+			m_state->PlaybackStreamOpen(streamflag);
 			return;
 
 
@@ -330,13 +367,6 @@ void Net::peerConnectRoutineJoin(ENetEvent& event)
 	}
 	newPeers[event.peer->address.host] =  event.peer;
 	return;
-
-
-
-
-
-
-	
 
 }
 
@@ -420,9 +450,10 @@ void Net::sendDataBroadcast(union Data payload, PACKETTYPE type)
 		p.type = type;
 		p.loaded_level = payload.loaded_level;
 		break;
-	case VOICE_CHUNK:
-		p.type = VOICE_CHUNK;
-		p.vc = payload.vc;
+	case VOICE_DATA: 
+		p.type = type;
+		p.ad = payload.ad;
+		break;
 
 		break;
 	case SPACE_SHIP:
@@ -510,6 +541,7 @@ std::string Net::hex_to_strip(unsigned int input)        //////// O XRISTOS KAI 
 		std::swap(output[i], output[size - i - 2]);
 		std::swap(output[i + 1], output[size - i - 1]);
 	}
+	//edw ginete malakia problema
 	unsigned int val = stoi(output, 0, 16);
 	std::string ip = std::to_string((val & 0xFF000000) >> 24) + '.' + std::to_string((val & 0x00FF0000) >> 16) + '.' + std::to_string((val & 0x0000FF00) >> 8) + '.' + std::to_string((val & 0x000000FF));
 	
@@ -555,10 +587,7 @@ bool Net::connectToHost(const std::string ip) // this is called when i connect t
 
 
 		cout << "conection succeded " << endl;
-		
-		
-
-		connectedPeers[0] = event.peer;
+			connectedPeers[0] = event.peer;
 		//*(connectedPeers[0]) = *(event.peer);
 
 
@@ -566,7 +595,10 @@ bool Net::connectToHost(const std::string ip) // this is called when i connect t
 
 		event.peer->data = m_state->connectpeer2player(0);
 		connectedPeers[0]->data = m_state->connectpeer2player(0);
-
+		
+		//opens the playback stream when the host connects
+		bool streamflag = true;
+		m_state->PlaybackStreamOpen(streamflag);
 		return true;
 	}
 	else {
@@ -615,6 +647,10 @@ bool Net::connectToPeer(const std::string ip, int id)// this should be called wh
 
 		event.peer->data = m_state->connectpeer2player(id);
 		connectedPeers[id]->data = m_state->connectpeer2player(id);
+
+		//opens the playback stream 
+		bool streamflag = true;
+		m_state->PlaybackStreamOpen(streamflag);
 
 		return true;
 
@@ -685,6 +721,7 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 
 	std::stringstream ss = std::stringstream(std::string((char*)buffer, size));
 	
+
 
 	
 	packet  p;
@@ -770,6 +807,10 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 		else {
 			m_state->setOPSpaceship(p.ss);
 		}
+	case VOICE_DATA:
+		std::cout << "elava ta arxeia" << std::endl;
+		m_state->sendToPlayback(p.ad);
+		break;
 
 		break;
 	case LEVEL_PACKET:
@@ -878,16 +919,6 @@ void Net::parseData(ENetPacket* net_packet, int timeDIF, ENetPeer* peer)
 
 	}
 
-
-
-
-
-
-
-
-
-
-
 }
 
 void Net::disconnect()///telling everyone i am disconecting
@@ -898,12 +929,9 @@ void Net::disconnect()///telling everyone i am disconecting
 	dc.idc = *m_state->getPlayer()->geto_id();
 	payload.idc = dc;
 
-
-	
 	//sendDataToPeer(p, payload, DISCONNECT);
 	sendDataBroadcast(payload, DISCONNECT);
 	enet_host_flush(client);
-	
 	
 }
 
@@ -919,9 +947,6 @@ void Net::deletePeer(int id)
 		m_state->setOnline(false, false);
 		cout << "HOST DISCONECTED" << '\n';
 	}
-
-
-
 }
 
 startG Net::createSGDtata()
@@ -1089,6 +1114,7 @@ void Net::addpMOVEToQueue(int o_id, float angle, float speed, float x, float y, 
 	
 	Data payload;
 
+	//edw to antikeimeno pmove pernei ta apo panw 
 	payload.pmove = packet;
 	
 
@@ -1170,5 +1196,23 @@ Net::Net(bool host) {
 Net::~Net()
 {
 	
+
+}
+
+void Net::addaudiodata(int id, float arr[]) {
+	//create pack
+	audiodata adpacket;
+	adpacket.playerid = id;
+	//copy to vector 
+	std::copy(arr, arr + 512, adpacket.audioData);
+
+	//std::cout << "sendaudiodata has to send chunk with size : " << sizeof(adpacket.audioData) << std::endl;
+	//std::copy(arr, arr + size, adpacket.audioData); //problima
+	//create payload
+	Data payload;
+	payload.ad = adpacket;
+	
+	
+	ad_packets.push(payload);
 
 }

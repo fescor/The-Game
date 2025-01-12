@@ -3,6 +3,8 @@
 #include "Player.h"
 #include "MainScreen.h"
 #include "Net.h"
+#include <portaudio.h>
+#include "AudioHandler.h"
 
 
 
@@ -22,7 +24,95 @@ void GameState::deletePlayer(const int id) // this should be called by net only
 int* GameState::connectpeer2player(int id)
 {
 	return o_players.find(id)->second->geto_id();
+
 }
+
+void GameState::PlaybackStreamOpen(bool flag) {
+	if (flag) {
+		if (!audiohandler) {
+			audiohandler = new AudioHandler();
+		}
+		//pst = std::thread(&AudioHandler::startplaybackstream, audiohandler);
+		audiohandler->startplaybackstream();
+	}
+	else {
+		/*
+		if (pst.joinable()) {
+			pst.join();
+		}
+		*/
+		audiohandler->stopPlaybackAudio();
+		delete audiohandler;
+		audiohandler = nullptr;
+	}
+	
+}
+
+
+bool GameState::PushToTalk(bool isStreaming) {
+	if (isStreaming) {
+
+		if (!audiohandler) {
+			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
+			//audiohandler = std::make_unique<AudioHandler>();
+			
+		}
+		pst = std::thread(&AudioHandler::startAudio, audiohandler);//thread start the stream
+		preperator = std::thread(&AudioHandler::preparedata, audiohandler);//thread start to send the data
+		return true;
+	}else
+	{		
+		if (pst.joinable()) {
+			pst.join();
+		}
+		if (preperator.joinable()) {
+			preperator.join();
+		}
+		
+		audiohandler->stopAudio();
+
+		delete audiohandler;
+		audiohandler = nullptr;
+		return false;
+	}
+		
+}
+	
+	
+
+void GameState::sendToPlayback(audiodata ad) {
+
+	int player_id = ad.playerid;
+	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
+	if (!audiohandler) {
+		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
+
+	}
+	if (playbackstarter.joinable()) {
+		playbackstarter.join();
+	}
+	//std::cout << "Starting thread for startstream..." << std::endl;
+	playbackstarter = std::thread(&AudioHandler::startplaybackstream,audiohandler);
+	if (receiver.joinable()) {
+		receiver.join();
+	}
+	//std::cout << "Starting thread for setbuffer..." << std::endl;
+	receiver = std::thread(&AudioHandler::setbuffer, audiohandler, player_id, chunk);
+	
+}
+/*
+void GameState::CheckAndStopStream() {
+	if (audiohandler) {
+		if (audiohandler->closecall()) {
+			audiohandler->stopAudio();
+			//delete audiohandler;
+			//audiohandler = nullptr;
+			std::cout << "Playback finished and stream stopped." << std::endl;
+		}
+	}
+}
+*/
+
 
 void GameState::initNet()
 {
@@ -272,14 +362,10 @@ bool GameState::getOnline()
 	return online;
 }
 
-
-
 void GameState::setStatus(char s)
 {
 	status = s;
 }
-
-
 
 char GameState::getStatus()
 {
@@ -315,19 +401,6 @@ void GameState::init()
 		break;
 
 	}
-	
-		
-	
-	
-	
-
-
-	
-
-	
-
-	//graphics::preloadBitmaps(getAssetDir());
-
 }
 
 void GameState::draw()
@@ -355,13 +428,43 @@ void GameState::update(float dt)
 		return;
 	}
 
+
+
 	if (status == 'L' && m_current_level == nullptr) {
 
 		init();
-		
-		
 
 	}
+	if (status == 'L' && m_current_level == nullptr) {
+
+		init();
+
+
+
+	}
+
+	//float CurrentTime = graphics::getGlobalTime();
+	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
+	if ((CurrentState) && (!PreviousState)) {
+
+		if (!isStreaming) {
+			isStreaming = true; //edw ksekinaei h diadikasia tou stream
+			GameState::PushToTalk(isStreaming);
+			
+		}
+	}
+	if ((!CurrentState) && (PreviousState)) {
+		//ReleaseTime = CurrentTime;
+		if (isStreaming){
+			isStreaming = false;
+			GameState::PushToTalk(false);
+		}
+	}
+
+	PreviousState = CurrentState; //update state
+	//CheckAndStopStream();
+
+
 	
 	
 	if (!playerToDelete.empty()) {
@@ -376,14 +479,12 @@ void GameState::update(float dt)
 	
 	switch (status) {
 	case 'M':
-		mainscreen->update(dt);
-		if (getNet()) {
-			getNet()->setinGame(false);
-		}
-		
-		
-		break;
 
+
+
+		mainscreen->update(dt);
+
+		break;
 	case'L':
 		if (!m_current_level) {
 			framecounter++;
@@ -393,12 +494,11 @@ void GameState::update(float dt)
 		break;
 
 	}
-	if (online && net == nullptr) { 
+	if (online && net == nullptr) {
 		initNet();
 	}
-	if (!online && net != nullptr) {//thsi shit is sus
+	if (!online && net != nullptr) {
 
-		
 		net->setOnline(false);
 		nt.join();
 
@@ -423,13 +523,17 @@ void GameState::update(float dt)
 		
 
 	}
-	
-	
+
+
 	framecounter++;
-	
-	
-	
+
+
+
+
 }
+
+
+
 
 GameState::~GameState()
 {
@@ -453,9 +557,6 @@ void GameState::startLevel()
 	if (!m_current_level) {
 		m_current_level = new Level();
 	}
-	
-
-	
 	
 
 	if (!m_player) {
@@ -532,6 +633,8 @@ bool GameState::loadedLevel()
 		return getLevel()->getGameLoadedStatus();
 	}
 	return false;
+	
+
 }
 	
 	
@@ -572,6 +675,8 @@ startG GameState::getMapData()
 	
 }
 
+
+
 void GameState::setMapData(startG strg)
 {
 
@@ -579,6 +684,8 @@ void GameState::setMapData(startG strg)
 
 
 }
+
+
 
 startG& GameState::getMapInfo()
 {

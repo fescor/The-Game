@@ -33,6 +33,25 @@ private:
 	class Level* m_current_level = nullptr;
 	class MainScreen* mainscreen = nullptr;
 
+	//AUDIO//
+	
+	class AudioHandler* audiohandler = nullptr;
+	bool PushToTalk(bool);
+	bool isStreaming = false;
+	bool toSend = false; 
+	bool PreviousState = false;
+	bool CurrentState;
+	std::thread pst;
+	std::thread preperator; 
+	std::thread receiver;
+	std::thread playbackstarter; 
+	float ReleaseTime = 0.0f;
+	const float Waitasec = 500.0f;
+	void CheckAndStopStream();
+	
+
+
+
 	
 	////// NET VARS //////
 
@@ -111,7 +130,7 @@ public:
 	/////////////////////////////////////////////////////
 
 
-	
+
 	void setStatus(char s);
 	char getStatus();
 
@@ -152,13 +171,16 @@ public:
 	struct startG& getMapInfo();// access the stored map data recieved from host 
 
 	void createMapInfoData();
-	
 	void deletePlanet(int o_id);
 	void deleteToken(int o_id);
 
 	void incident(int type);
 
 	void setSpawnPosOplayers();
+	//PUBLIC AUDIO //
+	void sendToPlayback(audiodata); //when receive audiodata send to audiohandler to playback
+	void PlaybackStreamOpen(bool flag); //open or close the streams when connection or disconnection
+	
 	
 	
 

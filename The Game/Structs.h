@@ -19,7 +19,7 @@ struct pMOVE
 	{
 		archive(id, angle , speed , x , y , fc , fire); // serialize things by passing them to the archive
 	}
-
+	//gege
 
 
 };
@@ -114,6 +114,17 @@ struct PEER
 	PEER() {};
 };
 
+struct  audiodata
+{
+	int playerid; //who send the data
+	//std::vector<float> audioData; 
+	float audioData[512];
+	template<class Archive>
+	void serialize(Archive& archive)
+	{
+		archive(audioData, playerid); // serialize things by passing them to the archive
+	}
+};
 struct setID
 {
 	int id = 0;
@@ -181,7 +192,7 @@ enum PACKETTYPE {
 	LOADED_LEVEL,
 	MAP_INFO,
 	PLAYER_INFO,
-	VOICE_CHUNK,
+	VOICE_DATA,
 	SPACE_SHIP,
 	LEVEL_PACKET,
 
@@ -215,6 +226,8 @@ struct packet
 		startG strtg;
 		Loaded loaded_level;
 		playerInfo pi;
+		audiodata ad;
+
 		voice  vc;
 		spaceShip ss;
 		levelPacketDelete lvlp;
@@ -252,6 +265,9 @@ struct packet
 				break;
 			case PLAYER_INFO:
 				archive(pi);
+				break;
+			case VOICE_DATA:
+				archive(ad);
 				break;
 			case SPACE_SHIP:
 				archive(ss);
@@ -296,5 +312,9 @@ union Data
 	spaceShip ss;
 	
 	levelPacketDelete lvlp;
+
+	
+	audiodata ad;
+	
 
 };

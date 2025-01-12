@@ -14,6 +14,7 @@ using namespace std;
 
 
 
+
 void MainScreen::drawSpaceShip(int i)
 {
 	m_spaceship.texture = m_state->getFullAssetPath("spaceship" + to_string(i) + ".png");
@@ -21,7 +22,7 @@ void MainScreen::drawSpaceShip(int i)
 	m_spaceship.outline_opacity = 0.0f;
 
 	graphics::drawRect(m_state->getCanvasWidth() * 0.5, m_state->getCanvasHeight() * 0.5 - 2.0f, 4.0f, 4.0f, m_spaceship);
-
+	
 }
 
 void MainScreen::hover()// here implement hover on menus for all cases

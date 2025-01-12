@@ -6,6 +6,7 @@
 #include <string.h>
 #include "enet/enet.h"
 
+
 /** @defgroup host ENet host functions
     @{
 */
@@ -272,8 +273,7 @@ void
 enet_host_broadcast (ENetHost * host, enet_uint8 channelID, ENetPacket * packet)
 {
     ENetPeer * currentPeer;
-
-    for (currentPeer = host -> peers;
+ for (currentPeer = host -> peers;
          currentPeer < & host -> peers [host -> peerCount];
          ++ currentPeer)
     {
