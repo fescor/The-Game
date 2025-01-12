@@ -151,6 +151,7 @@ public:
 	//PUBLIC AUDIO //
 	void sendToPlayback(audiodata); //when receive audiodata send to audiohandler to playback
 	void PlaybackStreamOpen(bool flag); //open or close the streams when connection or disconnection
+	void StartRecordStream(bool flag); //start or stop the record stream
 
 	
 	

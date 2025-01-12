@@ -47,17 +47,40 @@ void GameState::PlaybackStreamOpen(bool flag) {
 	}
 	
 }
-
+/*
+void GameState::StartRecordStream(bool flag) {
+	if (flag) {
+		if (!audiohandler) {
+			audiohandler = new AudioHandler();
+		}
+		//pst = std::thread(&AudioHandler::startplaybackstream, audiohandler);
+		audiohandler->startAudio();
+	}
+	else {
+		
+		if (pst.joinable()) {
+			pst.join();
+		}
+		
+		audiohandler->stopAudio();
+		delete audiohandler;
+		audiohandler = nullptr;
+	}
+}
+*/
 
 bool GameState::PushToTalk(bool isStreaming) {
 	if (isStreaming) {
-
+		
 		if (!audiohandler) {
 			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
 			//audiohandler = std::make_unique<AudioHandler>();
 			
 		}
 		pst = std::thread(&AudioHandler::startAudio, audiohandler);//thread start the stream
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		
 		preperator = std::thread(&AudioHandler::preparedata, audiohandler);//thread start to send the data
 		return true;
 	}else

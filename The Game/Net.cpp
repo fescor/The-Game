@@ -100,6 +100,7 @@ int Net::host()
 				//stop playback stream when a peer disconnects
 				bool streamflag = false;
 				m_state->PlaybackStreamOpen(streamflag);
+				//m_state->StartRecordStream(streamflag);
 
 				if (event.peer->data != nullptr) {
 					deletePeer(*((int*)event.peer->data));
@@ -188,6 +189,7 @@ int Net::join()
 				//stop playback stream when a peer disconnects
 				bool streamflag = false;
 				m_state->PlaybackStreamOpen(streamflag);
+				//m_state->StartRecordStream(streamflag);
 
 				if (event.peer->data != nullptr) {
 					deletePeer(*((int*)event.peer->data));
@@ -269,6 +271,7 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 	//open playback stream when a new peer connects
 	bool streamflag = true;
 	m_state->PlaybackStreamOpen(streamflag);
+	//m_state->StartRecordStream(streamflag);
 
 
 
@@ -301,6 +304,7 @@ void Net::peerConnectRoutineJoin(ENetEvent& event)
 			//open playback stream when a new peer connects
 			bool streamflag = true;
 			m_state->PlaybackStreamOpen(streamflag);
+			//m_state->StartRecordStream(streamflag);
 			return;
 
 
@@ -520,6 +524,7 @@ bool Net::connectToHost(const std::string ip) // this is called when i connect t
 		//opens the playback stream when the host connects
 		bool streamflag = true;
 		m_state->PlaybackStreamOpen(streamflag);
+		//m_state->StartRecordStream(streamflag);
 		return true;
 	}
 	else {
@@ -570,6 +575,7 @@ bool Net::connectToPeer(const std::string ip, int id)// this should be called wh
 		//opens the playback stream 
 		bool streamflag = true;
 		m_state->PlaybackStreamOpen(streamflag);
+		//m_state->StartRecordStream(streamflag);
 
 		return true;
 
