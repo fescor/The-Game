@@ -598,6 +598,11 @@ void GameState::deleteToken(int o_id)
 
 
 }
+void GameState::incident(int type)
+{
+	getLevel()->setIncident(type);
+
+}
 void GameState::createMapInfoData()
 {
 

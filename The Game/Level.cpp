@@ -434,35 +434,99 @@ void Level::Pshoot(Bullet* b)
 void Level::update(float dt)
 {
 
+	if (incidentGoToLobby && m_state->getOnline()) {
 
+		switch (incidentType) {
+		case PLAYER_DEAD:	
+			graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "PLAYER DIED GAME OVER", m_brush_player_bullet_count);
+			break;
+		case COMPLETED_LEVEL:
+			graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "LEVEL COMPLETED GOOD JOB", m_brush_player_bullet_count);
+			break;
+		case NEW_SIEGE:
+			graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "SIEGE COMPLETED", m_brush_player_bullet_count);
+			break;
+
+		}
+
+		if (!deathflag) {
+
+			timeofIncedent = graphics::getGlobalTime();
+			deathflag = true;
+		}
+		if (graphics::getGlobalTime() - timeofIncedent < 3000) {
+
+			return;
+		}
+		
+
+
+		deleteLevel();
+		return;
+
+	}
 
 
 
 	//if (m_planets.size() == 0 && levelDiffuculty != 3) {
 	if (m_planets.empty() && levelDiffuculty != 3) {
-		graphics::setFont(m_state->getFullAssetPath("font.ttf"));
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "EISAI OREOS PEXTIS", m_brush_player_bullet_count);
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 5.0f, 3.0f, "PRESS R TO RESTART", m_brush_player_bullet_count);
-		graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 10.0f, 3.0f, "PRESS M FOR MAIN MENU", m_brush_player_bullet_count);
-		if (graphics::getKeyState(graphics::SCANCODE_R)) {
+		if (m_state->getOnline()) {
+
+			graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "LEVEL COMPLETED GOOD JOB", m_brush_player_bullet_count);
+			if (!deathflag) {
+
+				
+				if (m_state->getOnline() && m_state->getNet()) {
+					m_state->getNet()->addLevelPacketToQueue(*m_state->getPlayer()->geto_id(), COMPLETED_LEVEL);
+				}
+
+				timeofIncedent = graphics::getGlobalTime();
+				deathflag = true;
+			}
+
+			if (graphics::getGlobalTime() - timeofIncedent < 3000) {
+
+				return;
+			}
 
 
-			restart(); //delete the main objects of the level (planets bullets and asteroids) and clear their vectors
-			m_state->init();
+			deleteLevel();
+			return;
 
 
 
 
 
 		}
-		if (graphics::getKeyState(graphics::SCANCODE_M)) {
+		else {
+			graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "EISAI OREOS PEXTIS", m_brush_player_bullet_count);
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 5.0f, 3.0f, "PRESS R TO RESTART", m_brush_player_bullet_count);
+			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 10.0f, 3.0f, "PRESS M FOR MAIN MENU", m_brush_player_bullet_count);
+			if (graphics::getKeyState(graphics::SCANCODE_R)) {
 
-			m_state->setLevelpointerNull();
-			m_state->setStatus('M');
-			delete this;
+
+				restart(); //delete the main objects of the level (planets bullets and asteroids) and clear their vectors
+				m_state->init();
+
+
+
+
+
+			}
+			if (graphics::getKeyState(graphics::SCANCODE_M)) {
+
+				m_state->setLevelpointerNull();
+				m_state->setStatus('M');
+				delete this;
+			}
+			//cout << "a";
+			return;
 		}
-		//cout << "a";
-		return;
 
 	}
 	//else if(m_planets.size() == 0){
@@ -472,6 +536,10 @@ void Level::update(float dt)
 		mapPlanets();
 
 		initObjects();
+
+		if (m_state->getOnline() && m_state->getNet()) {
+			m_state->getNet()->addLevelPacketToQueue(*m_state->getPlayer()->geto_id(), NEW_SIEGE);
+		}
 
 		std::this_thread::sleep_for(std::chrono::duration<float, milli>(800));
 		siege++;
@@ -503,19 +571,67 @@ void Level::update(float dt)
 
 			if (m_state->getPlayer()->getLives() == 1) {
 				//he is dead game over do the game over thingy
-				if (!efyges) {
-					graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
-					efyges = true;
+				
+				
+				if (m_state->getOnline()) {
+					graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+					graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "GAME OVER", m_brush_player_bullet_count);
+					if (!deathflag) {
+
+						if (!efyges) {
+							graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
+							efyges = true;
+						}
+						if (m_state->getOnline() && m_state->getNet()) {
+							m_state->getNet()->addLevelPacketToQueue(*m_state->getPlayer()->geto_id(), PLAYER_DEAD);
+						}
+
+						timeofIncedent = graphics::getGlobalTime();
+						deathflag = true;
+					}
+
+					if (graphics::getGlobalTime() - timeofIncedent < 3000) {
+						
+						return;
+					}
+					
+
+
+					deleteLevel();
+					return;
 				}
+				else {
+					if (!efyges) {
+						graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
+						efyges = true;
+					}
 
-				m_state->getNet()->addLevelPacketToQueue(*m_state->getPlayer()->geto_id() , PLAYER_DEAD);
+					graphics::setFont(m_state->getFullAssetPath("font.ttf"));
+					graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "GAME OVER", m_brush_player_bullet_count);
+					graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 5.0f, 3.0f, "PRESS R TO RESTART", m_brush_player_bullet_count);
+					graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 10.0f, 3.0f, "PRESS M FOR MAIN MENU", m_brush_player_bullet_count);
+					if (graphics::getKeyState(graphics::SCANCODE_R)) {
+
+
+						restart(); //delete the main objects of the level (planets bullets and asteroids) and clear their vectors
+						m_state->init();
 
 
 
 
 
+					}
+					if (graphics::getKeyState(graphics::SCANCODE_M)) {
+						deleteLevel();
 
-				return;
+					}
+					//cout << "a";
+					return;
+
+
+
+				}
+				
 			}
 			else {
 				m_state->getPlayer()->reduceLives();
@@ -536,32 +652,7 @@ void Level::update(float dt)
 
 	}		/*
 		else {
-			if (!efyges) {
-				graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
-				efyges = true;
-			}
-
-			graphics::setFont(m_state->getFullAssetPath("font.ttf"));
-			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5, 7.0f, "GAME OVER", m_brush_player_bullet_count);
-			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 5.0f, 3.0f, "PRESS R TO RESTART", m_brush_player_bullet_count);
-			graphics::drawText(2.0f, m_state->getCanvasHeight() * 0.5 + 10.0f, 3.0f, "PRESS M FOR MAIN MENU", m_brush_player_bullet_count);
-			if (graphics::getKeyState(graphics::SCANCODE_R)) {
-
-
-				restart(); //delete the main objects of the level (planets bullets and asteroids) and clear their vectors
-				m_state->init();
-
-
-
-
-
-			}
-			if (graphics::getKeyState(graphics::SCANCODE_M)) {
-				deleteLevel();
-
-			}
-			//cout << "a";
-			return;
+			
 
 		}
 		*/
@@ -982,6 +1073,8 @@ void Level::deleteLevel()
 	}
 	
 	m_state->setLevelpointerNull();
+	m_state->getPlayer()->resetLives();
+	
 	delete this;
 
 
@@ -997,6 +1090,13 @@ void Level::addToVectorDeleteP(int oid)
 void Level::addToVectorDeleteT(int oid)
 {
 	tokenToDeleteNET.push_back(oid);
+}
+
+void Level::setIncident(int iType)
+{
+	incidentGoToLobby = true;
+	incidentType = iType;
+
 }
 
 
@@ -1046,7 +1146,7 @@ void Level::restart()
 
 	}
 
-
+	m_state->getPlayer()->resetLives();
 	
 
 

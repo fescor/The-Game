@@ -773,15 +773,15 @@ void Net::parseData(unsigned char* buffer, size_t size , ENetEvent & event, int 
 
 		break;
 	case LEVEL_PACKET:
-		if (p.lvlp.type == 0) {
+		if (p.lvlp.type == PLANET_DESTROYED) {
 			m_state->deletePlanet(p.lvlp.o_id);
 
 		}
-		else if( p.lvlp.type == 1){
+		else if( p.lvlp.type == TOKEN_CONSUME){
 			m_state->deleteToken(p.lvlp.o_id);
 		}
-		else if (p.lvlp.type == 2) {
-
+		else if (p.lvlp.type == PLAYER_DEAD || p.lvlp.type == NEW_SIEGE || p.lvlp.type == COMPLETED_LEVEL) {
+			m_state->incident(p.lvlp.type);
 
 		}
 		break;

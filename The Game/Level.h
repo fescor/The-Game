@@ -87,7 +87,11 @@ class Level : public GameObject
 	bool allPlayersLoadedLevel();
 	bool gameLoaded = false;
 
-	
+	bool deathflag = false;
+	float timeofIncedent = .0f;
+
+	bool incidentGoToLobby = false;
+	int incidentType = 0;
 	
 
 public:
@@ -117,6 +121,8 @@ public:
 	void deleteLevel();
 	void addToVectorDeleteP(int oid);
 	void addToVectorDeleteT(int oid);
+
+	void setIncident(int iType);
 
 	~Level();
 

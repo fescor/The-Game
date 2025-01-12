@@ -889,6 +889,11 @@ void Player::reduceLives()
 	lives--;
 }
 
+void Player::resetLives()
+{
+	lives = 3;
+}
+
 void Player::respawn()
 {
 	this->changeHP(5);// reset hp

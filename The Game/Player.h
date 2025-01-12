@@ -140,6 +140,7 @@ public:
 	void draw(bool online) override;
 	int getLives();
 	void reduceLives();
+	void resetLives();
 	void respawn();
 
 

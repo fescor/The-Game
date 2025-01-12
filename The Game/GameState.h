@@ -150,6 +150,8 @@ public:
 	
 	void deletePlanet(int o_id);
 	void deleteToken(int o_id);
+
+	void incident(int type);
 	
 	
 
