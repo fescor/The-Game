@@ -27,6 +27,26 @@ int* GameState::connectpeer2player(int id)
 
 }
 
+void GameState::PlaybackStreamOpen(bool flag) {
+	if (flag) {
+		if (!audiohandler) {
+			audiohandler = new AudioHandler();
+		}
+		//pst = std::thread(&AudioHandler::startplaybackstream, audiohandler);
+		audiohandler->startplaybackstream();
+	}
+	else {
+		/*
+		if (pst.joinable()) {
+			pst.join();
+		}
+		*/
+		audiohandler->stopPlaybackAudio();
+		delete audiohandler;
+		audiohandler = nullptr;
+	}
+	
+}
 
 
 bool GameState::PushToTalk(bool isStreaming) {
@@ -80,6 +100,7 @@ void GameState::sendToPlayback(audiodata ad) {
 	receiver = std::thread(&AudioHandler::setbuffer, audiohandler, player_id, chunk);
 	
 }
+/*
 void GameState::CheckAndStopStream() {
 	if (audiohandler) {
 		if (audiohandler->closecall()) {
@@ -90,7 +111,7 @@ void GameState::CheckAndStopStream() {
 		}
 	}
 }
-
+*/
 
 
 void GameState::initNet()
@@ -239,7 +260,7 @@ void GameState::update(float dt)
 
 	}
 
-	float CurrentTime = graphics::getGlobalTime();
+	//float CurrentTime = graphics::getGlobalTime();
 	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
 	if ((CurrentState) && (!PreviousState)) {
 
@@ -258,7 +279,7 @@ void GameState::update(float dt)
 	}
 
 	PreviousState = CurrentState; //update state
-	CheckAndStopStream();
+	//CheckAndStopStream();
 
 
 	switch (status) {

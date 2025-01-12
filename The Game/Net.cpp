@@ -97,6 +97,10 @@ int Net::host()
 			case ENET_EVENT_TYPE_DISCONNECT:
 				
 				cout << "enet_peer disconected" << endl;
+				//stop playback stream when a peer disconnects
+				bool streamflag = false;
+				m_state->PlaybackStreamOpen(streamflag);
+
 				if (event.peer->data != nullptr) {
 					deletePeer(*((int*)event.peer->data));
 					event.peer->data = nullptr;
@@ -181,6 +185,10 @@ int Net::join()
 			case ENET_EVENT_TYPE_DISCONNECT:
 				
 				cout << "enet peer disconnected " << endl;
+				//stop playback stream when a peer disconnects
+				bool streamflag = false;
+				m_state->PlaybackStreamOpen(streamflag);
+
 				if (event.peer->data != nullptr) {
 					deletePeer(*((int*)event.peer->data));
 					event.peer->data = nullptr;
@@ -258,6 +266,10 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 
 
 	//cout << "A new Player connected with ID :  " + std::to_string(maxpeerID) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+	//open playback stream when a new peer connects
+	bool streamflag = true;
+	m_state->PlaybackStreamOpen(streamflag);
+
 
 
 	
@@ -286,6 +298,9 @@ void Net::peerConnectRoutineJoin(ENetEvent& event)
 			
 
 			cout << "A new Player connected with ID :  " + std::to_string(peer.first) + " IP : " + (hex_to_strip(event.peer->address.host)) << endl;
+			//open playback stream when a new peer connects
+			bool streamflag = true;
+			m_state->PlaybackStreamOpen(streamflag);
 			return;
 
 
@@ -502,7 +517,9 @@ bool Net::connectToHost(const std::string ip) // this is called when i connect t
 		event.peer->data = m_state->connectpeer2player(0);
 		connectedPeers[0]->data = m_state->connectpeer2player(0);
 		
-		//EDW KALW SINARTISI MALLON GAME STATE POU THA ANOIGEI KANALIA 
+		//opens the playback stream when the host connects
+		bool streamflag = true;
+		m_state->PlaybackStreamOpen(streamflag);
 		return true;
 	}
 	else {
@@ -549,6 +566,10 @@ bool Net::connectToPeer(const std::string ip, int id)// this should be called wh
 
 		event.peer->data = m_state->connectpeer2player(id);
 		connectedPeers[id]->data = m_state->connectpeer2player(id);
+
+		//opens the playback stream 
+		bool streamflag = true;
+		m_state->PlaybackStreamOpen(streamflag);
 
 		return true;
 
