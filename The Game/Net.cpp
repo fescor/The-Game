@@ -165,7 +165,7 @@ int Net::join()
 {	
 	ENetEvent event;
 	//if (!connectToHost(m_state->getHostIP())) {online = false;}
-	online = connectToHost(LAPTOP_IP);
+	online = connectToHost(m_state->getHostIP());
 	float timeB = graphics::getGlobalTime();
 	float timeDIF = 0.0f;
 	

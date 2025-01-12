@@ -726,7 +726,7 @@ MainScreen::MainScreen()
 void MainScreen::update(float dt)
 {
 	
-		float sleep_time = 100.0f;
+		float sleep_time = 90;
 
 		hover();	
 		if (selector == GIVE_HOST_IP_INPUT) {
@@ -742,8 +742,9 @@ void MainScreen::init()
 
 
 	
-
+	
 	graphics::playMusic("assets//backgroundmain.mp3", 1.0f, true, 0);
+	
 	selector = PLAY;
 	if (!m_background) {
 		m_background = new Background();

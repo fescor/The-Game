@@ -427,7 +427,7 @@ void GameState::update(float dt)
 
 	//float CurrentTime = graphics::getGlobalTime();
 	CurrentState = graphics::getKeyState(graphics::SCANCODE_K);
-	if ((CurrentState) && (!PreviousState)) {
+	if ((CurrentState) && (!PreviousState) && online) {
 
 		if (!isStreaming) {
 			isStreaming = true; //edw ksekinaei h diadikasia tou stream
@@ -435,7 +435,7 @@ void GameState::update(float dt)
 			
 		}
 	}
-	if ((!CurrentState) && (PreviousState)) {
+	if ((!CurrentState) && (PreviousState) && online) {
 		
 		if (isStreaming){
 			isStreaming = false;

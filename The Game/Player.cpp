@@ -648,7 +648,7 @@ void Player::update(float dt)
 			m_state->getNet()->addpMOVEToQueue(o_id, angle, speed, m_pos_x, m_pos_y, testcounter ,m_fire);
 			lastPacket_timeSend = graphics::getGlobalTime();
 			if (m_fire) {
-				cout << "preza";
+				
 				m_fire = false;
 			}
 		}
@@ -772,8 +772,7 @@ void Player::draw()
 	graphics::setOrientation(angle - 90.0f);
 	graphics::drawRect(m_state->getCanvasWidth() * 0.5f, m_state->getCanvasHeight() * 0.5f, 2.0f, 2.0f, m_brush_player);
 	graphics::resetPose();
-	graphics::drawText( this->m_pos_x + m_state->m_global_offset_x,this->m_pos_y + m_state->m_global_offset_y, 1.0f , " X : "  + std::to_string(this->m_pos_x) + " ,  Y :" + std::to_string(this->m_pos_y) + " , SP : " + std::to_string(speed), test);
-	graphics::drawText(this->m_pos_x + m_state->m_global_offset_x, this->m_pos_y + m_state->m_global_offset_y + 3, 1.0f, "angle : " + std::to_string(this->angle) , test);
+
 	if (explosion){
 		e->setXY(m_pos_x, m_pos_y); //explotion is implemented with the global offset on draw saw player gives his potition when he has to draw an e object on him
 

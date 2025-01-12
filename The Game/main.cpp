@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 
 	
 	
-	graphics::createWindow(800, 800, "IsWindow");
+	graphics::createWindow(800, 800, "THE GAME");
 
 	
 	init();

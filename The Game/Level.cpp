@@ -989,8 +989,7 @@ void Level::draw()
 	graphics::setFont(m_state->getFullAssetPath("font.ttf"));
 	//graphics::drawText(13.0f, 0.8f, 1.2f, "PLANETS LEFT : " + to_string(m_planets.size()), m_brush_player_bullet_count);
 	graphics::drawText(m_state -> getCanvasWidth()*0.1, m_state->getCanvasHeight(), 1.2f, "PLANETS LEFT : " + to_string(m_planets.size()), m_brush_player_bullet_count);
-	graphics::drawText(m_state->getCanvasWidth() * 0.3, m_state->getCanvasHeight(), 1.2f, "tokens left  : " + to_string(m_tokens.size()), m_brush_player_bullet_count);
-
+	
 	if (levelDiffuculty == 3) {
 
 
@@ -1024,7 +1023,7 @@ void Level::draw()
 
 
 		graphics::setFont(m_state->getFullAssetPath("font.ttf"));
-		graphics::drawText(m_state->getCanvasWidth()*0.35, m_state->getCanvasHeight(), 1.0f, "YOU DIED! " + std::to_string(m_state->getPlayer()->getLives()) + " LIVES REMAINING", m_brush_player_bullet_count);
+		graphics::drawText(m_state->getCanvasWidth()*0.35, m_state->getCanvasHeight() - 2.0f, 1.0f, "YOU DIED! " + std::to_string(m_state->getPlayer()->getLives()) + " LIVES REMAINING", m_brush_player_bullet_count);
 		
 	}
 	else {
