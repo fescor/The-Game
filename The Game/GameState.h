@@ -9,6 +9,7 @@
 #include <mutex>
 #include "Structs.h"
 #include <array>
+#include <concurrent_queue.h>
 //#include "Net.h"
 
 
@@ -81,6 +82,10 @@ public:
 	bool  connectionFailed = false;
 	bool connectingToHost = false;
 
+	
+	concurrency::concurrent_queue<int> playerToDelete;
+
+
 	//int availableSpaceship[4] = {4,1,2,3};
 	std::array<int, 4> availableSpaceship = {4,1,2,3};
 	int  getAvailableSS(int ass, int oid);
@@ -152,6 +157,8 @@ public:
 	void deleteToken(int o_id);
 
 	void incident(int type);
+
+	void setSpawnPosOplayers();
 	
 	
 

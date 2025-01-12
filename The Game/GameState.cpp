@@ -363,7 +363,13 @@ void GameState::update(float dt)
 
 	}
 	
-			
+	
+	if (!playerToDelete.empty()) {
+		int o_id; 
+		playerToDelete.try_pop(o_id);
+		deletePlayer(o_id);
+
+	}
 
 	
 		
@@ -601,6 +607,16 @@ void GameState::deleteToken(int o_id)
 void GameState::incident(int type)
 {
 	getLevel()->setIncident(type);
+
+}
+void GameState::setSpawnPosOplayers()
+{
+	for (auto& o_player : o_players) {
+		o_player.second->m_pos_x = o_player.second->getSpawnPos().x;
+		o_player.second->m_pos_y = o_player.second->getSpawnPos().y;
+
+	}
+
 
 }
 void GameState::createMapInfoData()

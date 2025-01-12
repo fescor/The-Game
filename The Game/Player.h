@@ -161,6 +161,8 @@ public:
 
 	void clearQueuedPackets();
 
+	potition getSpawnPos();
+
 
 	Player(int online_id);
 	~Player();

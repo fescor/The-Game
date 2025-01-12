@@ -1074,6 +1074,9 @@ void Level::deleteLevel()
 	
 	m_state->setLevelpointerNull();
 	m_state->getPlayer()->resetLives();
+	m_state->getPlayer()->clearQueuedPackets();
+	
+	
 	
 	delete this;
 

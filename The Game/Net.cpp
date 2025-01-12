@@ -844,10 +844,7 @@ void Net::parseData(ENetPacket* net_packet, int timeDIF, ENetPeer* peer)
 
 		break;
 	case PMOVE:
-		if (_host = true) {
-
-
-		}
+		
 		m_state->insertOPlayersPmove(p.pmove);
 		{
 			std::string s = "TIME BETWEEN ONLINE FRAMES :" + std::to_string(timeDIF) + "\n" +
@@ -915,7 +912,7 @@ void Net::disconnect()///telling everyone i am disconecting
 void Net::deletePeer(int id)
 {
 
-	m_state->deletePlayer(id);
+	m_state->playerToDelete.push(id);
 	if (!connectedPeers.empty()) { connectedPeers.erase(id); }
 	cout << "Player with ID : " + std::to_string(id) + " disconected " << endl;
 	if (id == 0) {

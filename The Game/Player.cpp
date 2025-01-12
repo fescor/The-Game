@@ -996,6 +996,11 @@ void Player::clearQueuedPackets()
 
 }
 
+potition Player::getSpawnPos()
+{
+	return spawn_pos;
+}
+
 
 
 Player::Player(int online_id)
