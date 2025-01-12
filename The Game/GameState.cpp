@@ -83,8 +83,8 @@ void GameState::CheckAndStopStream() {
 	if (audiohandler) {
 		if (audiohandler->closecall()) {
 			audiohandler->stopAudio();
-			delete audiohandler;
-			audiohandler = nullptr;
+			//delete audiohandler;
+			//audiohandler = nullptr;
 			std::cout << "Playback finished and stream stopped." << std::endl;
 		}
 	}

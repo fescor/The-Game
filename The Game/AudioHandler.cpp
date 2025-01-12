@@ -3,25 +3,28 @@
 #include "Player.h"
 #include "Net.h"
 #include <fstream>
+#include <queue>
 #include <cstdint>   // gia int16_t
 #include <iostream>
 #include <vector>
+#include <chrono>
 #include <mutex>
 
 
 using namespace std;
 #define _USE_MATH_DEFINES
-
-using namespace std;
 std::vector<float> AudioHandler::finalboss;
 std::vector<float> AudioHandler::globalAudioBuffer;
 std::vector <float> AudioHandler::temp_vector;
 
 std::mutex AudioHandler::buffermutex;
-std::map<int, std::vector<float>> AudioHandler::playbackMap;
+//std::map<int, std::vector<float>> AudioHandler::playbackMap;
+std::map<int, std::queue<float>> AudioHandler::playbackMap;
 std::mutex AudioHandler::playbackMutex;
 bool streamcloseflag = false;
+bool AudioHandler::dataready = false;
 std::condition_variable playbackCondition;
+
 
 
 // Constructor implementation
@@ -63,75 +66,6 @@ bool AudioHandler::audioInit() {
 }
 
 
-void AudioHandler::ShowAudioDevices() {
-	PaError err = Pa_Initialize();
-	if (err != paNoError) {
-		std::cerr << "PortAudio initialization failed: " << Pa_GetErrorText(err) << std::endl;
-		return;
-	}
-
-	int numDevices = Pa_GetDeviceCount();
-	if (numDevices < 0) {
-		std::cerr << "ERROR: Pa_GetDeviceCount returned " << numDevices << std::endl;
-		return;
-	}
-
-	std::cout << "Available audio devices:\n";
-
-	for (int i = 0; i < numDevices; i++) {
-		const PaDeviceInfo* deviceInfo = Pa_GetDeviceInfo(i);
-		if (!deviceInfo) continue;
-
-		std::cout << "Device " << i << ": " << deviceInfo->name << "\n";
-		std::cout << "  Max input channels: " << deviceInfo->maxInputChannels << "\n";
-		std::cout << "  Max output channels: " << deviceInfo->maxOutputChannels << "\n";
-		std::cout << "  Default sample rate: " << deviceInfo->defaultSampleRate << "\n";
-		std::cout << "  Host API: " << Pa_GetHostApiInfo(deviceInfo->hostApi)->name << "\n";
-
-		if (i == Pa_GetDefaultInputDevice()) {
-			std::cout << "  [Default Input Device]\n";
-		}
-		if (i == Pa_GetDefaultOutputDevice()) {
-			std::cout << "  [Default Output Device]\n";
-		}
-
-		std::cout << "---------------------------------\n";
-	}
-
-	Pa_Terminate();
-}
-
-
-//TODO: O KATHE PAIXTHS NA MPOREI NA EPILEKSEI THN SISKEUH POU THELEI GIA EISODO KAI EKSODO HXOU ANTI NA PICKARW TA DEFAULT 
-void AudioHandler::ShowDefaultDevices() const {
-	if (!initialized) {
-		cerr << "Portaudio not initialized." << endl;
-		return;
-	}
-	//get input default device
-	PaDeviceIndex definputdev = Pa_GetDefaultInputDevice();
-	if (definputdev == paNoDevice) {
-		cerr << "No default input device found." << endl;
-	}
-	else {
-		const PaDeviceInfo* inputinfo = Pa_GetDeviceInfo(definputdev);
-		if (inputinfo) {
-			cout << "Default input device: " << inputinfo->name << endl;
-		}
-	}
-	//get output default device
-	PaDeviceIndex defoutputdev = Pa_GetDefaultOutputDevice();
-	if (defoutputdev == paNoDevice) {
-		cerr << "No default output device found." << endl;
-	}
-	else {
-		const PaDeviceInfo* outputinfo = Pa_GetDeviceInfo(defoutputdev);
-		if (outputinfo) {
-			cout << "Default output device: " << outputinfo->name << endl;
-		}
-	}
-}
-
 void AudioHandler::startplaybackstream(){
 	if (stream && Pa_IsStreamActive(stream)) {
 		std::cerr << "Audio stream is already active!" << std::endl;
@@ -155,7 +89,8 @@ void AudioHandler::startplaybackstream(){
 	
 
 
-	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paClipOff, playbackcallback, nullptr);
+	//paClipOff: disable clipping, paDitherOff: disable dithering
+	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paFloat32, playbackcallback, nullptr);
 	if (err != paNoError) {
 		std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl; 
 		return;
@@ -214,7 +149,7 @@ void AudioHandler::startAudio(){
 	outputparametr.hostApiSpecificStreamInfo = nullptr; 
 
 	//open audio stream 
-	err = Pa_OpenStream(&stream, &inputparametr, &outputparametr, 48000, 512, paClipOff, audioCallback,nullptr);
+	err = Pa_OpenStream(&stream, &inputparametr, nullptr, 48000, 512, paFloat32, audioCallback,nullptr);
 	if (err != paNoError) {
 		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
 		return; 
@@ -300,7 +235,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	 }
 	 int playerid = *(m_state)->getPlayer()->geto_id();
 	 while (!temp_vector.empty())
-	 { //an exei arketa dedomena
+	 { 
 			 float preparechunk[512] = { 0 };
 			 //send fist 512 frames
 			 size_t dataToCopy = min(temp_vector.size(), size_t(512));
@@ -320,63 +255,72 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 }
 
  void AudioHandler::setbuffer(int i, const std::vector<float>& chunk) {
-	
-	 if (playbackMap.find(i) == playbackMap.end()) {
-		 playbackMap[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
-	}
-	 //take players buffer and insert the data
-	 auto& playerbuffer = playbackMap[i];
-	 std::vector<float> temp_buffer(chunk.begin(), chunk.end()); //COPY TO A TEMP VECTOR
-	 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
-	 //temp_buffer
-	
-	 
-	 
-	 
-	 
-	 
+	 {
+		 std::lock_guard<std::mutex> lock(playbackMutex);
+		 if (playbackMap.find(i) == playbackMap.end()) {
+			 //playbackMap[i] = std::vector<float>(); //create a buffer for each player when he send voice data 
+			 playbackMap[i] = std::queue<float>();
+		 }
+		 //take players buffer and insert the data
+		 /*
+		 auto& playerbuffer = playbackMap[i];
+		 std::vector<float> temp_buffer(chunk.begin(), chunk.end()); //COPY TO A TEMP VECTOR
+		 playerbuffer.insert(playerbuffer.end(), chunk.begin(), chunk.end());
+		 */
+		 auto& playerbuffer = playbackMap[i];
+		 for (const auto& sample : chunk) {
+			 playerbuffer.push(sample); 
+		 }
+		 
+		 dataready = true;
+		std::cout << "Buffer for player " << i << " has been updated with chunk of size: " << chunk.size() << std::endl;
+	 }
+	 playbackCondition.notify_one();
+
  }
 
  int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
-	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData)
-
- {
+	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
 	 float* out = static_cast<float*>(outputBuffer);
 	 std::fill(out, out + framesPerBuffer, 0.0f);
+	// std::cout << "playbackcallback called" << std::endl;
+	 while (!dataready) {
+		 //wait for data to be ready
+		 std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Wait for data to be ready
+	 }
+	 bool allbuffersEmpty = false;
 	 {
 		 std::lock_guard<std::mutex> lock(playbackMutex);
 		 for (auto& it : playbackMap) {
-			 auto& playerbuffer = it.second; 
-
-			 if (!playerbuffer.empty()) { 
-				 //how many samples to play
-				 size_t dataToPlayback= min(framesPerBuffer,playerbuffer.size());
-				 
-				 //add audio to output
+			 auto& playerbuffer = it.second;
+			 if (!playerbuffer.empty()) {
+				 allbuffersEmpty = false;
+				 size_t dataToPlayback = min(framesPerBuffer, playerbuffer.size());
 				 for (size_t i = 0; i < dataToPlayback; i++) {
-					 out[i] += playerbuffer[i];
+					 out[i] += playerbuffer.front();
+					 playerbuffer.pop();
+					 
 				 }
-			
-				//erase what you have played 
-				 playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
+				// playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
+				 // Reset the flag if buffer is empty after playback	
+				 if (playerbuffer.empty()) {
+					 dataready = false;
+					 
+				 }
 			 }
-			 else {
-				 streamcloseflag = true ;
-			 }
-			 
 		 }
+		 
+		 }
+	 if (allbuffersEmpty) {
+		 streamcloseflag = true;
 	 }
-	 
-	
-	 return paContinue;  
+	 return paContinue;
  }
 
+
  bool AudioHandler::closecall() {
-	 std::lock_guard<std::mutex> lock(playbackMutex);
-	 for (auto& it : playbackMap) {
-		 if (!it.second.empty()) {
-			 return false; // Buffer is not empty, playback is not finished
-		 }
+
+	 if (streamcloseflag) {
+		 return true; //playback has finished
 	 }
-	 return true; // All buffers are empty, playback is finished
  }
