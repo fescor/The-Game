@@ -98,7 +98,7 @@ void AudioHandler::startAudio(){
 	
 
 	//open audio stream 
-	err = Pa_OpenStream(&stream, &inputparametr, nullptr, 48000, 512, paFloat32, audioCallback,nullptr);
+	err = Pa_OpenStream(&stream, &inputparametr, nullptr, 48000, 512, paFloat32, &AudioHandler::audioCallback,nullptr);
 	if (err != paNoError) {
 		std::cerr << "Fail to open stream: " << Pa_GetErrorText(err) << std::endl;
 		return; 
@@ -168,12 +168,12 @@ void AudioHandler::stopAudio() {
 int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
 
 	const float* in = static_cast<const float*>(inputBuffer); //input data 
-	float* out = static_cast<float*>(outputBuffer); //output data
+	
 	//bool isPlaybackFinished = false;
 
 	if (inputBuffer) {
 		std::vector<float> chunk(in, in + framesPerBuffer); //copy chunk in local vector
-
+		/*
 		{
 			std::lock_guard<std::mutex> lock(buffermutex);// mutex lock
 			globalAudioBuffer.insert(globalAudioBuffer.end(), chunk.begin(), chunk.end());
@@ -181,15 +181,12 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		if (globalAudioBuffer.size() >= framesPerBuffer) {
 			dataready = true;
 		}
+		*/
+		auto gamestate = GameState::getInstance();
+		gamestate->getNet()->addaudiodata(*(gamestate)->getPlayer()->geto_id(), chunk.data());
 	}
-	else {
-		std::cout << "No input detected, outputting silence." << std::endl;
-		for (unsigned long i = 0; i < framesPerBuffer; i++) {
-			out[i] = 0.0f; // Silence
-			}
-	}
-	
 	//std::cout << "audiocallback size " << globalAudioBuffer.size() << std::endl;
+	
 	return paContinue;
 }
 
@@ -235,14 +232,15 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		 std::lock_guard<std::mutex> lock(playbackMutex);
 		 auto& playerbuffer = playbackMap[i];
 		
+		 //insert
 		 for (const auto& sample : chunk) {
 			 playerbuffer.push(sample); 
 		 }
 		 
-		 dataready = true;
+		// dataready = true;
 		std::cout << "Buffer for player " << i << " has been updated with chunk of size: " << chunk.size() << std::endl;
 	 }
-	 playbackCondition.notify_one();
+	// playbackCondition.notify_one();
 
  }
 
@@ -271,7 +269,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 
 
 	 //paClipOff: disable clipping, paDitherOff: disable dithering
-	 PaError err = Pa_OpenStream(&outstream, nullptr, &outputparametr, 48000, 512, paFloat32, playbackcallback, nullptr);
+	 PaError err = Pa_OpenStream(&outstream, nullptr, &outputparametr, 48000, 512, paFloat32, &AudioHandler::playbackcallback, nullptr);
 	 if (err != paNoError) {
 		 std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl;
 		 return;
@@ -292,32 +290,31 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
  int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
 	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {
 	 float* out = static_cast<float*>(outputBuffer);
-	 std::fill(out, out + framesPerBuffer, 0.0f);
-	// std::cout << "playbackcallback called" << std::endl;
-	
-	 //////
-	 bool allbuffersEmpty = false;
+	 //std::fill(out, out + framesPerBuffer, 0.0f);
+	 float playbackchunk[512] = { 0 };
 	 {
-		 std::lock_guard<std::mutex> lock(playbackMutex);
+		 // std::lock_guard<std::mutex> lock(playbackMutex);
 		 for (auto& it : playbackMap) {
 			 auto& playerbuffer = it.second;
+
 			 if (!playerbuffer.empty()) {
-				 allbuffersEmpty = false;
+
 				 size_t dataToPlayback = min(framesPerBuffer, playerbuffer.size());
 				 for (size_t i = 0; i < dataToPlayback; i++) {
-					 out[i] += playerbuffer.front();
+					 playbackchunk[i] += playerbuffer.front();
 					 playerbuffer.pop();
-					 
+
 				 }
-				// playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
-				 // Reset the flag if buffer is empty after playback	
-				 
+				 // playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
+				  // Reset the flag if buffer is empty after playback	
+
 			 }
+
 		 }
-		 
+		 for (size_t i = 0; i < framesPerBuffer; i++) {
+			 out[i] = playbackchunk[i];
+
 		 }
-	 if (allbuffersEmpty) {
-		 streamcloseflag = true;
 	 }
 	 return paContinue;
  }

@@ -271,7 +271,7 @@ void Net::peerConnectRoutineHOST(ENetEvent& event)
 	//open playback stream when a new peer connects
 	bool streamflag = true;
 	m_state->PlaybackStreamOpen(streamflag);
-	//m_state->StartRecordStream(streamflag);
+	
 
 
 
