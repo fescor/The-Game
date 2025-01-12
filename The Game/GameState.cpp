@@ -34,6 +34,7 @@ bool GameState::PushToTalk(bool isStreaming) {
 
 		if (!audiohandler) {
 			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
+			//audiohandler = std::make_unique<AudioHandler>();
 			
 		}
 		pst = std::thread(&AudioHandler::startAudio, audiohandler);//thread start the stream

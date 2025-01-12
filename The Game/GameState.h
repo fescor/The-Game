@@ -31,7 +31,7 @@ private:
 	class MainScreen* mainscreen = nullptr;
 
 	//AUDIO//
-	//dimiourgia pointer gia antikeimeno audiomanager
+	
 	class AudioHandler* audiohandler = nullptr;
 	//push to talk
 	bool PushToTalk(bool);

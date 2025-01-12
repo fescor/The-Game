@@ -137,16 +137,7 @@ void AudioHandler::startAudio(){
 	inputparametr.suggestedLatency = Pa_GetDeviceInfo(inputparametr.device)->defaultLowInputLatency;
 	inputparametr.hostApiSpecificStreamInfo = nullptr;
 
-	outputparametr.device = Pa_GetDefaultOutputDevice(); // get default speakers as output device
-	//PaDeviceIndex outputparametr.device = Pa_GetDefaultOutputDevice();
-	if (outputparametr.device == paNoDevice) {
-		std::cerr << "Cant find default output device." << std::endl;
-		return;
-	}
-	outputparametr.channelCount = 1;
-	outputparametr.sampleFormat = paFloat32;
-	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
-	outputparametr.hostApiSpecificStreamInfo = nullptr; 
+	
 
 	//open audio stream 
 	err = Pa_OpenStream(&stream, &inputparametr, nullptr, 48000, 512, paFloat32, audioCallback,nullptr);
@@ -286,7 +277,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	// std::cout << "playbackcallback called" << std::endl;
 	 while (!dataready) {
 		 //wait for data to be ready
-		 std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Wait for data to be ready
+		 //std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Wait for data to be ready
 	 }
 	 bool allbuffersEmpty = false;
 	 {
