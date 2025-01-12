@@ -208,7 +208,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 			 // globalAudioBuffer.clear();
 		 }
 		 int playerid = *(m_state)->getPlayer()->geto_id();
-		 while (Pa_IsStreamActive(stream))
+		 while (stream && Pa_IsStreamActive(stream))
 		 {
 			 float preparechunk[512] = { 0 };
 			 //send fist 512 frames
@@ -311,7 +311,6 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 				 size_t dataToPlayback = min(framesPerBuffer, it.second.unsafe_size());
 				 for (size_t i = 0; i < dataToPlayback; i++) {
 					 it.second.try_pop(out[i]);
-					 //ante gamisou
 					 
 				 }
 				// playerbuffer.erase(playerbuffer.begin(), playerbuffer.begin() + dataToPlayback);
