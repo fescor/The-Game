@@ -493,10 +493,7 @@ bool Net::connectToHost(const std::string ip) // this is called when i connect t
 
 
 		cout << "conection succeded " << endl;
-		
-		
-
-		connectedPeers[0] = event.peer;
+			connectedPeers[0] = event.peer;
 		//*(connectedPeers[0]) = *(event.peer);
 
 
@@ -504,7 +501,8 @@ bool Net::connectToHost(const std::string ip) // this is called when i connect t
 
 		event.peer->data = m_state->connectpeer2player(0);
 		connectedPeers[0]->data = m_state->connectpeer2player(0);
-
+		
+		//EDW KALW SINARTISI MALLON GAME STATE POU THA ANOIGEI KANALIA 
 		return true;
 	}
 	else {
