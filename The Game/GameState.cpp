@@ -29,11 +29,11 @@ int* GameState::connectpeer2player(int id)
 
 void GameState::PlaybackStreamOpen(bool flag) {
 	if (flag) {
-		if (!audiohandler) {
-			audiohandler = new AudioHandler();
+		if (!outputaudiohandler) {
+			outputaudiohandler = new AudioHandler();
 		}
 		//pst = std::thread(&AudioHandler::startplaybackstream, audiohandler);
-		audiohandler->startplaybackstream();
+		outputaudiohandler->startplaybackstream();
 	}
 	else {
 		/*
@@ -41,9 +41,9 @@ void GameState::PlaybackStreamOpen(bool flag) {
 			pst.join();
 		}
 		*/
-		audiohandler->stopPlaybackAudio();
-		delete audiohandler;
-		audiohandler = nullptr;
+		outputaudiohandler->stopPlaybackAudio();
+		delete outputaudiohandler;
+		outputaudiohandler = nullptr;
 	}
 	
 }
@@ -51,28 +51,27 @@ void GameState::PlaybackStreamOpen(bool flag) {
 
 bool GameState::PushToTalk(bool isStreaming) {
 	if (isStreaming) {
-
-		if (!audiohandler) {
-			audiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
+		
+		if (!inputaudiohandler) {
+			inputaudiohandler = new AudioHandler();//gia na ginei init thn prwth fora mono mexri na to ksana pathsei 
 			//audiohandler = std::make_unique<AudioHandler>();
 			
 		}
-		pst = std::thread(&AudioHandler::startAudio, audiohandler);//thread start the stream
-		preperator = std::thread(&AudioHandler::preparedata, audiohandler);//thread start to send the data
+		//pst = std::thread(&AudioHandler::startAudio, inputaudiohandler);//thread start the stream
+		inputaudiohandler->startAudio();	
+
+		//std::this_thread::sleep_for(std::chrono::milliseconds(100));
+		
+		//preperator = std::thread(&AudioHandler::preparedata, inputaudiohandler);//thread start to send the data
 		return true;
 	}else
 	{		
-		if (pst.joinable()) {
-			pst.join();
-		}
-		if (preperator.joinable()) {
-			preperator.join();
-		}
 		
-		audiohandler->stopAudio();
+		
+		inputaudiohandler->stopAudio();
 
-		delete audiohandler;
-		audiohandler = nullptr;
+		delete inputaudiohandler;
+		inputaudiohandler = nullptr;
 		return false;
 	}
 		
@@ -84,34 +83,17 @@ void GameState::sendToPlayback(audiodata ad) {
 
 	int player_id = ad.playerid;
 	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
-	if (!audiohandler) {
-		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
-
-	}
-	if (playbackstarter.joinable()) {
-		playbackstarter.join();
-	}
+	
+	
 	//std::cout << "Starting thread for startstream..." << std::endl;
-	playbackstarter = std::thread(&AudioHandler::startplaybackstream,audiohandler);
-	if (receiver.joinable()) {
-		receiver.join();
-	}
+//	playbackstarter = std::thread(&AudioHandler::startplaybackstream, outputaudiohandler);
+
 	//std::cout << "Starting thread for setbuffer..." << std::endl;
-	receiver = std::thread(&AudioHandler::setbuffer, audiohandler, player_id, chunk);
+	//receiver = std::thread(&AudioHandler::setbuffer, outputaudiohandler, player_id, chunk);
+	outputaudiohandler->setbuffer(player_id,chunk);
 	
 }
-/*
-void GameState::CheckAndStopStream() {
-	if (audiohandler) {
-		if (audiohandler->closecall()) {
-			audiohandler->stopAudio();
-			//delete audiohandler;
-			//audiohandler = nullptr;
-			std::cout << "Playback finished and stream stopped." << std::endl;
-		}
-	}
-}
-*/
+
 
 
 void GameState::initNet()
@@ -454,7 +436,7 @@ void GameState::update(float dt)
 		}
 	}
 	if ((!CurrentState) && (PreviousState)) {
-		//ReleaseTime = CurrentTime;
+		
 		if (isStreaming){
 			isStreaming = false;
 			GameState::PushToTalk(false);
@@ -462,7 +444,7 @@ void GameState::update(float dt)
 	}
 
 	PreviousState = CurrentState; //update state
-	//CheckAndStopStream();
+	
 
 
 	

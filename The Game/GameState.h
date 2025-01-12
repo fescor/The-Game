@@ -35,7 +35,8 @@ private:
 
 	//AUDIO//
 	
-	class AudioHandler* audiohandler = nullptr;
+	class AudioHandler* inputaudiohandler = nullptr;
+	class AudioHandler* outputaudiohandler = nullptr;
 	bool PushToTalk(bool);
 	bool isStreaming = false;
 	bool toSend = false; 
@@ -47,7 +48,7 @@ private:
 	std::thread playbackstarter; 
 	float ReleaseTime = 0.0f;
 	const float Waitasec = 500.0f;
-	void CheckAndStopStream();
+	
 	
 
 
