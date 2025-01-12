@@ -2,7 +2,7 @@
 #include "Player.h"
 
 #include "GameState.h"
-
+#include "mainScreen.h"
 #include "setcolor.h"
 #include <iostream>
 #include <string>
@@ -499,7 +499,7 @@ void Level::update(float dt)
 
 	if (m_state->getPlayer()->returnHP() <= 0) {
 
-		if (m_state->getOnline()) {
+		
 
 			if (m_state->getPlayer()->getLives() == 1) {
 				//he is dead game over do the game over thingy
@@ -507,6 +507,14 @@ void Level::update(float dt)
 					graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
 					efyges = true;
 				}
+
+				m_state->getNet()->addLevelPacketToQueue(*m_state->getPlayer()->geto_id() , PLAYER_DEAD);
+
+
+
+
+
+
 				return;
 			}
 			else {
@@ -526,7 +534,7 @@ void Level::update(float dt)
 
 
 
-		}
+	}		/*
 		else {
 			if (!efyges) {
 				graphics::playSound(m_state->getFullAssetPath("efyges1.mp3"), 1.0f, false);// hope you dont get mad:)
@@ -556,8 +564,9 @@ void Level::update(float dt)
 			return;
 
 		}
+		*/
 
-	}
+	
 
 
 	float delta_time = dt / 2000.0f;
@@ -960,12 +969,19 @@ std::unordered_map<int, Tokens*>& Level::getm_tokens()
 void Level::deleteLevel()
 {
 
-	m_state->setLevelpointerNull();
+	
 	m_state->setStatus('M');
 	if (m_state->getNet()) {
 		m_state->getNet()->setinGame(false);
+		if (m_state->amHost()) {
+			m_state->getMainscreen()->setSelector(LOBBY_SCREEN_STARTG);
+		}
+		else {
+			m_state->getMainscreen()->setSelector(LOBBY_SCREEN_CS);
+		}
 	}
 	
+	m_state->setLevelpointerNull();
 	delete this;
 
 

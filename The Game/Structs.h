@@ -191,6 +191,13 @@ enum PACKETTYPE {
 
 };
 
+enum LEVEL_PACKET_TYPE 
+{
+	PLANET_DESTROYED,
+	TOKEN_CONSUME,
+	PLAYER_DEAD,
+};
+
 
 
 struct packet

@@ -132,6 +132,7 @@ public:
 	class Player* getPlayer() { return m_player; }
 	class Level* getLevel() { return m_current_level; }
 	class Net* getNet() { return net ; }
+	class MainScreen* getMainscreen() { return mainscreen; }
 	void insertOPlayersPmove(struct pMOVE packet);
 	const std::map<int, std::unique_ptr<Player>>& geto_playersmap();
 	int getPlayersLoadedLevel();// get the numbers of connected players that have loaded the level in their local machine
