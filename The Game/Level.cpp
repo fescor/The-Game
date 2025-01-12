@@ -176,7 +176,7 @@ void Level::collectToken()
 					break; 
 
 				}
-				if (m_state->getNet()->getOnline()) {
+				if (m_state->getOnline() && m_state->getNet()) {
 					m_state->getNet()->addLevelPacketToQueue(it->first, 1);
 				}
 
@@ -234,7 +234,7 @@ void Level::bulletColissionPlanet()
 					if (planet->returnHP() <= 0) {
 						score += 100;
 						//delete m_planets[j];
-						if (m_state->getNet()->getOnline()) {
+						if (m_state->getOnline() && m_state->getNet()) {
 							m_state->getNet()->addLevelPacketToQueue(pair.first, 0);
 						}
 						
@@ -409,7 +409,7 @@ Background* Level::getBackground()
 Level::Level(const std::string& name)
 {
 
-	if (m_state->amHost()) {
+	if (!m_state->getOnline() || m_state->amHost()) {
 
 		readMap(m_state->getFullAssetPath("vectors.txt"));
 		readTokens(m_state->getFullAssetPath("tokens.txt"));

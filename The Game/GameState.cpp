@@ -463,7 +463,7 @@ void GameState::startLevel()
 		if (iter->second) { iter->second->init(true); }
 	}
 
-	if (!amHost()) {
+	if (!amHost() && online) {
 		m_current_level->init(mapinfo);
 	}
 	else {

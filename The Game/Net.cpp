@@ -10,12 +10,14 @@
 #define LAPTOP_IP "10.124.68.24"
 #define AGLOU_PC "10.124.68.113"
 #define BABUSUS "10.124.68.56"
-//TODO : error when host dc hapening on peer (bug happens after peer-net sends type msg 3 )
+
+
+//TODO : error when host dc hapening on peer (bug happens after peer-net sends type msg 3 ) 
 // TODO : when a peers no host restarts after being killed he spawns alla planets and objects again 
 
 //---- edge case ana exeis xrono ti tha ginei an den  kataferei ena palio peer na kanei connect sto kenourgio peer pou bike 
 
-//----THIS IS KINDA IMPORTANT----for some reason when a laptop tried to connect to PC (after pc dc and connected to lobby again)
+//----THIS IS KINDA IMPORTANT----for some reason when a laptop tried to connect to PC (after pc dc and connected to lobby again) 
 
 
 
