@@ -29,6 +29,7 @@ int* GameState::connectpeer2player(int id)
 
 
 
+
 bool GameState::PushToTalk(bool isStreaming) {
 	if (isStreaming) {
 

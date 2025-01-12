@@ -33,7 +33,6 @@ private:
 	//AUDIO//
 	
 	class AudioHandler* audiohandler = nullptr;
-	//push to talk
 	bool PushToTalk(bool);
 	bool isStreaming = false;
 	bool toSend = false; 
@@ -46,6 +45,7 @@ private:
 	float ReleaseTime = 0.0f;
 	const float Waitasec = 500.0f;
 	void CheckAndStopStream();
+	void StreamsOpen(); 
 
 
 

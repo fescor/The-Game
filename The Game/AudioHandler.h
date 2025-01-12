@@ -13,6 +13,7 @@ class AudioHandler : public GameObject {
 private:
 	bool initialized;
 	PaStream* stream = nullptr;
+	PaStream* outstream = nullptr;
 
 	//bool pb_initialized;
 	//PaStream* pb_stream = nullprt;

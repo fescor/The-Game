@@ -67,7 +67,7 @@ bool AudioHandler::audioInit() {
 
 
 void AudioHandler::startplaybackstream(){
-	if (stream && Pa_IsStreamActive(stream)) {
+	if (stream && Pa_IsStreamActive(outstream)) {
 		std::cerr << "Audio stream is already active!" << std::endl;
 		return; // ean exei anoiksei mhn ksana anoigeis
 	}
@@ -90,13 +90,13 @@ void AudioHandler::startplaybackstream(){
 
 
 	//paClipOff: disable clipping, paDitherOff: disable dithering
-	PaError err = Pa_OpenStream(&stream, nullptr, &outputparametr, 48000, 512, paFloat32, playbackcallback, nullptr);
+	PaError err = Pa_OpenStream(&outstream, nullptr, &outputparametr, 48000, 512, paFloat32, playbackcallback, nullptr);
 	if (err != paNoError) {
 		std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl; 
 		return;
 	}
 	//start stream
-	err = Pa_StartStream(stream);
+	err = Pa_StartStream(outstream);
 	if (err != paNoError) {
 		std::cerr << "Pa_StartStream failed: " << Pa_GetErrorText(err) << std::endl;
 		return; 
