@@ -66,48 +66,6 @@ bool AudioHandler::audioInit() {
 }
 
 
-void AudioHandler::startplaybackstream(){
-	if (stream && Pa_IsStreamActive(outstream)) {
-		std::cerr << "Audio stream is already active!" << std::endl;
-		return; // ean exei anoiksei mhn ksana anoigeis
-	}
-	if (!initialized) {
-		cerr << "Portaudio not initialized." << endl;
-		return;
-	}
-	PaStreamParameters outputparametr;
-	outputparametr.device = Pa_GetDefaultOutputDevice(); // get default speakers as output device
-	//PaDeviceIndex outputparametr.device = Pa_GetDefaultOutputDevice();
-	if (outputparametr.device == paNoDevice) {
-		std::cerr << "Cant find default output device." << std::endl;
-		return;
-	}
-	outputparametr.channelCount = 1;
-	outputparametr.sampleFormat = paFloat32;
-	outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
-	outputparametr.hostApiSpecificStreamInfo = nullptr;
-	
-
-
-	//paClipOff: disable clipping, paDitherOff: disable dithering
-	PaError err = Pa_OpenStream(&outstream, nullptr, &outputparametr, 48000, 512, paFloat32, playbackcallback, nullptr);
-	if (err != paNoError) {
-		std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl; 
-		return;
-	}
-	//start stream
-	err = Pa_StartStream(outstream);
-	if (err != paNoError) {
-		std::cerr << "Pa_StartStream failed: " << Pa_GetErrorText(err) << std::endl;
-		return; 
-	}
-	else {
-		std::cout << "Stream started" << std::endl;
-	}
-	
-}
-
-
 void AudioHandler::startAudio(){
 	
 	if (stream && Pa_IsStreamActive(stream)) {
@@ -161,7 +119,25 @@ void AudioHandler::startAudio(){
 
 
 //stop stream and playblack 
-
+void AudioHandler::stopPlaybackAudio() {
+	if (outstream) {
+		//stop audio stream
+		PaError err = Pa_StopStream(outstream);
+		if (err != paNoError) {
+			std::cerr << "Fail to stop audio stream." << Pa_GetErrorText(err) << std::endl;
+			return;
+		}
+		//close audio stream
+		err = Pa_CloseStream(outstream);
+		if (err != paNoError) {
+			std::cerr << "Fail to close audio stream." << Pa_GetErrorText(err) << std::endl;
+			return;
+		}
+		outstream = nullptr;
+		std::cout << "input Audio stream just stopped and closed!" << std::endl;
+		//AudioHandler::getAndClearAudioBuffer();
+	}
+}
 void AudioHandler::stopAudio() {
 	if (stream) {
 		//stop audio stream
@@ -269,6 +245,49 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 	 playbackCondition.notify_one();
 
  }
+
+
+ void AudioHandler::startplaybackstream() {
+	 if (outstream && Pa_IsStreamActive(outstream)) {
+		 std::cerr << "Audio stream is already active!" << std::endl;
+		 return; // ean exei anoiksei mhn ksana anoigeis
+	 }
+	 if (!initialized) {
+		 cerr << "Portaudio not initialized." << endl;
+		 return;
+	 }
+	 PaStreamParameters outputparametr;
+	 outputparametr.device = Pa_GetDefaultOutputDevice(); // get default speakers as output device
+	 //PaDeviceIndex outputparametr.device = Pa_GetDefaultOutputDevice();
+	 if (outputparametr.device == paNoDevice) {
+		 std::cerr << "Cant find default output device." << std::endl;
+		 return;
+	 }
+	 outputparametr.channelCount = 1;
+	 outputparametr.sampleFormat = paFloat32;
+	 outputparametr.suggestedLatency = Pa_GetDeviceInfo(outputparametr.device)->defaultLowInputLatency;
+	 outputparametr.hostApiSpecificStreamInfo = nullptr;
+
+
+
+	 //paClipOff: disable clipping, paDitherOff: disable dithering
+	 PaError err = Pa_OpenStream(&outstream, nullptr, &outputparametr, 48000, 512, paFloat32, playbackcallback, nullptr);
+	 if (err != paNoError) {
+		 std::cerr << "Pa_OpenStream failed: " << Pa_GetErrorText(err) << std::endl;
+		 return;
+	 }
+	 //start stream
+	 err = Pa_StartStream(outstream);
+	 if (err != paNoError) {
+		 std::cerr << "Pa_StartStream failed: " << Pa_GetErrorText(err) << std::endl;
+		 return;
+	 }
+	 else {
+		 std::cout << "Output Stream started" << std::endl;
+	 }
+
+ }
+
 
  int AudioHandler::playbackcallback(const void* inputBuffer, void* outputBuffer, unsigned long framesPerBuffer,
 	 const PaStreamCallbackTimeInfo* timeInfo, PaStreamCallbackFlags statusFlags, void* userData) {

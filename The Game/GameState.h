@@ -45,7 +45,7 @@ private:
 	float ReleaseTime = 0.0f;
 	const float Waitasec = 500.0f;
 	void CheckAndStopStream();
-	void StreamsOpen(); 
+	
 
 
 
@@ -148,7 +148,9 @@ public:
 
 	void createMapInfoData();
 	
+	//PUBLIC AUDIO //
 	void sendToPlayback(audiodata); //when receive audiodata send to audiohandler to playback
+	void PlaybackStreamOpen(bool flag); //open or close the streams when connection or disconnection
 
 	
 	

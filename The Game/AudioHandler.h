@@ -41,6 +41,7 @@ public:
 	void startAudio(); //start audio stream to record
 	void startplaybackstream(); //starts audio stream to playback
 	void stopAudio();
+	void stopPlaybackAudio(); 
 	void  ShowDefaultDevices() const;
 	//bool AudioRecorder(int durationSeconds, const std::string& filename);
 	static int audioCallback(const void* inputbuffer, void* outputbuffer, unsigned long framsPerBuffer, const PaStreamCallbackTimeInfo* timeinfo, PaStreamCallbackFlags statusflag, void* userData);
