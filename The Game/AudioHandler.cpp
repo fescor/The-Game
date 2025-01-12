@@ -298,6 +298,7 @@ int AudioHandler::audioCallback(const void* inputBuffer, void* outputBuffer, uns
 		 //wait for data to be ready
 		 //std::this_thread::sleep_for(std::chrono::milliseconds(10)); // Wait for data to be ready
 	 }
+	 //////
 	 bool allbuffersEmpty = false;
 	 {
 		 std::lock_guard<std::mutex> lock(playbackMutex);
