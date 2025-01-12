@@ -4,8 +4,6 @@
 #include "GameState.h"
 #include <vector>
 #include <mutex>
-#include <concurrent_queue.h>
-#include <concurrent_vector.h>
 #include <queue>
 #include "GameState.h"
 #include "GameObject.h"
@@ -26,12 +24,12 @@ private:
 
 public:
 	static std::vector<float> finalboss;
-	static concurrency::concurrent_vector <float> globalAudioBuffer; //buffer to send audio
+	static std::vector <float> globalAudioBuffer; //buffer to send audio
 	static std::vector <float> temp_vector;//temp vector to copy globalaudiobuffer
 	static std::mutex buffermutex; //mutex for safety 
 	//static std::vector<float> playbackBuffer; // buffer to playback
 	//static std::map<int, std::vector<float>> playbackMap;
-	static std::map<int, concurrency::concurrent_queue<float>> playbackMap;	//map to store the audio data of each player
+	static std::map<int, std::queue<float>> playbackMap;	//map to store the audio data of each player
 	static std::mutex playbackMutex; // mutex for playbacksafety
 	//std::vector <float> temp_buffer; //buffer that when is empty playback should finish 
 	
@@ -52,6 +50,6 @@ public:
 	void preparedata();
 	void setbuffer(int i, const std::vector<float>& buffer);
 	bool closecall();
-	//static bool dataready ;
+	static bool dataready ;
 	//static bool streamcloseflag;
 };

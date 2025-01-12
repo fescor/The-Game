@@ -32,15 +32,15 @@ void GameState::PlaybackStreamOpen(bool flag) {
 		if (!audiohandler) {
 			audiohandler = new AudioHandler();
 		}
-		playbackstarter = std::thread(&AudioHandler::startplaybackstream, audiohandler);
-		//audiohandler->startplaybackstream();
+		//pst = std::thread(&AudioHandler::startplaybackstream, audiohandler);
+		audiohandler->startplaybackstream();
 	}
 	else {
-		
-		if (playbackstarter.joinable()) {
-			playbackstarter.join();
+		/*
+		if (pst.joinable()) {
+			pst.join();
 		}
-		
+		*/
 		audiohandler->stopPlaybackAudio();
 		delete audiohandler;
 		audiohandler = nullptr;
@@ -84,7 +84,6 @@ void GameState::sendToPlayback(audiodata ad) {
 
 	int player_id = ad.playerid;
 	std::vector<float> chunk(std::begin(ad.audioData), std::end(ad.audioData));
-	/*
 	if (!audiohandler) {
 		audiohandler = new AudioHandler(); //build audiohandler obj only 1 time 
 
@@ -99,8 +98,6 @@ void GameState::sendToPlayback(audiodata ad) {
 	}
 	//std::cout << "Starting thread for setbuffer..." << std::endl;
 	receiver = std::thread(&AudioHandler::setbuffer, audiohandler, player_id, chunk);
-	*/
-	audiohandler->setbuffer(player_id, chunk);
 	
 }
 /*
