@@ -1,6 +1,6 @@
 The Game.exp
 The Game.lib
-lib/enet-1.3.18/docs/html
+*.html
 # Prerequisites
 *.d
 
